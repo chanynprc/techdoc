@@ -1,3 +1,3 @@
-# Hello, world!
+# Hello, world! #
 
-This is a hellow world file. :-)
+This is a hello world file. :-)
