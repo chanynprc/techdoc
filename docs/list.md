@@ -1,7 +1,3 @@
-# Document list
+## 文章列表
 
-这里是中文
-
-# 中文标题
-
-中文内容
+[Linux Basic](http://www.chenyineng.info/techdoc/docs/basic/linux)
