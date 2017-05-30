@@ -35,6 +35,20 @@
 - 关系名、属性名以及属性类型称作该关系的模式
 - 数据库模式是关系模式的集合
 
+### SQL查询的一般形式
+
+```sql
+SELECT <属性表> FROM <关系表> WHERE <条件>
+GROUP BY <属性表> HAVING <条件> ORDER BY <属性表>
+```
+
+1. 取FROM子句中列出的各个关系的元组的所有可能组合
+2. 将不符合WHERE子句中给出的条件的元组去掉
+3. 如果有GROUP BY子句，则将剩下的元组按GROUP BY子句中给出的属性的值分组
+4. 如果有HAVING子句，则按照HAVING子句中给出的条件检查每一个组，去掉不符合条件的组
+5. 按照SELECT子句的说明，对指定的属性和属性上的聚集（例如一组中的和）计算出结果元组
+6. 按照ORDER BY子句中的属性列的值对结果元组进行排序
+
 ### OLTP vs OLAP
 
 **OLTP**：联机事务处理（Online Transaction Processing）。数据量小，DML频繁
