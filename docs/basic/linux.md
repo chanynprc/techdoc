@@ -1,6 +1,6 @@
-## Linux basic
+## Linux Basic
 
-### Commands
+### Shell命令
 
 #### 在目录下查找包含字符串的文件
 
@@ -15,6 +15,7 @@ grep -r "zh_CN" ./
 ```bash
 grep -r "zh_CN" ./pre*
 ```
+ 
+### 引用
 
-
-http://www.cnblogs.com/sunleecn/archive/2011/11/01/2232210.html
+[1] http://www.cnblogs.com/sunleecn/archive/2011/11/01/2232210.html
