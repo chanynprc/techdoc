@@ -2,7 +2,7 @@
 
 ### Database
 
-[数据库简介](/techdoc/docs/database/intro)
+[DBMS系统概述](/techdoc/docs/database/intro)
 
 ### Basic
 
