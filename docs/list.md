@@ -1,8 +1,10 @@
+## 文章列表
+
 ### Database
 
-[数据库介绍](/techdoc/docs/database/intro)
+[数据库简介](/techdoc/docs/database/intro)
 
 ### Basic
 
-[Linux Basic](http://www.chenyineng.info/techdoc/docs/basic/linux)
+[Linux Basic](/techdoc/docs/basic/linux)
 
