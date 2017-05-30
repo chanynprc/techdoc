@@ -15,7 +15,7 @@ grep -r "zh_CN" ./
 ```bash
 grep -r "zh_CN" ./pre*
 ```
- 
+
 ### 引用
 
 [1] http://www.cnblogs.com/sunleecn/archive/2011/11/01/2232210.html
