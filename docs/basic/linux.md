@@ -1,8 +1,8 @@
 ## Linux Basic
 
-### Shell命令
+<!--### Shell命令-->
 
-#### 在目录下查找包含字符串的文件
+### 在目录下查找包含字符串的文件
 
 当前目录下的所有文件中的字符串
 
@@ -16,6 +16,18 @@ grep -r "zh_CN" ./
 grep -r "zh_CN" ./pre*
 ```
 
+### 清除SVN未被版本控制的文件
+
+``` bash
+svn st | grep '^?' | awk '{print $2}' | xargs rm -rf
+```
+
+1. 第一个命令执行　svn status, 
+2. 第二个命令查找　? 开头的行，没有加入版本控制的文件或目录开头显示 ? 号。
+3. 第三个命令获得第二个参数，　是带路径的文件或目录名。
+4. 第四个命令删除它。
+
 ### 引用
 
 [1] http://www.cnblogs.com/sunleecn/archive/2011/11/01/2232210.html
+[2] http://blog.csdn.net/caz28/article/details/50246951
