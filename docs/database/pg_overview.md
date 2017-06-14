@@ -9,8 +9,8 @@ Postgres-XL是一个横向可扩展的开源数据库集群，它可以灵活地
 它由三个主要部分组成，分别是：
 
 - Global Transaction Monitor (GTM)
-- Coordinator
-- Data Node
+- Coordinator：管理用户会话，并与GTM和Data Nodes进行交互，对查询语句进行解析，制定执行计划，并将序列化的全局计划发送给所涉及的组件。
+- Data Node：Data Node是实际数据存储的位置，数据的分布方式由DBA配置。
 
 其基础架构为：
 
