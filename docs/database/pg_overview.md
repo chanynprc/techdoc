@@ -14,7 +14,7 @@ Postgres-XL是一个横向可扩展的开源数据库集群，它可以灵活地
 
 其基础架构为：
 
-![](/techdocs/docs/database/images/xl_cluster_architecture.jpg)
+![](/techdoc/docs/database/images/xl_cluster_architecture.jpg)
 
 ### 引用
 
