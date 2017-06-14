@@ -8,6 +8,8 @@
 
 [查询编译器](/techdoc/docs/database/dsi_query_compiler)
 
+----------
+
 ### Basic
 
 [Linux Basic](/techdoc/docs/basic/linux)
