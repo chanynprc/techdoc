@@ -2,7 +2,7 @@
 
 ### Tag：数据库
 
-[PostgreSQL简介](/techdoc/docs/database/pg_overview)
+[PostgreSQL概览](/techdoc/docs/database/pg_overview)
 
 ----------
 
