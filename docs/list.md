@@ -4,6 +4,8 @@
 
 [PostgreSQL概览](/techdoc/docs/database/pg_overview)
 
+[Postgres-XL优化器架构](/techdoc/docs/database/pg_optimizer)
+
 ----------
 
 ### Database System Implementation 读书笔记
