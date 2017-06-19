@@ -1,10 +1,11 @@
 ## Postgres-XL优化器概述
 
-### 代码结构
+### 主要函数
 
 ```cpp
-List *
-pg_plan_queries(List *querytrees, int cursorOptions, ParamListInfo boundParams)
+List *pg_plan_queries(List *querytrees,
+                      int cursorOptions,
+                      ParamListInfo boundParams)
 ```
 
 输入：
@@ -22,7 +23,11 @@ pg_plan_queries(List *querytrees, int cursorOptions, ParamListInfo boundParams)
 
 无实质处理，对输入的每一个query tree调用pg_plan_query进行处理（Utility命令除外）。
 
-#### pg_plan_query
+```cpp
+PlannedStmt *pg_plan_query(Query *querytree,
+                           int cursorOptions,
+                           ParamListInfo boundParams)
+```
 
 输入：
 - Query *querytree
