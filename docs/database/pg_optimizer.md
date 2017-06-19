@@ -73,7 +73,7 @@ Plan *subquery_planner(PlannerGlobal *glob,
 }
 ```
 
-subquery_planner构造生成计划的主入口，它被每一个```SELECT```递归调用。
+subquery_planner构造生成计划的主入口，它被每一个`SELECT`递归调用。
 
 首先，构造PlannerInfo结构，其次进行一系列查询重写（如CTE处理、子链接提升、子查询提升）和表达式处理，然后调用inheritance_planner或grouping_planner生成计划，最后进行一些收尾处理后返回Plan。
 
@@ -93,7 +93,7 @@ static Plan *grouping_planner(PlannerInfo *root,
 }
 ```
 
-进行grouping、aggregation等的处理。并且，调用query_planner生成cheapest_path和sorted_path，选择best_path，并调用create_plan生成计划。
+进行grouping、aggregation等的处理。并且，调用query_planner生成cheapest_path和sorted_path，然后选择best_path，并调用create_plan生成计划。
 
 ```cpp
 RelOptInfo *query_planner(PlannerInfo *root,
@@ -114,7 +114,7 @@ RelOptInfo *query_planner(PlannerInfo *root,
 
 生成path。并不生成最优路径（best path），而是生成考虑了join的cheapest_path和sorted_path。
 
-如果查询无```FROM```子句，直接生成路径并返回。否则，进行一系列预处理，并调用make_one_rel生成最终RelOptInfo，包含cheapest_path和sorted_path等信息。
+如果查询无`FROM`子句，直接生成路径并返回。否则，进行一系列预处理，并调用make_one_rel生成最终RelOptInfo，包含cheapest_path和sorted_path等信息。
 
 ```cpp
 Plan *create_plan(PlannerInfo *root,
