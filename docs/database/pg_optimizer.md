@@ -6,20 +6,10 @@
 List *pg_plan_queries(List *querytrees,
                       int cursorOptions,
                       ParamListInfo boundParams)
+{
+    pg_plan_query
+}
 ```
-
-输入：
-- List *querytrees：
-- int cursorOptions：
-- ParamListInfo boundParams：
-
-输出：
-- List *：
-
-调用：
-- pg_plan_query
-
-说明：
 
 无实质处理，对输入的每一个query tree调用pg_plan_query进行处理（Utility命令除外）。
 
@@ -44,7 +34,11 @@ PlannedStmt *pg_plan_query(Query *querytree,
 
 无实质处理，调用planner函数进行处理
 
-#### planner
+```cpp
+PlannedStmt *planner(Query *parse,
+                     int cursorOptions,
+                     ParamListInfo boundParams)
+```
 
 输入：
 - Query *parse
@@ -63,7 +57,11 @@ PlannedStmt *pg_plan_query(Query *querytree,
 
 无实质处理，根据条件调用不同的计划生成接口
 
-#### pgxc_planner
+```cpp
+PlannedStmt *pgxc_planner(Query *query,
+                          int cursorOptions,
+                          ParamListInfo boundParams)
+```
 
 输入：
 - Query *query
