@@ -130,6 +130,7 @@ Query
 PlannedStmt
 PlannerGlobal
 PlannerInfo
+RelOptInfo
 ```
 
 ### 常见缩写
