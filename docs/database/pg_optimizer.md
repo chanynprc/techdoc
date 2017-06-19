@@ -2,7 +2,10 @@
 
 ### 代码结构
 
-#### pg_plan_queries
+```cpp
+List *
+pg_plan_queries(List *querytrees, int cursorOptions, ParamListInfo boundParams)
+```
 
 输入：
 - List *querytrees：
