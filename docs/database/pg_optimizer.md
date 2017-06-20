@@ -78,14 +78,14 @@ subquery_planner构造生成计划的主入口，它被每一个`SELECT`递归�
 首先，构造PlannerInfo结构，其次进行一系列查询重写（如CTE处理、子链接提升、子查询提升）和表达式处理，然后调用inheritance_planner或grouping_planner生成计划，最后进行一些收尾处理后返回Plan。
 
 ```cpp
-static Plan *inheritance_planner(PlannerInfo *root)
+Plan *inheritance_planner(PlannerInfo *root)
 {
     grouping_planner
 }
 ```
 
 ```cpp
-static Plan *grouping_planner(PlannerInfo *root,
+Plan *grouping_planner(PlannerInfo *root,
                               double tuple_fraction)
 {
     query_planner
@@ -115,6 +115,33 @@ RelOptInfo *query_planner(PlannerInfo *root,
 生成path。并不生成最优路径（best path），而是生成考虑了join的cheapest_path和sorted_path，这些path被包含于RelOptInfo结构。
 
 如果查询无`FROM`子句，直接生成路径并返回。否则，进行一系列预处理，包括分配rel和rte的空间，初始化，构造基表的RelOptInfo，解析join tree等。并调用make_one_rel生成最终RelOptInfo，包含cheapest_path和sorted_path等信息。
+
+```cpp
+RelOptInfo *make_one_rel(PlannerInfo *root,
+                         List *joinlist)
+{
+    //设置基表的行数、宽度等
+    set_base_rel_sizes
+
+    //设置基表的扫描path
+    set_base_rel_pathlists
+
+    make_rel_from_joinlist
+}
+```
+
+- 设置基表的行数、宽度等信息
+- 构造基表扫描path
+- 调用make_rel_from_joinlist构造join的path。
+
+```cpp
+RelOptInfo *make_rel_from_joinlist(PlannerInfo *root,
+                                   List *joinlist)
+{
+}
+```
+
+计算需要构造多少层的join
 
 ```cpp
 Plan *create_plan(PlannerInfo *root,
