@@ -141,7 +141,7 @@ RelOptInfo *make_rel_from_joinlist(PlannerInfo *root,
 }
 ```
 
-- 计算需要构造多少层的join
+计算需要构造多少层的join
 
 ```cpp
 Plan *create_plan(PlannerInfo *root,
