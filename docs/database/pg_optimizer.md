@@ -112,9 +112,9 @@ RelOptInfo *query_planner(PlannerInfo *root,
 }
 ```
 
-生成path。并不生成最优路径（best path），而是生成考虑了join的cheapest_path和sorted_path。
+生成path。并不生成最优路径（best path），而是生成考虑了join的cheapest_path和sorted_path，这些path被包含于RelOptInfo结构。
 
-如果查询无`FROM`子句，直接生成路径并返回。否则，进行一系列预处理，并调用make_one_rel生成最终RelOptInfo，包含cheapest_path和sorted_path等信息。
+如果查询无`FROM`子句，直接生成路径并返回。否则，进行一系列预处理，包括分配rel和rte的空间，初始化，构造基表的RelOptInfo，解析join tree等。并调用make_one_rel生成最终RelOptInfo，包含cheapest_path和sorted_path等信息。
 
 ```cpp
 Plan *create_plan(PlannerInfo *root,
