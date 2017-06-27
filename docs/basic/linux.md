@@ -34,7 +34,7 @@ useradd -d /home/username -m username
 passwd username
 ```
 
-```-m```表示用户名，```-d```表示该用户的根目录
+```-d```指定该用户的根目录，```-m```表示创建该用户根目录
  
 ### 引用
 
