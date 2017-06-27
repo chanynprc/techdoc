@@ -22,3 +22,4 @@
 
 [Linux Basic](/techdoc/docs/basic/linux)
 
+[GDB Basic](/techdoc/docs/basic/gdb)
