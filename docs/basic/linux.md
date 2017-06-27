@@ -27,8 +27,19 @@ svn st | grep '^?' | awk '{print $2}' | xargs rm -rf
 3. 第三个命令获得第二个参数，是带路径的文件或目录名
 4. 第四个命令删除它
 
+### 添加系统新用户
+ 
+``` bash
+useradd -d /home/username -m username
+passwd username
+```
+ 
+```-m```表示用户名，```-d```表示该用户的根目录
+ 
 ### 引用
 
 [1] http://www.cnblogs.com/sunleecn/archive/2011/11/01/2232210.html
 
 [2] http://blog.csdn.net/caz28/article/details/50246951
+ 
+[3] http://www.cnblogs.com/daizhuacai/archive/2013/01/17/2865132.html 
