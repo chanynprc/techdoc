@@ -28,12 +28,12 @@ svn st | grep '^?' | awk '{print $2}' | xargs rm -rf
 4. 第四个命令删除它
 
 ### 添加系统新用户
- 
+
 ``` bash
 useradd -d /home/username -m username
 passwd username
 ```
- 
+
 ```-m```表示用户名，```-d```表示该用户的根目录
  
 ### 引用
