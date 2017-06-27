@@ -2,7 +2,7 @@
  
 命令 | 说明
 ----- | -----
-```bt``` | 查看函数调用栈和参数
+bt | 查看函数调用栈和参数
 
 
 First Header | Second Header
