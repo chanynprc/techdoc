@@ -20,7 +20,7 @@ grep -r "zh_CN" ./pre*
 
 ```bash
 find . -name filename
-find . -iname filename
+find /home/user/downloads -iname filename
 ```
 
 ```-name```指定要查找的文件名，可模糊匹配，如：可利用file*来模糊匹配以file开头的文件。
