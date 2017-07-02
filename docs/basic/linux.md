@@ -16,6 +16,17 @@ grep -r "zh_CN" ./
 grep -r "zh_CN" ./pre*
 ```
 
+### 查找文件
+
+```bash
+find . -name filename
+find . -iname filename
+```
+
+```-name```指定要查找的文件名，可模糊匹配，如：可利用file*来模糊匹配以file开头的文件。
+
+```-iname```指定要查找的文件名，但忽略大小写。
+
 ### 清除SVN未被版本控制的文件
 
 ``` bash
