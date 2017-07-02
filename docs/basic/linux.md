@@ -23,9 +23,9 @@ find . -name filename
 find /home/user/downloads -iname filename
 ```
 
-```-name```指定要查找的文件名，可模糊匹配，如：可利用file*来模糊匹配以file开头的文件。
+`-name`指定要查找的文件名，可模糊匹配，如：可利用file*来模糊匹配以file开头的文件。
 
-```-iname```指定要查找的文件名，但忽略大小写。
+`-iname`指定要查找的文件名，但忽略大小写。
 
 ### 清除SVN未被版本控制的文件
 
