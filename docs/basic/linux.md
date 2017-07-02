@@ -38,6 +38,28 @@ svn st | grep '^?' | awk '{print $2}' | xargs rm -rf
 3. 第三个命令获得第二个参数，是带路径的文件或目录名
 4. 第四个命令删除它
 
+### 查看硬盘剩余空间和文件夹占用空间大小
+
+查看硬盘剩余空间
+```bash
+df -lh
+```
+
+查看某文件夹占用空间大小
+
+```bash
+du -sh <folder>
+du -sh *
+```
+
+### 挂载ISO文件
+
+```bash
+cd mnt
+mkdir iso
+mount -o loop -t iso9660 isofile.iso /mnt/iso
+```
+
 ### 系统用户操作
 
 #### 添加用户
