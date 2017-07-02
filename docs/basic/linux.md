@@ -52,6 +52,27 @@ du -sh <folder>
 du -sh *
 ```
 
+### 修改系统时间
+
+修改系统时间
+
+```bash
+date -s 14:36:53
+date -s 08/28/2008
+```
+
+同步系统时间到硬件时间
+
+```bash
+hwclock -w
+hwclock --systohc
+```
+
+同步硬件时间到系统时间
+```bash
+hwclock --hctosys
+```
+
 ### 挂载ISO文件
 
 ```bash
