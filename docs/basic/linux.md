@@ -76,7 +76,7 @@ hwclock --hctosys
 ### 挂载ISO文件
 
 ```bash
-cd mnt
+cd /mnt
 mkdir iso
 mount -o loop -t iso9660 isofile.iso /mnt/iso
 ```
