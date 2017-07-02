@@ -28,18 +28,17 @@ svn st | grep '^?' | awk '{print $2}' | xargs rm -rf
 4. 第四个命令删除它
 
 ### 系统用户操作
-
-添加用户：
+ 
+#### 添加用户
 
 ``` bash
 useradd -d /home/username -m username
 passwd username
 ```
 
-- ```-d```指定该用户的根目录
-- ```-m```表示创建该用户根目录
+```-d```指定该用户的根目录，```-m```表示创建该用户根目录
 
-删除用户: 
+#### 删除用户
 
 ``` bash
 userdel username
