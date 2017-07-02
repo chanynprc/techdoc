@@ -35,7 +35,7 @@ svn st | grep '^?' | awk '{print $2}' | xargs rm -rf
 useradd -d /home/username -m username
 passwd username
 ```
- 
+
 - ```-d```指定该用户的根目录
 - ```-m```表示创建该用户根目录
 
