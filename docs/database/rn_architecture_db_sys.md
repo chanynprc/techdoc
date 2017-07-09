@@ -10,6 +10,9 @@
 
 #### Query Executor
 
+```math
+E = mc^2
+```
 
 ### 引用
 
