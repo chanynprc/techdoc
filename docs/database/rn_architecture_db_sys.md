@@ -2,9 +2,9 @@
 
 ### Relational Query Processor
 
-关系查询处理器的输入是一个SQL查询语句，在关系查询处理器内部对SQL语句进行验证、解析、优化，生成执行计划，然后由执行器获取（fatch，或拉取，pull）结果元祖。
+关系查询处理器的输入是一个SQL查询语句，在其内部对SQL语句进行验证、解析和优化，生成执行计划，然后由执行器获取（fatch，或拉取，pull）结果元组。
 
-关系查询处理器可以被看做是一个单用户、单线程的任务。重点在对数据操作语言（DML，如SELECT、INSERT、UPDATE、DELETE）的处理上，而数据定义语言（DDL）通常不需要查询优化器的参与。
+关系查询处理器可以被看做是一个单用户、单线程的任务。重点在于对数据操作语言（DML，如SELECT、INSERT、UPDATE、DELETE）的处理上，而数据定义语言（DDL）通常不需要查询优化器的参与。
 
 #### Query Parsing and Authorization
 
