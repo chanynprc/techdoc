@@ -2,7 +2,7 @@
 
 ### Tag：数据库
 
-[Architecture of a Database System笔记](/techdoc/docs/database/rn_architecture_db_sys)
+[Architecture of a Database System笔记](/techdoc/docs/database/p_architecture_db_sys)
 
 [PostgreSQL概览](/techdoc/docs/database/pg_overview)
 
