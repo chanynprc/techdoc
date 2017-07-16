@@ -14,17 +14,11 @@ Very clean match | Sports
 A clean but forgettable game | Sports
 It was a close election | Not
 
-a formula
-
-$$x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}$$
-
-end formula
-
 要使用Naive Bayes分类器对“A very close game”进行分类，其本质就是计算这句话主题为Sports的概率。即
 
-```math
+$$
 P(Sports | A~very~close~game)
-```
+$$
 
 ### 引用
 
