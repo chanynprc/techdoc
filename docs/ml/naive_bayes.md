@@ -17,7 +17,7 @@ It was a close election | Not
 要使用Naive Bayes分类器对“A very close game”进行分类，其本质就是计算这句话主题为Sports的概率。即
 
 $$
-P(Sports | A very close game)
+P(Sports | A~very~close~game)
 $$
 
 ### Bayes定理
