@@ -2,7 +2,7 @@
 
 在机器学习中，Naive Bayes分类器是一种假定各特征之间有强独立性情况下，运用Bayes定理的概率分类器。在NLP中，常被应用于文本类别的预测。它简单、快速、准确、可靠。
 
-### 例子
+### 例子及其建模
 
 我们的目标是判断一个句子是不是和Sports相关，训练集有5个句子：
 
@@ -17,7 +17,13 @@ It was a close election | Not
 要使用Naive Bayes分类器对“A very close game”进行分类，其本质就是计算这句话主题为Sports的概率。即
 
 $$
-P(Sports | A~very~close~game)
+P(Sports | A very close game)
+$$
+
+### Bayes定理
+
+$$
+P(A|B) = \frac{P(A)*P(B|A)}{P(B)}
 $$
 
 ### 引用
