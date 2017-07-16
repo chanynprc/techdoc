@@ -4,6 +4,8 @@
 
 [Naive Bayes分类器](/techdoc/docs/ml/naive_bayes)
 
+----------
+
 ### Tag：数据库
 
 [Architecture of a Database System笔记](/techdoc/docs/database/p_architecture_db_sys)
