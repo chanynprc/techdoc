@@ -22,7 +22,9 @@ $$
 
 ### Bayes定理
 
-![](/techdoc/docs/ml/images/bayes.png)
+<div align=center>
+![](/techdoc/docs/ml/images/bayes.png =120)
+</div>
 
 $$
 P(A|B) = \frac{P(A)*P(B|A)}{P(B)}
