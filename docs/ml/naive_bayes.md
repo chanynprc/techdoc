@@ -32,10 +32,10 @@ $$
 
 ![](/techdoc/docs/ml/images/bayes.png)
 
-在上图中，要表示$P(A\capB)$，可以有两种形式：
+在上图中，要表示$P(A \cap B)$，可以有两种形式：
 
 $$
-P(A\capB) = P(A)*P(B|A) = P(B)*P(A|B)
+P(A \cap B) = P(A)*P(B|A) = P(B)*P(A|B)
 $$
 
 ### 引用
