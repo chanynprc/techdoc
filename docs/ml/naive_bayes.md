@@ -23,7 +23,7 @@ $$
 ### Bayes定理
 
 <div align=center>
-![](/techdoc/docs/ml/images/bayes.png =120)
+![](/techdoc/docs/ml/images/bayes.png)
 </div>
 
 $$
