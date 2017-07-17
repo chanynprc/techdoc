@@ -22,6 +22,8 @@ $$
 
 ### Bayes定理
 
+![](/techdoc/docs/ml/images/bayes.png)
+
 $$
 P(A|B) = \frac{P(A)*P(B|A)}{P(B)}
 $$
