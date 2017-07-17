@@ -22,12 +22,20 @@ $$
 
 ### Bayes定理
 
-<div align=center>
-![](/techdoc/docs/ml/images/bayes.png)
-</div>
+Bayes定理的公式表示为：
 
 $$
 P(A|B) = \frac{P(A)*P(B|A)}{P(B)}
+$$
+
+可以使用图形来帮助理解Bayes公式。
+
+![](/techdoc/docs/ml/images/bayes.png)
+
+在上图中，要表示$P(A\capB)$，可以有两种形式：
+
+$$
+P(A\capB) = P(A)*P(B|A) = P(B)*P(A|B)
 $$
 
 ### 引用
