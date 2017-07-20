@@ -14,7 +14,7 @@ Very clean match | Sports
 A clean but forgettable game | Sports
 It was a close election | Not Sports
 
-要使用Naive Bayes分类器对“A very close game”进行分类，其本质就是计算这句话主题为Sports和Not Sports的概率。即
+要使用Naive Bayes分类器对“A very close game”进行分类，其本质就是计算这句话主题为Sports和Not Sports的概率，即
 
 $$
 \left\{
@@ -22,6 +22,8 @@ P(Sports | A~very~close~game)
 P(Not Sports | A~very~close~game)
 \right.
 $$
+
+比较它们的大小，“A very close game”属于概率较大的那一类。
 
 ### Bayes定理
 
