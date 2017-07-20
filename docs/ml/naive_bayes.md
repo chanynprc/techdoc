@@ -17,12 +17,10 @@ It was a close election | Not Sports
 要使用Naive Bayes分类器对“A very close game”进行分类，其本质就是计算这句话主题为Sports和Not Sports的概率，即
 
 $$
-\left\{
 \begin{cases}
 P(Sports | A~very~close~game) \\
 P(Not Sports | A~very~close~game)
 \end{cases}
-\right.
 $$
 
 比较它们的大小，“A very close game”属于概率较大的那一类。
@@ -55,7 +53,7 @@ $$
 P(Sports | A~very~close~game) = \frac{P(Sports) * P(A~very~close~game | Sports)}{P(A~very~close~game)}
 $$
 
-其中，$P(Sports)$可以方便地利用训练集计算得出，$P(A~very~close~game)$在各分类中都包含，而我们只需比较概率大小，可以不予计算。所以问题集中于计算$P(A~very~close~game \| Sports)$。
+其中，$P(Sports)$属于先验概率，可以方便地利用训练集计算得出，$P(A~very~close~game)$在各分类中都包含，而我们只需比较概率大小，可以不予计算。所以问题集中于计算$P(A~very~close~game \| Sports)$。
 
 ### 特征提取
 
