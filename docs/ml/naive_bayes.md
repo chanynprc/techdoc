@@ -9,15 +9,18 @@
 Text | Category
 ---|---
 A great game | Sports
-The election was over | Not
+The election was over | Not Sports
 Very clean match | Sports
 A clean but forgettable game | Sports
-It was a close election | Not
+It was a close election | Not Sports
 
-要使用Naive Bayes分类器对“A very close game”进行分类，其本质就是计算这句话主题为Sports的概率。即
+要使用Naive Bayes分类器对“A very close game”进行分类，其本质就是计算这句话主题为Sports和Not Sports的概率。即
 
 $$
+\left\{
 P(Sports | A~very~close~game)
+P(Not Sports | A~very~close~game)
+\right.
 $$
 
 ### Bayes定理
@@ -39,6 +42,10 @@ P(A \cap B) = P(A)*P(B|A) = P(B)*P(A|B)
 $$
 
 经过转换，很容易得出Bayes公式。
+
+### 模型求解
+
+
 
 ### 引用
 
