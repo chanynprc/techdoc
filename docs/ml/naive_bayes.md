@@ -18,8 +18,10 @@ It was a close election | Not Sports
 
 $$
 \left\{
+\begin{aligned}
 P(Sports | A~very~close~game) \\
 P(Not Sports | A~very~close~game)
+\end{aligned}
 \right.
 $$
 
@@ -47,7 +49,7 @@ $$
 
 ### 模型求解
 
-
+要计算$P(Sports | A~very~close~game)$，
 
 ### 引用
 
