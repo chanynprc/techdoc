@@ -49,7 +49,11 @@ $$
 
 ### 模型求解
 
-要计算$P(Sports | A~very~close~game)$，
+应用Bayes定理，可以将$P(Sports | A~very~close~game)$作如下的转换：
+
+$$
+P(Sports | A~very~close~game) = \frac{P(Sports) * P(A~very~close~game | Sports)}{P(A~very~close~game)}
+$$
 
 ### 引用
 
