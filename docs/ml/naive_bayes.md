@@ -55,7 +55,7 @@ $$
 P(Sports | A~very~close~game) = \frac{P(Sports) * P(A~very~close~game | Sports)}{P(A~very~close~game)}
 $$
 
-其中，$P(Sports)$可以方便地利用训练集计算得出，$P(A~very~close~game)$在
+其中，$P(Sports)$可以方便地利用训练集计算得出，$P(A~very~close~game)$在各分类中都包含，而我们只需比较概率大小，可以不予计算。所以问题集中于计算$P(A~very~close~game \| Sports)$。
 
 ### 引用
 
