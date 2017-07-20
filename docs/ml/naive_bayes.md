@@ -18,10 +18,10 @@ It was a close election | Not Sports
 
 $$
 \left\{
-\begin{aligned}
+\begin{cases}
 P(Sports | A~very~close~game) \\
 P(Not Sports | A~very~close~game)
-\end{aligned}
+\end{cases}
 \right.
 $$
 
@@ -56,6 +56,10 @@ P(Sports | A~very~close~game) = \frac{P(Sports) * P(A~very~close~game | Sports)}
 $$
 
 其中，$P(Sports)$可以方便地利用训练集计算得出，$P(A~very~close~game)$在各分类中都包含，而我们只需比较概率大小，可以不予计算。所以问题集中于计算$P(A~very~close~game \| Sports)$。
+
+### 特征提取
+
+在机器学习中，非常关键的一环就是特征提取，它对机器学习效果起着决定性作用。
 
 ### 引用
 
