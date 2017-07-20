@@ -18,7 +18,7 @@ It was a close election | Not Sports
 
 $$
 \left\{
-P(Sports | A~very~close~game)
+P(Sports | A~very~close~game) \\
 P(Not Sports | A~very~close~game)
 \right.
 $$
