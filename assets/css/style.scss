@@ -1,7 +1,7 @@
 ---
 ---
 
-@import "jekyll-theme-minimal";
+@import "jekyll-theme-cayman";
 
 body {
   color: #000000;
@@ -28,6 +28,26 @@ h4, h5, h6 {
 
 .MathJax {
   outline:0;
+}
+
+//cayman
+.page-header {
+  color: $header-heading-color;
+  text-align: center;
+  background-color: $header-bg-color-secondary;
+  background-image: none;//linear-gradient(120deg, $header-bg-color-secondary, $header-bg-color);
+
+  @include large {
+    padding: 1rem 1rem;
+  }
+
+  @include medium {
+    padding: 1rem 1rem;
+  }
+
+  @include small {
+    padding: 1rem 1rem;
+  }
 }
 
 //h2 {
