@@ -7,35 +7,36 @@ body {
   color: #000000;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family:"Noto Sans", "Helvetica Neue", Helvetica, Arial, SimHei, sans-serif;
-}
-
-h2{
-  padding-bottom:0.3em;
-  //font-size:1.5em;
-  border-bottom:1px solid #eaecef;
-}
-
-h3{
-  //color: #1858B8;
-  color: #0071BC;
-}
-
-h4, h5, h6 {
-  color: #00A600;
-}
-
 .main-content {
-  table {
-    display: table;
-  }
+    h1, h2, h3, h4, h5, h6 {
+      font-family:"Noto Sans", "Helvetica Neue", Helvetica, Arial, SimHei, sans-serif;
+    }
+
+    h2{
+      padding-bottom:0.3em;
+      //font-size:1.5em;
+      border-bottom:1px solid #eaecef;
+      color: #000000;
+    }
+
+    h3{
+      //color: #1858B8;
+      color: #0071BC;
+    }
+
+    h4, h5, h6 {
+      color: #00A600;
+    }
+
+    table {
+      display: table;
+    }
   
-  th, td {
+    th, td {
       text-align:left;
       padding:5px 10px;
       border-bottom:1px solid #e5e5e5;
-  }
+    }
 }
 
 .MathJax {
