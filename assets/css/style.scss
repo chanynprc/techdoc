@@ -26,9 +26,16 @@ h4, h5, h6 {
   color: #00A600;
 }
 
-table {
-  width:100%;
-  border-collapse:collapse;
+.main-content {
+  table {
+    display: table;
+  }
+  
+  th, td {
+      text-align:left;
+      padding:5px 10px;
+      border-bottom:1px solid #e5e5e5;
+  }
 }
 
 .MathJax {
