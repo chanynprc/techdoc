@@ -48,7 +48,13 @@ body {
 .page-header {
   color: $header-heading-color;
   text-align: center;
-  background-color: #0071BC;//$header-bg-color-secondary;
+  //background-color: $header-bg-color-secondary;
+  //background-color: #0071BC;//blue
+  background-color: #8cc600;//green
+  //background-color: #0071BC;//yellow
+  //background-color: #0071BC;//orange
+  //background-color: #0071BC;//pink
+  //background-color: #0071BC;//red
   background-image: none;//linear-gradient(120deg, $header-bg-color-secondary, $header-bg-color);
 
   @include large {
