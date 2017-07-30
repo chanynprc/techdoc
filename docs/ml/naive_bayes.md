@@ -66,10 +66,7 @@ $$
 由于假设文本中词的出现是相互独立的，那么可对模型进行处理：
 
 $$
-P(A~very~close~game | Sports) = P(A|Sports)\\
-*P(very|Sports)\\
-*P(close|Sports)\\
-*P(game|Sports)
+P(A~very~close~game | Sports) = P(A|Sports)*P(very|Sports)*P(close|Sports)*P(game|Sports)
 $$
 
 这样，计算就方便直观多了。首先计算先验概率，训练集中Sports分类出现了3次，训练集大小为5，则$P(Sports)=3/5$，$P(Not Sports)=2/5$。在Sports分类中，单词“A”出现了2次，单词“very”出现了1次，单词“close”出现了0次，单词“game”出现了2次，Sports分类共11个词，所以：
