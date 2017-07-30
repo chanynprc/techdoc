@@ -111,14 +111,19 @@ $$
 同理可得：
 
 $$
-P(Not Sports) * P(A~very~close~game | Not Sports) = 1.43*10^{-5}
+P(Not~Sports) * P(A~very~close~game | Not~Sports) = 1.43*10^{-5}
 $$
 
 结论是文本“A very close game”属于Sports分类。
 
 ### 更进一步的调优方法
 
+还有一些其他方法，可以帮助Naive Bayes分类器提升效果。
 
+- 删除Stop words：删除一些对分类结果没有帮助的词，比如“A”、“the”、“was”等。
+- 变体还原（lemmatization）：将单词的变体进行还原，将一组词结合在一起，看成一个特征，比如“better”和“good”看成一组，“game”和“match”看成一组。
+- 使用N-gram：对于一些常用而明显的词组，将他们看成一个整体，而不是直接拆成一个词一个词地分析。
+- 使用TF-IDF：不仅仅计算每个词的出现概率，而且将每个词在文本中的重要程度也考虑进去进行加权。
 
 ### 引用
 
@@ -127,3 +132,11 @@ $$
 [2] https://en.wikipedia.org/wiki/Naive_Bayes_classifier
 
 [3] https://en.wikipedia.org/wiki/Additive_smoothing
+
+[4] https://en.wikipedia.org/wiki/Stop_words
+
+[5] https://en.wikipedia.org/wiki/Lemmatisation
+
+[6] http://sebastianraschka.com/Articles/2014_naive_bayes_1.html
+
+[7] https://en.wikipedia.org/wiki/Tf%E2%80%93idf
