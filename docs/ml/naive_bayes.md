@@ -79,9 +79,45 @@ $$
 P(A|Sports)=2/11 \\
 P(very|Sports)=1/11 \\
 P(close|Sports)=0/11 \\
-P(game|Sports)=2/22
+P(game|Sports)=2/11
 \end{cases}
 $$
+
+这个结果相乘以后会导致$P(A~very~close~game \| Sports)$结果为0，也就是说，一旦测试集中含有训练集中未出现的单词，该条训练集可能面临计算出概率为0的情况，这对我们的计算是没有意义的。
+
+所以，为了解决这个问题，我们引入Laplace smoothing。简单来说，就是将词典中的词语计数都加1，以消除某特征概率为0的情况。在实际的文本分类中，词典很大，文本相对而言较小，所以在应用Laplace smoothing后，不会对计算的概率造成非常大的影响。对于此例，我们可认为词典为
+
+```
+A great game The election was over Very clean match but forgettable It close
+```
+
+那么，重新计算后的概率为：
+
+$$
+\begin{cases}
+P(A|Sports)=\frac{2+1}{11+14} \\
+P(very|Sports)=\frac{1+1}{11+14} \\
+P(close|Sports)=\frac{0+1}{11+14} \\
+P(game|Sports)=\frac{2+1}{11+14}
+\end{cases}
+$$
+
+所以：
+
+$$
+P(Sports) * P(A~very~close~game | Sports) = 4.61*10^{-5}
+$$
+
+同理可得：
+
+$$
+P(Not Sports) * P(A~very~close~game | Not Sports) = 1.43*10^{-5}
+$$
+
+结论是文本“A very close game”属于Sports分类。
+
+### 更进一步的调优方法
+
 
 
 ### 引用
