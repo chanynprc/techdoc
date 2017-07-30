@@ -19,7 +19,7 @@ It was a close election | Not Sports
 $$
 \begin{cases}
 P(Sports | A~very~close~game) \\
-P(Not Sports | A~very~close~game)
+P(Not~Sports | A~very~close~game)
 \end{cases}
 $$
 
@@ -45,7 +45,7 @@ $$
 
 经过转换，很容易得出Bayes公式。
 
-### 模型求解I
+### 模型求解
 
 应用Bayes定理，可以将$P(Sports \| A~very~close~game)$作如下的转换：
 
@@ -55,21 +55,17 @@ $$
 
 其中，$P(Sports)$属于先验概率，可以方便地利用训练集计算得出，$P(A~very~close~game)$在各分类中都包含，而我们只需比较概率大小，可以不予计算。所以问题集中于计算$P(A~very~close~game \| Sports)$。
 
-### 特征提取
+> 在机器学习中，非常关键的一环就是特征提取，它对机器学习效果起着决定性作用。
 
-在机器学习中，非常关键的一环就是特征提取，它对机器学习效果起着决定性作用。
+> 在文本分类中，常常使用词频作为文本的特征。一篇文章或一个文本由若干个词组成，假设我们不考虑上下文关系，这些词都是一个个独立的个体。通过统计每个词出现的次数，计算它们出现的频率，作为这篇文章或文本的特征。虽然这种方法忽略了上下文、词与词之间的连接关系，但在文本分类的实践中，被证明是简单而有效的。
 
-在文本分类中，常常使用词频作为文本的特征。一篇文章或一个文本由若干个词组成，假设我们不考虑上下文关系，这些词都是一个个独立的个体。通过统计每个词出现的次数，计算它们出现的频率，作为这篇文章或文本的特征。虽然这种方法忽略了上下文、词与词之间的连接关系，但在文本分类的实践中，被证明是简单而有效的。
-
-### 模型求解II
-
-由于假设文本中词的出现是相互独立的，那么可对模型进行处理：
+假设文本中词的出现是相互独立的，那么可对模型进行处理：
 
 $$
 P(A~very~close~game | Sports) = P(A|Sports)*P(very|Sports)*P(close|Sports)*P(game|Sports)
 $$
 
-这样，计算就方便直观多了。首先计算先验概率，训练集中Sports分类出现了3次，训练集大小为5，则$P(Sports)=3/5$，$P(Not Sports)=2/5$。在Sports分类中，单词“A”出现了2次，单词“very”出现了1次，单词“close”出现了0次，单词“game”出现了2次，Sports分类共11个词，所以：
+这样，计算就方便直观多了。首先计算先验概率，训练集中Sports分类出现了3次，训练集大小为5，则$P(Sports)=3/5$，$P(Not~Sports)=2/5$。在Sports分类中，单词“A”出现了2次，单词“very”出现了1次，单词“close”出现了0次，单词“game”出现了2次，Sports分类共11个词，所以：
 
 $$
 \begin{cases}
@@ -82,7 +78,9 @@ $$
 
 这个结果相乘以后会导致$P(A~very~close~game \| Sports)$结果为0，也就是说，一旦测试集中含有训练集中未出现的单词，该条训练集可能面临计算出概率为0的情况，这对我们的计算是没有意义的。
 
-所以，为了解决这个问题，我们引入Laplace smoothing。简单来说，就是将词典中的词语计数都加1，以消除某特征概率为0的情况。在实际的文本分类中，词典很大，文本相对而言较小，所以在应用Laplace smoothing后，不会对计算的概率造成非常大的影响。对于此例，我们可认为词典为
+> 为了解决这个问题，我们引入Laplace smoothing。简单来说，就是将词典中的词语计数都加1，以消除某特征概率为0的情况。在实际的文本分类中，词典很大，文本相对而言较小，所以在应用Laplace smoothing后，不会对计算的概率造成非常大的影响。
+
+对于此例，我们可认为词典为：
 
 ```
 A great game The election was over Very clean match but forgettable It close
@@ -137,3 +135,4 @@ $$
 [6] http://sebastianraschka.com/Articles/2014_naive_bayes_1.html
 
 [7] https://en.wikipedia.org/wiki/Tf%E2%80%93idf
+
