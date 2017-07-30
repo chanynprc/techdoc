@@ -63,14 +63,31 @@ $$
 
 ### 模型求解II
 
-由于假设文本中词的出现是相互独立的，那么可对模型中
+由于假设文本中词的出现是相互独立的，那么可对模型进行处理：
 
 $$
-P(A~very~close~game | Sports) = P(A|Sports)*P(very|Sports)*P(close|Sports)*P(game|Sports)
+P(A~very~close~game | Sports) = P(A|Sports)\\
+*P(very|Sports)\\
+*P(close|Sports)\\
+*P(game|Sports)
 $$
+
+这样，计算就方便直观多了。首先计算先验概率，训练集中Sports分类出现了3次，训练集大小为5，则$P(Sports)=3/5$，$P(Not Sports)=2/5$。在Sports分类中，单词“A”出现了2次，单词“very”出现了1次，单词“close”出现了0次，单词“game”出现了2次，Sports分类共11个词，所以：
+
+$$
+\begin{cases}
+P(A|Sports)=2/11 \\
+P(very|Sports)=1/11 \\
+P(close|Sports)=0/11 \\
+P(game|Sports)=2/22
+\end{cases}
+$$
+
 
 ### 引用
 
 [1] https://yq.aliyun.com/articles/113512 （本文示例等内容主要来自此文章，仅为学习和总结目的，如有侵权，请与笔者联系）
 
 [2] https://en.wikipedia.org/wiki/Naive_Bayes_classifier
+
+[3] https://en.wikipedia.org/wiki/Additive_smoothing
