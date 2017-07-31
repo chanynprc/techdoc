@@ -6,6 +6,12 @@
 
 ----------
 
+### Tag：算法
+
+[Bloom Filter](/techdoc/docs/algo/bloom_filter)
+
+----------
+
 ### Tag：数据库
 
 [Architecture of a Database System笔记](/techdoc/docs/database/p_architecture_db_sys)
