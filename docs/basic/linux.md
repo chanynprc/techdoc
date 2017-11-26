@@ -41,6 +41,7 @@ svn st | grep '^?' | awk '{print $2}' | xargs rm -rf
 ### 查看硬盘剩余空间和文件夹占用空间大小
 
 查看硬盘剩余空间
+
 ```bash
 df -lh
 ```
@@ -51,6 +52,26 @@ df -lh
 du -sh <folder>
 du -sh *
 ```
+
+### 建立SSH信任关系
+
+在A机器生成公私钥对：
+
+```bash
+ssh_keygen
+```
+
+生成过程中会询问公私钥文件位置，默认为`~/.ssh`文件夹下的`id_rsa`和`id_rsa.pub`，然后询问是否需要密码，不输入表示不需要密码。
+
+将刚刚生成的公钥文件拷贝到B机器上，并且添加到B机器的SSH信任公钥列表中：
+
+```bash
+cat id_rsa.pub >>  ~/.ssh/authorized_keys
+```
+
+这样就建立了A机器访问B机器的信任关系，这个信任是有方向的，若要建立B机器访问A机器的信任关系，需要逆向重复上述步骤。
+
+建立好SSH信任关系后，就可以使用SSH登录或SCP拷贝文件了。
 
 ### 修改系统时间
 
@@ -83,16 +104,16 @@ mount -o loop -t iso9660 isofile.iso /mnt/iso
 
 ### 系统用户操作
 
-#### 添加用户
+添加用户
 
 ``` bash
 useradd -d /home/username -m username
 passwd username
 ```
 
-`-d`指定该用户的根目录，`-m`表示创建该用户根目录
+其中，`-d`指定该用户的根目录，`-m`表示创建该用户根目录
 
-#### 删除用户
+删除用户
 
 ``` bash
 userdel username
@@ -105,3 +126,5 @@ userdel username
 [2] http://blog.csdn.net/caz28/article/details/50246951
 
 [3] http://www.cnblogs.com/daizhuacai/archive/2013/01/17/2865132.html 
+
+[4] http://blog.csdn.net/nfer_zhuang/article/details/42646849
