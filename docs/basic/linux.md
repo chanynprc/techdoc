@@ -4,13 +4,13 @@
 
 ### 查找包含字符串的文件
 
-当前目录下的所有文件中的字符串
+（1）当前目录下的所有文件中的字符串
 
 ```bash
 grep -r "zh_CN" ./
 ```
 
-当前目录下的以pre开头的文件中的字符串
+（2）当前目录下的以pre开头的文件中的字符串
 
 ```bash
 grep -r "zh_CN" ./pre*
@@ -40,13 +40,13 @@ svn st | grep '^?' | awk '{print $2}' | xargs rm -rf
 
 ### 查看硬盘剩余空间和文件夹占用空间大小
 
-查看硬盘剩余空间
+（1）查看硬盘剩余空间
 
 ```bash
 df -lh
 ```
 
-查看某文件夹占用空间大小
+（2）查看某文件夹占用空间大小
 
 ```bash
 du -sh <folder>
@@ -75,21 +75,22 @@ cat id_rsa.pub >>  ~/.ssh/authorized_keys
 
 ### 修改系统时间
 
-修改系统时间
+（1）修改系统时间
 
 ```bash
 date -s 14:36:53
 date -s 08/28/2008
 ```
 
-同步系统时间到硬件时间
+（2）同步系统时间到硬件时间
 
 ```bash
 hwclock -w
 hwclock --systohc
 ```
 
-同步硬件时间到系统时间
+（3）同步硬件时间到系统时间
+
 ```bash
 hwclock --hctosys
 ```
@@ -104,7 +105,7 @@ mount -o loop -t iso9660 isofile.iso /mnt/iso
 
 ### 系统用户操作
 
-添加用户
+（1）添加用户
 
 ``` bash
 useradd -d /home/username -m username
@@ -113,7 +114,7 @@ passwd username
 
 其中，`-d`指定该用户的根目录，`-m`表示创建该用户根目录
 
-删除用户
+（2）删除用户
 
 ``` bash
 userdel username
