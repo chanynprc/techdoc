@@ -28,6 +28,10 @@
 
 [辅助存储管理](/techdoc/docs/database/dsi_secondary_storage_management)
 
+[索引结构](/techdoc/docs/database/dsi_index_structures)
+
+[查询执行](/techdoc/docs/database/dsi_query_execution)
+
 [查询编译器](/techdoc/docs/database/dsi_query_compiler)
 
 ----------
