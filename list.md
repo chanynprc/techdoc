@@ -20,6 +20,8 @@
 
 [Postgres-XL优化器架构](/techdoc/docs/database/pg_optimizer)
 
+[PostgreSQL's Extended Statistics](/techdoc/docs/database/pg_ext_stat)
+
 ----------
 
 ### Database System Implementation 读书笔记
