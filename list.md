@@ -16,6 +16,8 @@
 
 [Architecture of a Database System笔记](/techdoc/docs/database/p_architecture_db_sys)
 
+[Orca: A Modular Query Optimizer Architecture for Big Data](/techdoc/docs/database/p_orca)
+
 [PostgreSQL概览](/techdoc/docs/database/pg_overview)
 
 [Postgres-XL优化器架构](/techdoc/docs/database/pg_optimizer)
