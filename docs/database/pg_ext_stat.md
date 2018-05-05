@@ -1,4 +1,4 @@
-## PostgreSQL's Extended Statistics
+## PostgreSQL扩展统计信息
 
 ### 背景
 

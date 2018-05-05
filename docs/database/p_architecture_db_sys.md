@@ -1,4 +1,4 @@
-## Architecture of a Database System笔记
+## Architecture of a Database System
 
 ### Relational Query Processor
 

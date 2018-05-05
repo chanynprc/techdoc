@@ -1,4 +1,4 @@
-## Postgres-XL优化器概述
+## Postgres-XL优化器代码架构
 
 ### 主要函数
 
