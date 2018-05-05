@@ -20,12 +20,11 @@ $$
 \begin{align}
   runcost 
   &= iocost + cpucost \\
-  &= seq\_page\_cost \times N_{page} \\
-  &+ (cpu\_tuple\_cost + cpu\_operator\_cost) \times N_{tuple}
+  &= seq\_page\_cost \times N_{page} + (cpu\_tuple\_cost + cpu\_operator\_cost) \times N_{tuple}
 \end{align}
 $$
 
-这里的$cpu\_tuple\_cost$可能根据表存储方式的不同而不同，可以进行识别和适配。$cpucost$中还需要加上对输出列处理的代价，此代价只需考虑输出的行数，而不是总行数。
+这里的$$cpu\_tuple\_cost$$可能根据表存储方式的不同而不同，可以进行识别和适配。$$cpucost$$中还需要加上对输出列处理的代价，此代价只需考虑输出的行数，而不是总行数。
 
 ### 连接算子
 
