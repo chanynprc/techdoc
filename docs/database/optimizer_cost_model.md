@@ -14,7 +14,7 @@
 
 顺序扫描的start up cost可以认为是0，但其实也应包含磁盘寻道、寻找扇区、读取第1个扇区、CPU处理等的时间。
 
-顺序扫描的run cost由两部分组成，IO cost和CPU cost。磁盘IO要将包含对象表的所有Page读取到内存，CPU需要对所有Tuple进行处理。这里认为所有数据Page都在磁盘上，没有考虑数据Page已经在内存中的情况。
+顺序扫描的run cost由2个部分组成，IO cost和CPU cost。磁盘IO要将包含对象表的所有Page读取到内存，CPU需要对所有Tuple进行处理。这里认为所有数据Page都在磁盘上，没有考虑数据Page已经在内存中的情况。
 
 $$
 \begin{align}
@@ -25,6 +25,12 @@ $$
 $$
 
 这里的$$cpu\_tuple\_cost$$可能根据表存储方式的不同而不同，可以进行识别和适配。$$cpucost$$中还需要加上对输出列处理的代价，此代价只需考虑输出的行数，而不是总行数。
+
+#### Index Scan
+
+索引扫描的start up cost（TBA）
+
+索引扫描的run cost由4个部分组成，索引IO cost、索引CPU cost、数据IO cost和数据CPU cost。
 
 ### 连接算子
 
