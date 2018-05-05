@@ -20,7 +20,7 @@ $$
 \begin{align}
   runcost 
   &= iocost + cpucost \\
-  &= seq\_page\_cost \times N_{page} 
+  &= seq\_page\_cost \times N_{page} \\
   &+ (cpu\_tuple\_cost + cpu\_operator\_cost) \times N_{tuple}
 \end{align}
 $$
