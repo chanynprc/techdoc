@@ -12,15 +12,15 @@
 
 #### Sequential Scan
 
-start up cost = 0
+顺序扫描的start up cost可以认为是0，但其实也应包含磁盘寻道、寻找扇区、读取第1个扇区、CPU处理等的时间。
 
-run cost = IO cost + CPU cost
+顺序扫描的run cost由两部分组成，IO cost和CPU cost。磁盘IO要将包含对象表的所有Page读取到内存，CPU需要对所有Tuple进行处理。这里认为所有数据Page都在磁盘上，没有考虑数据Page已经在内存中的情况。
 
 $$
 \begin{align}
-  run cost 
-  &= IO cost + CPU cost \\
-  &= (cpu_tuple_cost + cpu_operator_cost) \times N_{tuple} + seq_page_cost \times N_{page}
+  runcost 
+  &= iocost + cpucost \\
+  &= seq\_page\_cost \times N_{page} + (cpu\_tuple\_cost + cpu\_operator\_cost) \times N_{tuple}
 \end{align}
 $$
 
