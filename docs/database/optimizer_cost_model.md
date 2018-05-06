@@ -56,6 +56,56 @@ $$
 
 最后，索引扫描的run cost为上述4个cost之和。
 
+### 单目算子
+
+#### Sort
+
+我们先研究排序数据能直接在内存中放下的情况。
+
+排序算子的start up cost包括了对数据进行排序的操作。快速排序的时间复杂度是$$O(nlogn)$$，所以start up cost为：
+
+$$
+startupcost = childtotalcost + comparison\_cost \times N_{tuple} \times log_{2}(N_{tuple})
+$$
+
+排序算子的run cost包括了对排完序的数据进行扫描输出的操作。
+
+$$
+runcost = cpu_operator_cost \times N_{tuple}
+$$
+
+如果不能用内排序，而要考虑外排序的话，则需要将下盘量考虑在内。要计算下盘量，要确定需要执行多少轮下盘，每一轮需要对所有数据进行并归。
+
+假设可用于排序的内存为$$sort\_mem\_bytes$$，数据的宽度为$$width$$，那么数据量可以简化为：
+
+$$
+inputbytes = width \times N_{tuple}
+$$
+
+需要进行排序的轮次为：
+
+$$
+nsort = inputbytes / sort\_mem\_bytes
+$$
+
+假设可用内存可供$$nmerge$$个排序子序列进行并归，则需要下盘的轮次为：
+
+$$
+ndisk = log_{nmerge}(nsort)
+$$
+
+下盘Page数为：
+
+$$
+npage = 2 \times N_{page} \times ndisk
+$$
+
+所以，下盘带来的代价为：
+
+$$
+sort\_disk\_cost = (seq\_page\_cost \times 0.75 + random\_page\_cost \times 0.25) \times npage
+$$
+
 ### 连接算子
 
 ### 引用
