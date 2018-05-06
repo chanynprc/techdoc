@@ -34,21 +34,21 @@ $$
 
 $$
 \begin{align}
-indexiocost &=& random\_page\_cost \times N_{index\_page} \times selectivity \\
-indexcpucost &=& (cpu\_index\_tuple\_cost + qual\_op\_cost) \times N_{index\_tuple} \times selectivity \\
-tablecpucost &=& (cpu\_tuple\_cost + cpu\_qual\_tuple\_cost) \times N_{tuple} \times selectivity
+indexiocost &= random\_page\_cost \times N_{index\_page} \times selectivity \\
+indexcpucost &= (cpu\_index\_tuple\_cost + qual\_op\_cost) \times N_{index\_tuple} \times selectivity \\
+tablecpucost &= (cpu\_tuple\_cost + cpu\_qual\_tuple\_cost) \times N_{tuple} \times selectivity
 \end{align}
 $$
 
-其中，$$cpu\_qual\_tuple\_cost$$为处理非索引条件时每个Tuple上的代价。
+其中，$$cpu\_qual\_tuple\_cost$$为处理非索引条件时每个Tuple上的代价，$$selectivity$$为算子选择率。
 
 数据IO cost的代价模型相对复杂，需要考虑索引与数据Page的存储地址相关性。如果数据文件按照条件中的字段排序，且该字段上建有索引，则这种索引与数据的存储是相关的，否则是不相关的。相关的索引与数据存储结构中，从索引地址到数据Page的访问只需1次随机块访问，后续均为顺序访问。在非相关结构中，从索引到数据Page的访问均为随机访问。这种差别会带来索引扫描代价的不同。
 
 $$
 \begin{align}
-maxiocost &=& random\_page\_cost \times N_{page} \\
-miniocost &=& random\_page\_cost \times 1 + seq\_page\_cost \times (N_{page} \times selectivity - 1) \\
-tableiocost &=& maxiocost + correlation^2 \times (miniocost - maxiocost)
+maxiocost &= random\_page\_cost \times N_{page} \\
+miniocost &= random\_page\_cost \times 1 + seq\_page\_cost \times (N_{page} \times selectivity - 1) \\
+tableiocost &= maxiocost + correlation^2 \times (miniocost - maxiocost)
 \end{align}
 $$
 

@@ -12,7 +12,7 @@
 
 ----------
 
-### Tag：数据库
+### Tag：数据库综合
 
 [查询优化框架](/techdoc/docs/database/optimizer_framework)
 
@@ -20,15 +20,19 @@
 
 [优化器代价模型](/techdoc/docs/database/optimizer_cost_model)
 
-[论文笔记：Architecture of a Database System](/techdoc/docs/database/p_architecture_db_sys)
-
-[论文笔记：Orca: A Modular Query Optimizer Architecture for Big Data](/techdoc/docs/database/p_orca)
-
 [PostgreSQL概览](/techdoc/docs/database/pg_overview)
 
 [Postgres-XL优化器代码架构](/techdoc/docs/database/pg_optimizer)
 
 [PostgreSQL的扩展统计信息](/techdoc/docs/database/pg_ext_stat)
+
+----------
+
+### Tag：论文笔记
+
+[Architecture of a Database System](/techdoc/docs/database/p_architecture_db_sys)
+
+[Orca: A Modular Query Optimizer Architecture for Big Data](/techdoc/docs/database/p_orca)
 
 ----------
 
