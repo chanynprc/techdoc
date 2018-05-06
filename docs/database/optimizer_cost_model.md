@@ -34,8 +34,8 @@ $$
 
 $$
 \begin{align}
-indexiocost &=& random\_page\_cost \times N_{index\_page} \times selectivity
-indexcpucost &=& (cpu\_index\_tuple\_cost + qual\_op\_cost) \times N_{index\_tuple} \times selectivity
+indexiocost &=& random\_page\_cost \times N_{index\_page} \times selectivity \\
+indexcpucost &=& (cpu\_index\_tuple\_cost + qual\_op\_cost) \times N_{index\_tuple} \times selectivity \\
 tablecpucost &=& (cpu\_tuple\_cost + cpu\_qual\_tuple\_cost) \times N_{tuple} \times selectivity
 \end{align}
 $$
@@ -46,11 +46,13 @@ $$
 
 $$
 \begin{align}
-maxiocost &=& random\_page\_cost \times N_{page}
-miniocost &=& random\_page\_cost \times 1 + seq\_page\_cost \times (N_{page} \times selectivity - 1)
+maxiocost &=& random\_page\_cost \times N_{page} \\
+miniocost &=& random\_page\_cost \times 1 + seq\_page\_cost \times (N_{page} \times selectivity - 1) \\
 tableiocost &=& maxiocost + correlation^2 \times (miniocost - maxiocost)
 \end{align}
 $$
+
+其中，$$correlation$$是统计信息之一，详见《优化器行数估算》一文。
 
 最后，索引扫描的run cost为上述4个cost之和。
 
@@ -59,3 +61,5 @@ $$
 ### 引用
 
 [1] http://www.interdb.jp/pg/pgsql03.html
+
+[2] http://www.chenyineng.info/techdoc/docs/database/optimizer_row_estimation
