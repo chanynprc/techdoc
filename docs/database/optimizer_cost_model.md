@@ -118,7 +118,7 @@ Nest Loop Join的run cost由3个部分组成，outer的扫描代价，inner的�
 
 $$
 \begin{align}
-runcost &= Cost_{outer\_seqscan} + Cost_{inner\_seqscan} \times N_{outer\_tuple}
+runcost &= Cost_{outer\_seqscan} + Cost_{inner\_seqscan} \times N_{outer\_tuple} \\
 runcost &+= (cpu\_tuple\_cost + cpu\_operator\_cost) \times N_{outer\_tuple} \times N_{inner\_tuple}
 \end{align}
 $$
@@ -131,8 +131,8 @@ run cost与普通Nest Loop Join的区别在于，内表扫描的是物化后的r
 
 $$
 \begin{align}
-Cost_{inner\_rescan} &= cpu\_operator\_cost \times N_{inner\_tuple}
-runcost &= Cost_{outer\_seqscan} + Cost_{inner\_materialize} + Cost_{inner\_rescan} \times (N_{outer\_tuple} - 1)
+Cost_{inner\_rescan} &= cpu\_operator\_cost \times N_{inner\_tuple} \\
+runcost &= Cost_{outer\_seqscan} + Cost_{inner\_materialize} + Cost_{inner\_rescan} \times (N_{outer\_tuple} - 1) \\
 runcost &+= (cpu\_tuple\_cost + cpu\_operator\_cost) \times N_{outer\_tuple} \times N_{inner\_tuple}
 \end{align}
 $$
@@ -145,7 +145,7 @@ $$
 
 $$
 \begin{align}
-totalcost &= Cost_{outer\_seqscan}
+totalcost &= Cost_{outer\_seqscan} \\
 totalcost &+= (cpu\_tuple\_cost + Cost_{inner\_parameterized}) \times N_{outer\_tuple}
 \end{align}
 $$
