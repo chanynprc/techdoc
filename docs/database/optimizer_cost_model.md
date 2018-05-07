@@ -108,7 +108,67 @@ $$
 
 ### 连接算子
 
+#### Nest Loop Join
+
+（1）参与Nest Loop Join的两个表均为顺序扫描
+
+Nest Loop Join不需要做什么准备工作，它的start up cost为0。
+
+Nest Loop Join的run cost由3个部分组成，outer的扫描代价，inner的扫描代价，以及Join本身的代价。
+
+$$
+\begin{align}
+runcost &= Cost_{outer\_seqscan} + Cost_{inner\_seqscan} \times N_{outer\_tuple}
+runcost &+= (cpu\_tuple\_cost + cpu\_operator\_cost) \times N_{outer\_tuple} \times N_{inner\_tuple}
+\end{align}
+$$
+
+（2）参与Nest Loop Join的外表为顺序扫描，内表为物化
+
+start up cost依然为0。
+
+run cost与普通Nest Loop Join的区别在于，内表扫描的是物化后的rescan，而不用再去扫内表。
+
+$$
+\begin{align}
+Cost_{inner\_rescan} &= cpu\_operator\_cost \times N_{inner\_tuple}
+runcost &= Cost_{outer\_seqscan} + Cost_{inner\_materialize} + Cost_{inner\_rescan} \times (N_{outer\_tuple} - 1)
+runcost &+= (cpu\_tuple\_cost + cpu\_operator\_cost) \times N_{outer\_tuple} \times N_{inner\_tuple}
+\end{align}
+$$
+
+（3）参与Nest Loop Join的外表为顺序扫描，内表为索引扫描
+
+这种情况下，start up cost就不能认为是0了，要考虑索引访问的代价，认为是索引访问1条内表元素的代价。
+
+这里直接计算total cost：
+
+$$
+\begin{align}
+totalcost &= Cost_{outer\_seqscan}
+totalcost &+= (cpu\_tuple\_cost + Cost_{inner\_parameterized}) \times N_{outer\_tuple}
+\end{align}
+$$
+
+当然，外表也可以使用索引，这里就不讨论它的代价模型了。
+
+#### Merge Join
+
+start up cost是内表和外表进行排序的代价。
+
+run cost的代价就是将外表内表顺序扫描一遍，其复杂度为$$O(N_{outer\_tuple} + N_{inner\_tuple})$$。
+
+#### Hash Join
+
+Hash Join的代价模型较为复杂，具体代价模型此处不展开，待后续补充讨论。
+
+粗略地讲，理想状况下，如果所有操作能在内存中完成，start up cost的复杂度为$$N_{inner\_tuple})$$，run cost的复杂度为$$O(N_{outer\_tuple} + N_{inner\_tuple})$$。
+
+如果考虑内存放不下Hash表时，则需每次处理1个Batch，要考虑Hash Batch下盘的情况。此外，如果有一个特别的存储MCV值的Skew Batch，则能减少下盘量，代价模型又进一步复杂起来。
+
 ### 引用
+
+[0] Code of PostgreSQL
 
 [1] http://www.interdb.jp/pg/pgsql03.html
 
