@@ -48,7 +48,7 @@ $$
 \begin{align}
 maxiocost &= random\_page\_cost \times N_{page} \\
 miniocost &= random\_page\_cost \times 1 + seq\_page\_cost \times (N_{page} \times selectivity - 1) \\
-tableiocost &= correlation^2 \times miniocost + (1 - correlation^2) \times maxiocost
+tableiocost &= correlation^2 \times miniocost + (1 - correlation^2) \times maxiocost \\
 &= maxiocost + correlation^2 \times (miniocost - maxiocost)
 \end{align}
 $$
@@ -163,13 +163,13 @@ run cost的代价就是将外表内表顺序扫描一遍，其复杂度为$$O(N_
 
 Hash Join的代价模型较为复杂，具体代价模型此处不多展开，待后续补充讨论。简单地说，Hash Join的start up cost用于建立Hash表，run cost用于进行Probe。
 
-&&
+$$
 \begin{align}
 startupcost &= (cpu\_operator\_cost \times N_{hashclauses} + cpu\_tuple\_cost) \times N_{inner\_tuple} \\
 runcost &= cpu\_operator\_cost \times N_{hashclauses} \times N_{outer\_tuple} \\
 runcost &+= qual\_cost \times N_{bucket\_size} \times 0.5 \times N_{outer\_tuple}
 \end{align}
-&&
+$$
 
 粗略地讲，理想状况下，如果所有操作能在内存中完成，start up cost的复杂度为$$N_{inner\_tuple})$$，run cost的复杂度为$$O(N_{outer\_tuple} + N_{inner\_tuple})$$。
 
