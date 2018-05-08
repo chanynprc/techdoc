@@ -16,7 +16,7 @@
 
 [查询优化框架](/techdoc/docs/database/optimizer_framework)
 
-[优化器行数估算](/techdoc/docs/database/optimizer_row_estimation)
+[优化器行数估算](/techdoc/docs/database/optimizer_cardinality_estimation)
 
 [优化器代价模型](/techdoc/docs/database/optimizer_cost_model)
 

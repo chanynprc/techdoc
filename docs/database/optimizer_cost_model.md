@@ -48,11 +48,12 @@ $$
 \begin{align}
 maxiocost &= random\_page\_cost \times N_{page} \\
 miniocost &= random\_page\_cost \times 1 + seq\_page\_cost \times (N_{page} \times selectivity - 1) \\
-tableiocost &= maxiocost + correlation^2 \times (miniocost - maxiocost)
+tableiocost &= correlation^2 \times miniocost + (1 - correlation^2) \times maxiocost
+&= maxiocost + correlation^2 \times (miniocost - maxiocost)
 \end{align}
 $$
 
-其中，$$correlation$$是统计信息之一，详见《优化器行数估算》一文。
+其中，$$correlation$$是统计信息之一，详见《优化器行数估算》一文。$$N_{page}$$为考虑缓存因素后的Page数，使用Mackert and Lohman公式计算（见引用[1]）。
 
 最后，索引扫描的run cost为上述4个cost之和。
 
@@ -160,7 +161,15 @@ run cost的代价就是将外表内表顺序扫描一遍，其复杂度为$$O(N_
 
 #### Hash Join
 
-Hash Join的代价模型较为复杂，具体代价模型此处不展开，待后续补充讨论。
+Hash Join的代价模型较为复杂，具体代价模型此处不多展开，待后续补充讨论。简单地说，Hash Join的start up cost用于建立Hash表，run cost用于进行Probe。
+
+&&
+\begin{align}
+startupcost &= (cpu\_operator\_cost \times N_{hashclauses} + cpu\_tuple\_cost) \times N_{inner\_tuple} \\
+runcost &= cpu\_operator\_cost \times N_{hashclauses} \times N_{outer\_tuple} \\
+runcost &+= qual\_cost \times N_{bucket\_size} \times 0.5 \times N_{outer\_tuple}
+\end{align}
+&&
 
 粗略地讲，理想状况下，如果所有操作能在内存中完成，start up cost的复杂度为$$N_{inner\_tuple})$$，run cost的复杂度为$$O(N_{outer\_tuple} + N_{inner\_tuple})$$。
 
@@ -170,6 +179,8 @@ Hash Join的代价模型较为复杂，具体代价模型此处不展开，待�
 
 [0] Code of PostgreSQL
 
-[1] http://www.interdb.jp/pg/pgsql03.html
+[1] Lothar F. Mackert and Guy M. Lohman. 1989. Index scans using a finite LRU buffer: a validated I/O model. ACM Trans. Database Syst. 14, 3 (September 1989), 401-424.
 
-[2] http://www.chenyineng.info/techdoc/docs/database/optimizer_row_estimation
+[2] http://www.interdb.jp/pg/pgsql03.html
+
+[3] http://www.chenyineng.info/techdoc/docs/database/optimizer_cardinality_estimation
