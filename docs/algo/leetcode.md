@@ -43,7 +43,7 @@ for (; 0 != b; )
     sum = a ^ b;
     carry = a & b;
     a = sum;
-    b = carry;
+    b = carry << 1;
 }
 ```
 
