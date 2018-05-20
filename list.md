@@ -10,6 +10,10 @@
 
 [Bloom Filter](/techdoc/docs/algo/bloom_filter)
 
+[Questions in Interview](/techdoc/docs/algo/interview)
+
+[Questions of LeetCode](/techdoc/docs/algo/leetcode)
+
 ----------
 
 ### Tag：数据库综合
