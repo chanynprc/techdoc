@@ -8,9 +8,11 @@ PostgreSQL是一个被广泛应用的开源数据库系统，由它也构筑了M
  
 在逻辑结构上，我们称PostgreSQL数据库系统为一个Database Cluster，这里的Cluster并不表示有很多物理服务器，而是表示一个PostgreSQL实例可以有多个Database。每个Database包含各种属于这个Database的对象，这些对象可以是Table、Index、View、Function、Sequence等。一个对象只属于某一个Database，用户访问时，每次也只能访问一个Database。多个Database共同组成了PostgreSQL数据库系统。
  
-物理结构是指数据库中Database和对象的存储方式。在初始化数据库后，一般有一个目录```base```被用来存储数据文件。在这个```base```目录中有多个表示Database的文件夹，每个Database一个文件夹，文件夹的名字是Database的OID。每个Database中的对象的文件都存放于其属于的Database的文件夹中。
+物理结构是指数据库中Database和对象的存储方式。在初始化数据库后，在```PGDATA```目录下有一个目录```base```文件夹被用来存储数据文件。在这个```base```文件夹中有多个表示Database的文件夹，每个Database一个文件夹，文件夹的名字是Database的OID。每个Database中的对象的文件都存放于其属于的Database的文件夹中。
  
-与Database不同，Database中的对象并不直接使用OID作为它们的文件名，而是使用一个```relfilenode```来作为对象的文件名。一般情况下，```relfilenode```与对象的OID相同，但是在一些特殊的操作后（如TRUNCATE、REINDEX、CLUSTER），```relfilenode```可能会发生改变，从而不等于对象的OID。同时，每个对象文件的大小也有规定，可以通过参数设定，对象文件大小超过一定阈值后，一个新的文件将产生，名字为```relfilenode.1```，如果再超过阈值，第3个名为```relfilenode.2```新文件将产生。除此之外，还有表示Free Space Map的```relfilenode_fsm```文件和表示Visibility Map的```relfilenode_vm```文件。
+与Database不同，Database中的对象并不直接使用OID作为它们的文件名，而是使用一个```relfilenode```来作为对象的文件名。一般情况下，```relfilenode```与对象的OID相同，但是在一些特殊的操作后（如TRUNCATE、REINDEX、CLUSTER），```relfilenode```可能会发生改变，从而不等于对象的OID。同时，每个对象文件的大小也有规定，可以通过参数设定，对象文件大小超过一定阈值后，一个新的文件将产生，名字为```relfilenode.1```，如果再超过阈值，第3个名为```relfilenode.2```新文件将产生。除此之外，还有表示Free Space Map的```relfilenode_fsm```文件和表示Visibility Map的```relfilenode_vm```文件。所以，一个对象可能有多个文件与之对应。
+ 
+TableSpace被用于在```PGDATA```目录外存放数据文件。建立一个TableSpace后，PostgreSQL将在```PGDATA/pg_tblspc```目录下建立一个链接，指向TableSpace的目录。在TableSpace的目录下，会先建立一个与PostgreSQL版本号相关的文件夹，此版本号文件夹类似于内部文件目录```base```，在版本号文件夹下是表示Database的文件夹。如果对象被建立在一个已有的Database中，那么版本号文件夹下会出现一个同名（Database的OID）的文件夹，如果对象被建立在一个新的Database中，则会使用新的Database的OID作为文件夹名字。
 
 ### 进程结构
  
