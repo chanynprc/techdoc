@@ -6,9 +6,9 @@ PostgreSQL是一个被广泛应用的开源数据库系统，由它也构筑了M
  
 ### 逻辑结构和物理结构
  
-### 进程和内存结构
+### 进程结构
  
-PostgreSQL有一个多进程的架构，它的进程主要有：
+PostgreSQL是一个多进程的架构，它的进程主要有：
  
 - Server Process：所有其他进程的父进程，负责对整个系统的管理
 - Background Processes：针对于每个独立功能的进程，如Vacuum进程、Checkpoint进程
@@ -22,13 +22,17 @@ Backend Process也被称为Postgres进程，它被启动用于处理来自一个
 
 Background Processes用于一些独立而特殊的功能：
  
-- Background Writer：将Buffer Pool中的脏页持久化
+- Background Writer：将Shared Buffer Pool中的脏页持久化
 - Checkpointer：处理Check Point相关的操作
 - AutoVacuum Launcher：定期进行Vacuum
 - WAL Writer：定期将WAL Buffer中的WAL数据持久化
 - Statistics Collector：进行统计信息收集
 - Logging Collector：将日志信息写入Log文件
 - Archiver：进行日志归档
+
+### 内存结构
+
+
 ### PostgreSQL的扩展
  
 #### Postgres-XL
