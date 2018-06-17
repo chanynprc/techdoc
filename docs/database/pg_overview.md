@@ -15,8 +15,10 @@ PostgreSQL有一个多进程的架构，它的进程主要有：
 - Replication Associated Processes
 - Background Worker Process
 - Backend Processes：处理来自客户端的连接，处理查询请求，针对每个连接，都有一个独立的Backend Processes
-
-
+ 
+在老版本的PostgreSQL中，Server Process被称为Postmaster。当使用pg_ctl命令启动数据库时，Server Process就被启动了，然后它会在内存中申请一块Shared Memory，并启动Background Processes、Replication Associatied Processes和Background Worker Process。当收到来自客户端的连接请求时，启动Backend Process。
+ 
+Backend Process也被称为Postgres进程，它被启动用于处理来自一个客户端的所有查询请求，在客户端关闭连接时被销毁。一个Backend Process只被允许访问一个Database实例，所以在客户端连接PostgreSQL的服务端时，需要指定连接哪一个数据库。PostgreSQL允许多个客户端同时连接服务端，但有一个参数控制最大连接数。因为PostgreSQL没有实现连接池的机制，当服务端频繁连接和断连服务端时，性能会因建连接和启动Backend Process而降低，但有一些第三方中间件可用于处理连接池问题。
 ### PostgreSQL的扩展
  
 #### Postgres-XL
