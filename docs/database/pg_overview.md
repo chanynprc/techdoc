@@ -24,8 +24,8 @@ TableSpace被用于在```PGDATA```目录外存放数据文件。建立一个Tabl
 对象文件内部由Page/Block组成，它们的大小是固定的（默认8K）。对象文件和Page的组织形式如图所示：
 
 ![](/techdoc/docs/database/images/pg_heap_table_file.png)
- 
-Tuple Identifier（TID）被用于标记每一个Tuple，由两个数字组成，Block Number（Page在数据文件中的偏移）和Offset Number（Tuple在Page中的偏移）。
+
+Tuple Identifier（TID）被用于标记每一个Tuple，由两个数字组成，Block Number（Page在数据文件中的偏移）和Offset Number（Tuple在Page中的偏移）。在索引的叶节点中，存放着目标数值（Key）和它的TID，通过这个TID可以直接定位到目标数据的Tuple。
 
 当一个Tuple的大小超过2K时，PostgreSQL采用TOAST（The Oversized-Attribute Storage Technique）技术进行存储。
 
