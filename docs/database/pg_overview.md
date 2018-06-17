@@ -30,6 +30,8 @@ Background Processes用于一些独立而特殊的功能：
 - Logging Collector：将日志信息写入Log文件
 - Archiver：进行日志归档
 
+> 为了防止因Server Failure而丢失数据，PostgreSQL支持了WAL机制，WAL数据也被称为XLOG，是PostgreSQL的事务日志
+
 ### 内存结构
  
 PostgreSQL的内存主要分为两大类，每个Backend Process的私有内存，以及所有进程共用的共享内存。
@@ -45,8 +47,6 @@ PostgreSQL的内存主要分为两大类，每个Backend Process的私有内存�
 - Shared Buffer Pool：从持久化存储读取表和索引的页面后，存放于此区域
 - WAL Buffer：WAL数据被持久化前，存放于此
 - Commit Log：存放CLOG
-
-> 为了防止因Server Failure而丢失数据，PostgreSQL支持了WAL机制，WAL数据也被称为XLOG，是PostgreSQL的事务日志
 
 > CLOG（Commit Log）用于记录并发控制（Concurrency Control，CC）机制的事务状态（in_progress、committed、aborted等）
  
