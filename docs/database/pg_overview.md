@@ -5,6 +5,16 @@
 PostgreSQL是一个被广泛应用的开源数据库系统，由它也构筑了MySQL之外的又一开源数据库生态。PostgreSQL本身是一个单机数据库，有很多公司和组织基于PostgreSQL开发了分布式的数据库系统，比如Greenplum和Postgre-XL等。
  
 ### 逻辑结构和物理结构
+ 
+### 进程和内存结构
+ 
+PostgreSQL有一个多进程的架构，它的进程主要有：
+ 
+- Server Process：所有其他进程的父进程，负责对整个系统的管理
+- Background Processes：针对于每个独立功能的进程，如Vacuum进程、Checkpoint进程
+- Replication Associated Processes
+- Background Worker Process
+- Backend Processes：处理来自客户端的连接，处理查询请求，针对每个连接，都有一个独立的Backend Processes
 
 
 ### PostgreSQL的扩展
