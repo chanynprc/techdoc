@@ -82,4 +82,6 @@ Postgres-XL基于PostgreSQL开发而来，是一个横向可扩展的开源数�
 
 [0] http://www.interdb.jp/pg/
 
-[1] http://www.postgres-xl.org/overview/
+[1] 彭智勇，彭煜玮，PostgreSQL数据库内核分析，2012，机械工业出版社
+
+[2] http://www.postgres-xl.org/overview/
