@@ -23,7 +23,7 @@ TableSpace被用于在```PGDATA```目录外存放数据文件。建立一个Tabl
 
 对象文件内部由Page/Block组成，它们的大小是固定的（默认8K）。对象文件和Page的组织形式如图所示：
 
-
+![](/techdoc/docs/database/images/pg_heap_table_file.png)
 
 ### 进程结构
 
