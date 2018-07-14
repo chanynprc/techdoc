@@ -83,7 +83,26 @@ PostgreSQL借助词法分析工具Lex和语法分析工具Yacc来进行词法解
 
 查询处理是整个数据库中最为深奥复杂的一部分，尤其是作为数据库大脑的优化器部分，此处不作展开，笔者将在其他文章中作重点阐述。
 
-### 并发控制
+### 并发控制（Concurrency Control）
+
+并发控制是为处理一致性（consistency）和隔离性（isolation）所设计的机制。有3种主流的并发控制技术：
+
+- MVCC (Multi-version Concurrency Control)：写操作创建一个新版本数据，并保留旧版本数据，读操作选择一个保持事务隔离性的版本进行数据读取，MVCC的特点是读不阻塞写，写不阻塞读
+- S2PL (Strict Two-Phase Locking)：S2PL在写数据时需要加排他锁，所以写会阻塞读
+- OCC (Optimistic Concurrency Control)
+
+PostgreSQL和一些RDBMS（如Oracle）使用的是MVCC的一个变种，快照隔离（Snapshot Isolation, SI）。Oracle和PostgreSQL之间不同的是，Oracle使用回滚段（rollback segments），当需要写新的数据时，老数据被写入回滚段，然后直接在原数据区域写入数据。PostgreSQL在原数据页直接插入新数据，读数据时根据可见性规则选择相应的数据版本。
+
+在PostgreSQL 9.1版本中，加入了Serializable Snapshot Isolation (SSI)以检测serialization anomalies并处理其带来的冲突。所以从9.1版本以后，PostgreSQL支持了真正的可串行化隔离级别。其他数据库中，SQL Server使用的是SSI，Oracle使用的是SI。
+
+隔离级别 | Dirty Reads | Non-repeatable Read | Phantom Read | Serialization Anomaly
+--- | --- | --- | --- | ---
+ READ COMMITTED | × | ○ | ○ | ○ 
+ REPEATABLE READ | × | × | ×(PG) ○(ANSI SQL) | ○
+ SERIALIZABLE | × | × | × | ×
+
+×: Not Possible
+○: Possible
 
 ### PostgreSQL的扩展
 
