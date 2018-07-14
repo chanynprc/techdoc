@@ -107,6 +107,16 @@ PostgreSQL中的隔离级别如下：
 
 PostgreSQL使用了MVCC和2PL混合的方式。对于DML语句（SELECT, UPDATE, INSERT, DELETE）使用SSI，对于DDL语句（CREATE TABLE等）使用2PL。
 
+#### 事务ID
+
+一个事务开始后，将被分配一个ID。在PostgreSQL中事务ID称为txid（transaction id），是一个32位无符号整形。通过事务ID，可以比较事务的先后顺序以及判别数据修改的可见性。由于32位无符号整形是有限的，PostgreSQL将事务ID看成一个环，环上某一点的前面一半事务ID看成是Past事务ID，后面一半事务ID看成是Future事务ID。
+
+PostgreSQL中，有3个特殊的事务ID：
+
+- 0：无效的ID
+- 1：Bootstrap txid，只在初始化数据库时使用
+- 2：Frozen txid
+
 ### PostgreSQL的扩展
 
 #### Postgres-XL
