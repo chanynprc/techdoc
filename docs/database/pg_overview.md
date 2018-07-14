@@ -95,14 +95,17 @@ PostgreSQL和一些RDBMS（如Oracle）使用的是MVCC的一个变种，快照�
 
 在PostgreSQL 9.1版本中，加入了Serializable Snapshot Isolation (SSI)以检测serialization anomalies并处理其带来的冲突。所以从9.1版本以后，PostgreSQL支持了真正的可串行化隔离级别。其他数据库中，SQL Server使用的是SSI，Oracle使用的是SI。
 
-隔离级别 | Dirty Reads | Non-repeatable Read | Phantom Read | Serialization Anomaly
+PostgreSQL中的隔离级别如下：
+
+隔离级别 | Dirty<br/>Reads | Non-repeatable<br/>Read | Phantom<br/>Read | Serialization<br/>Anomaly
 --- | --- | --- | --- | ---
  READ COMMITTED | × | ○ | ○ | ○ 
- REPEATABLE READ | × | × | ×(PG) ○(ANSI SQL) | ○
+ REPEATABLE READ | × | × | ×(PG)<br/>○(ANSI SQL) | ○
  SERIALIZABLE | × | × | × | ×
 
-×: Not Possible
-○: Possible
+×: Not Possible<br/>○: Possible
+
+PostgreSQL使用了MVCC和2PL混合的方式。对于DML语句（SELECT, UPDATE, INSERT, DELETE）使用SSI，对于DDL语句（CREATE TABLE等）使用2PL。
 
 ### PostgreSQL的扩展
 
