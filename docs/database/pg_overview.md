@@ -141,7 +141,7 @@ PostgreSQL中，有3个特殊的事务ID：
 -- txid = 100
 BEGIN;
 INSERT INTO t VALUES ('A');
-END;
+COMMIT;
 ```
 
 则一条新的记录被添加到page中：
@@ -161,10 +161,10 @@ END;
 BEGIN;
 UPDATE t SET data='B';
 UPDATE t SET data='C';
-END;
+COMMIT;
 ```
 
-两条语句会在page中插入两个新的tuple，并对之前的tuple作更新。
+两条语句会在page中插入两个新的tuple，并对之前的tuple作更新，标记（逻辑上）删除。
 
 第1条语句执行后，原tuple的t_xmax、t_ctid会被更新，并插入一条新的数据：
 
@@ -198,7 +198,7 @@ END;
 -- txid = 102
 BEGIN;
 DELETE FROM t;
-END;
+COMMIT;
 ```
 
 系统不会立即删除这条记录，而是将记录标记为删除，即设置其t_xmax，系统运行VACUUM命令后，将对存储空间进行回收：
