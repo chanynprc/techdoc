@@ -113,9 +113,25 @@ PostgreSQL使用了MVCC和2PL混合的方式。对于DML语句（SELECT, UPDATE,
 
 PostgreSQL中，有3个特殊的事务ID：
 
-- 0：无效的ID
+- 0：Invalid txid
 - 1：Bootstrap txid，只在初始化数据库时使用
 - 2：Frozen txid
+
+#### Tuple结构
+
+前面介绍过Table的Page结构，在Page中，每一个元组是以Tuple形式存储的，Tuple的结构如下：
+
+```
+---------------------------------------------------------------------------------------------
+| t_xmin | t_xmax | t_cid | t_ctid | t_infomask2 | t_infomask | t_hoff | t_bits | User Data |
+--------------------------------------------------------------------------------------------- 
+```
+
+各字段的含义如下：
+- t_xmin：
+- t_xmax：
+- t_cid：
+- t_ctid：
 
 ### PostgreSQL的扩展
 
