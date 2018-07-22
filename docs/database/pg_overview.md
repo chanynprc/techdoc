@@ -215,6 +215,23 @@ COMMIT;
 +--------+--------+-------+--------+-----------+
 ```
 
+#### Commit Log (clog)
+
+Commit log被用于保存事务的状态，存放于shared memory中。PostgreSQL的事务状态有4种：
+
+- IN_PROGRESS
+- COMMITTED
+- ABORTED
+- SUB_COMMITTED（用于子事务）
+
+clog是一个数组结构，数组下标是事务ID（txid），数组内容是对应txid的事务状态。clog的数组是按照page（8KB）分配的，如果txid超过了目前的数组长度，则会扩展新的8KB给clog。
+
+当PostgreSQL停机或触发checkpoint时，clog将被从内存中写入磁盘的pg_log（pg_xact）文件夹进行持久化，这些文件被命名为`0000`、`0001`等，每个文件的大小上限是256KB，也就是说每个文件最多容纳32个clog的page。当PostgreSQL启动时，pg_log（pg_xact）文件夹下的文件将被加载成clog。当然，并非clog中的所有数据都是有用的，Vacuum会对clog的page以及文件进行清理。
+
+#### 事务快照（Transaction Snapshot）
+
+
+
 ### PostgreSQL的扩展
 
 #### Postgres-XL
