@@ -230,7 +230,28 @@ clog是一个数组结构，数组下标是事务ID（txid），数组内容是�
 
 #### 事务快照（Transaction Snapshot）
 
+事务快照用于表示对于某个特性的事务、某个特定的时间点而言，哪些事务是active的。
 
+PostgreSQL使用一个格式化的字符串表示事务快照。它的格式是`xmin:xmax:xip_list`，各字段的含义为：
+
+- xmin：最早的active的txid，早于这个txid的事务要么已提交，要么已回滚
+- xmax：最早的未被分配的txid
+- xip_list：此快照中active的txid，取值范围为[xmin, xmax)
+
+```
++-----------------+----+----+-----+-----+-----+-----+-----+-----+
+| Snapshot        | 98 | 99 | 100 | 101 | 102 | 103 | 104 | 105 |
++-----------------+----+----+-----+-----+-----+-----+-----+-----+
+| 100:100:        | o  | o  | ×   | ×   | ×   | ×   | ×   | ×   |
++-----------------+----+----+-----+-----+-----+-----+-----+-----+
+| 100:104:100,102 | o  | o  | ×   | o   | ×   | o   | ×   | ×   |
++-----------------+----+----+-----+-----+-----+-----+-----+-----+
+
+×：active   , invisible           , in progress or not yet started
+o：inactive , visible if commited , commited or aborted
+```
+
+可以总结规律为：（1）xmax之前在xip_list的txid为active，（2）xmax及xmax以后的txid均active，（3）active的txid不可见。
 
 ### PostgreSQL的扩展
 
