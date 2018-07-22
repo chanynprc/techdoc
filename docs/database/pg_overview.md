@@ -257,6 +257,18 @@ o：inactive , visible if commited , commited or aborted
 
 #### 可见性规则
 
+可见性规则是利用tuple的xmin、xmax、clog和snapshot来判断tuple的可见性。此处只讨论简化了的可见性规则。
+
+**Status(t_xmin) = ABORTED**
+
+如果tuple的xmin的txid为ABORTED，那说明插入此tuple的事务没有成功，此tuple应为不可见。
+
+> **Rule 1**: If Status(t_xmin) = ABORTED ⇒ Invisible
+
+**Status(t_xmin) = IN_PROGRESS**
+
+如果此条
+
 #### 可见性检查
 
 ### PostgreSQL的扩展
