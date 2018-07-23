@@ -272,11 +272,16 @@ o：inactive , visible if commited , commited or aborted
 情况1：如果tuple的xmin指示的事务是当前事务，说明此tuple在当前事务中被插入，（1）如果此tuple的xmax为INVALID，则此tuple可见，（2）如果tuple的xmax不为INVALID，则此tuple被当前事务update或delete了，此tuple不可见。
 
 > **Rule 2**: If Status(t_xmin) = IN_PROGRESS ∧ t_xmin = current_txid ∧ t_xmax = INVAILD ⇒ Visible
+
 > **Rule 3**: If Status(t_xmin) = IN_PROGRESS ∧ t_xmin = current_txid ∧ t_xmax ≠ INVAILD ⇒ Invisible
 
 情况2：如果tuple的xmin指示的事务不是当前事务，说明此tuple在其他IN_PROGRESS状态的事务中被插入，此tuple应为不可见。
 
 > **Rule 4**: If Status(t_xmin) = IN_PROGRESS ∧ t_xmin ≠ current_txid ⇒ Invisible
+
+**Status(t_xmin) = COMMITTED**
+
+
 
 #### 可见性检查
 
