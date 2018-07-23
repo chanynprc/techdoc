@@ -269,9 +269,13 @@ o：inactive , visible if commited , commited or aborted
 
 如果tuple的xmin指示的事务为IN_PROGRESS状态，则此tuple的可见性需要分情况讨论。
 
-情况1：如果tuple的xmin指示的事务是当前事务，说明此tuple在当前事务中被插入，（1）如果此tuple的xmax为INVALID，则此tuple可见，（2）如果tuple的xmax不为INVALID，则此tuple被当前事务update或delete了，此tuple不可见。
+情况1：如果tuple的xmin指示的事务是当前事务，说明此tuple在当前事务中被插入。
+
+情况1.1：如果此tuple的xmax为INVALID，说明此tuple在当前事务中insert后未作修改，则此tuple可见。
 
 > **Rule 2**: If Status(t_xmin) = IN_PROGRESS ∧ t_xmin = current_txid ∧ t_xmax = INVAILD ⇒ Visible
+
+情况1.2：如果tuple的xmax不为INVALID，说明此tuple被当前事务update或delete了，此tuple不可见。
 
 > **Rule 3**: If Status(t_xmin) = IN_PROGRESS ∧ t_xmin = current_txid ∧ t_xmax ≠ INVAILD ⇒ Invisible
 
@@ -281,7 +285,37 @@ o：inactive , visible if commited , commited or aborted
 
 **Status(t_xmin) = COMMITTED**
 
+如果tuple的xmin指示的事务为COMMITTED状态，则此tuple的可见性需要分情况讨论。
 
+情况1：如果snapshot中显示xmin指示的事务为active状态，则该xmin指示的事务应被视为IN_PROGRESS，而当前事务一定不是COMMITTED，所以xmin指示的事务不是当前事务，这就可以使用`Rule 4`确定此tuple不可见。
+
+> **Rule 5**: If Status(t_xmin) = COMMITTED ∧ Snapshot(t_xmin) = active ⇒ Invisible
+
+情况2：如果snapshot中显示xmin指示的事务为inactive状态，则该xmin指示的事务可视为COMMITTED。
+
+情况2.1：如果tuple的xmax为INVALID，说明此tuple未被修改，或者如果tuple的xmax指示的事务为ABORTED状态，说明此tuple的后续更改失败了，则此tuple可见。
+
+> **Rule 6**: If Status(t_xmin) = COMMITTED ∧ Snapshot(t_xmin) = inactive ∧ (t_xmax = INVALID ∨ Status(t_xmax) = ABORTED) ⇒ Visible
+
+情况2.2：如果tuple的xmax指示的事务为IN_PROGRESS状态，则需根据xmax指示的事务是不是当前事务来决定。
+
+情况2.2.1：如果xmax指示的事务是当前事务，说明此tuple被当前事务update或delete了，此tuple不可见。
+
+> **Rule 7**: If Status(t_xmin) = COMMITTED ∧ Snapshot(t_xmin) = inactive ∧ Status(t_xmax) = IN_PROGRESS ∧ t_xmax = current_txid ⇒ Invisible
+
+情况2.2.2：如果xmax指示的事务不是当前事务，说明此tuple被某个IN_PROGRESS状态的其他事务update或delete了，但此事务未提交，所以其update或delete被认为未生效，则此tuple可见。
+
+> **Rule 8**: If Status(t_xmin) = COMMITTED ∧ Snapshot(t_xmin) = inactive ∧ Status(t_xmax) = IN_PROGRESS ∧ t_xmax ≠ current_txid ⇒ Visible
+
+情况2.3：如果tuple的xmax指示的事务为COMMITTED状态，则需要根据snapshot中该事务的状态判断。
+
+情况2.3.1：如果snapshot中显示xmax指示的事务为active状态，则该事务可认为未提交，其update或delete未生效，此tuple可见。此情况可归约为`Rule 8`。
+
+> **Rule 9**: If Status(t_xmin) = COMMITTED ∧ Snapshot(t_xmin) = inactive ∧ Status(t_xmax) = COMMITTED ∧ Snapshot(t_xmax) = active ⇒ Visible
+
+情况2.3.2：如果snapshot中显示xmax指示的事务为inactive状态，即为真正的COMMITTED状态，此tuple被该事务update或delete，此tuple不可见。
+
+> **Rule 10**: If Status(t_xmin) = COMMITTED ∧ Snapshot(t_xmin) = inactive ∧ Status(t_xmax) = COMMITTED ∧ Snapshot(t_xmax) ≠ active ⇒ Invisible
 
 #### 可见性检查
 
