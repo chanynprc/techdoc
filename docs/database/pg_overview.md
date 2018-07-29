@@ -332,6 +332,7 @@ o：inactive , visible if commited , commited or aborted
 | T3 | SELECT * FROM t;         | SELECT * FROM t;         |
 | T4 | COMMIT;                  |                          |
 | T5 |                          | SELECT * FROM t;         |
+| T6 |                          | COMMIT;                  |
 +----+--------------------------+--------------------------+
 
 T1:
@@ -351,15 +352,17 @@ After T2:
 +---------+--------+--------+-------+--------+-----------+
 ```
 
-在T3时刻，不论事务隔离级别被如何设置，两个事务拿到的snapshot是“100:100:”，clog是Clog(100)=COMMITTED，Clog(101)=IN_PROGRESS，Clog(102)=IN_PROGRESS。那么，根据上文所述的可见性规则，txid为101的事务可见的是Tuple_2，txid为102的事务可见的是Tuple_1。
+在T3时刻，不论事务隔离级别被如何设置，两个事务拿到的snapshot是“100:100:”，clog的情况是Clog(100) = COMMITTED，Clog(101) = IN_PROGRESS，Clog(102) = IN_PROGRESS。那么，根据上文所述的可见性规则，txid为101的事务可见的是Tuple_2，读取到的内容是‘B’，txid为102的事务可见的是Tuple_1，读取到的内容是‘A’。无论txid为101的事务后续是否失败，在txid为102的事务中不会出现读取到txid为101事务未提交的修改的情况。
 
-可以看出，在PostgreSQL中，无论何种事务隔离级别，不会出现一个事务读取另一个未提交事务的脏数据的情况，这样就避免了脏读。
+可以看出，在PostgreSQL中，无论何种事务隔离级别，不会出现一个事务读取另一个未提交事务的脏数据的情况，这样就避免了脏读异常。
 
 **重复读（Repeatable Reads）**
 
 重复读是指一个事务中两次读取到的数据内容出现了差异。
 
-继续使用上述示例，
+继续使用上述示例，在T5时刻，如果txid为102事务的隔离级别设置的为READ COMMITTED，其snapshot为“101:101:”，如果txid为102事务的隔离级别设置为REPEATABLE READ，其snapshot为“100:100:”，clog的情况是Clog(100) = COMMITTED，Clog(101) = COMMITTED，Clog(102) = IN_PROGRESS。那么，根据可见性规则，如果txid为102事务的隔离级别设置的为READ COMMITTED，Tuple_1不可见，Tuple_2可见，如果txid为102事务的隔离级别设置为REPEATABLE READ，Tuple_1可见，Tuple_2不可见。
+
+可以看出，在PostgreSQL中，READ COMMITTED隔离级别可能会导致一个事务中两次读取到的数据内容出现差异，但是在REPEATABLE READ隔离级别中，不会出现这一情况，这样就避免了重复读异常。
 
 **幻读（Phantom Reads）**
 
