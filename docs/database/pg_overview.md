@@ -259,13 +259,13 @@ o：inactive , visible if commited , commited or aborted
 
 可见性规则是利用tuple的xmin、xmax、clog和snapshot来判断tuple的可见性。此处只讨论简化了的可见性规则。
 
-**Status(t_xmin) = ABORTED**
+**Clog(t_xmin) = ABORTED**
 
 如果tuple的xmin指示的事务为ABORTED状态，说明插入此tuple的事务没有成功，此tuple应为不可见。
 
-> **Rule 1**: If Status(t_xmin) = ABORTED ⇒ Invisible
+> **Rule 1**: If Clog(t_xmin) = ABORTED ⇒ Invisible
 
-**Status(t_xmin) = IN_PROGRESS**
+**Clog(t_xmin) = IN_PROGRESS**
 
 如果tuple的xmin指示的事务为IN_PROGRESS状态，则此tuple的可见性需要分情况讨论。
 
@@ -273,51 +273,97 @@ o：inactive , visible if commited , commited or aborted
 
 情况1.1：如果此tuple的xmax为INVALID，说明此tuple在当前事务中insert后未作修改，则此tuple可见。
 
-> **Rule 2**: If Status(t_xmin) = IN_PROGRESS ∧ t_xmin = current_txid ∧ t_xmax = INVAILD ⇒ Visible
+> **Rule 2**: If Clog(t_xmin) = IN_PROGRESS ∧ t_xmin = current_txid ∧ t_xmax = INVAILD ⇒ Visible
 
 情况1.2：如果tuple的xmax不为INVALID，说明此tuple被当前事务update或delete了，此tuple不可见。
 
-> **Rule 3**: If Status(t_xmin) = IN_PROGRESS ∧ t_xmin = current_txid ∧ t_xmax ≠ INVAILD ⇒ Invisible
+> **Rule 3**: If Clog(t_xmin) = IN_PROGRESS ∧ t_xmin = current_txid ∧ t_xmax ≠ INVAILD ⇒ Invisible
 
 情况2：如果tuple的xmin指示的事务不是当前事务，说明此tuple在其他IN_PROGRESS状态的事务中被插入，此tuple应为不可见。
 
-> **Rule 4**: If Status(t_xmin) = IN_PROGRESS ∧ t_xmin ≠ current_txid ⇒ Invisible
+> **Rule 4**: If Clog(t_xmin) = IN_PROGRESS ∧ t_xmin ≠ current_txid ⇒ Invisible
 
-**Status(t_xmin) = COMMITTED**
+**Clog(t_xmin) = COMMITTED**
 
 如果tuple的xmin指示的事务为COMMITTED状态，则此tuple的可见性需要分情况讨论。
 
 情况1：如果snapshot中显示xmin指示的事务为active状态，则该xmin指示的事务应被视为IN_PROGRESS，而当前事务一定不是COMMITTED，所以xmin指示的事务不是当前事务，这就可以使用`Rule 4`确定此tuple不可见。
 
-> **Rule 5**: If Status(t_xmin) = COMMITTED ∧ Snapshot(t_xmin) = active ⇒ Invisible
+> **Rule 5**: If Clog(t_xmin) = COMMITTED ∧ Snapshot(t_xmin) = active ⇒ Invisible
 
 情况2：如果snapshot中显示xmin指示的事务为inactive状态，则该xmin指示的事务可视为COMMITTED。
 
 情况2.1：如果tuple的xmax为INVALID，说明此tuple未被修改，或者如果tuple的xmax指示的事务为ABORTED状态，说明此tuple的后续更改失败了，则此tuple可见。
 
-> **Rule 6**: If Status(t_xmin) = COMMITTED ∧ Snapshot(t_xmin) = inactive ∧ (t_xmax = INVALID ∨ Status(t_xmax) = ABORTED) ⇒ Visible
+> **Rule 6**: If Clog(t_xmin) = COMMITTED ∧ Snapshot(t_xmin) = inactive ∧ (t_xmax = INVALID ∨ Clog(t_xmax) = ABORTED) ⇒ Visible
 
 情况2.2：如果tuple的xmax指示的事务为IN_PROGRESS状态，则需根据xmax指示的事务是不是当前事务来决定。
 
 情况2.2.1：如果xmax指示的事务是当前事务，说明此tuple被当前事务update或delete了，此tuple不可见。
 
-> **Rule 7**: If Status(t_xmin) = COMMITTED ∧ Snapshot(t_xmin) = inactive ∧ Status(t_xmax) = IN_PROGRESS ∧ t_xmax = current_txid ⇒ Invisible
+> **Rule 7**: If Clog(t_xmin) = COMMITTED ∧ Snapshot(t_xmin) = inactive ∧ Clog(t_xmax) = IN_PROGRESS ∧ t_xmax = current_txid ⇒ Invisible
 
 情况2.2.2：如果xmax指示的事务不是当前事务，说明此tuple被某个IN_PROGRESS状态的其他事务update或delete了，但此事务未提交，所以其update或delete被认为未生效，则此tuple可见。
 
-> **Rule 8**: If Status(t_xmin) = COMMITTED ∧ Snapshot(t_xmin) = inactive ∧ Status(t_xmax) = IN_PROGRESS ∧ t_xmax ≠ current_txid ⇒ Visible
+> **Rule 8**: If Clog(t_xmin) = COMMITTED ∧ Snapshot(t_xmin) = inactive ∧ Clog(t_xmax) = IN_PROGRESS ∧ t_xmax ≠ current_txid ⇒ Visible
 
 情况2.3：如果tuple的xmax指示的事务为COMMITTED状态，则需要根据snapshot中该事务的状态判断。
 
 情况2.3.1：如果snapshot中显示xmax指示的事务为active状态，则该事务可认为未提交，其update或delete未生效，此tuple可见。此情况可归约为`Rule 8`。
 
-> **Rule 9**: If Status(t_xmin) = COMMITTED ∧ Snapshot(t_xmin) = inactive ∧ Status(t_xmax) = COMMITTED ∧ Snapshot(t_xmax) = active ⇒ Visible
+> **Rule 9**: If Clog(t_xmin) = COMMITTED ∧ Snapshot(t_xmin) = inactive ∧ Clog(t_xmax) = COMMITTED ∧ Snapshot(t_xmax) = active ⇒ Visible
 
 情况2.3.2：如果snapshot中显示xmax指示的事务为inactive状态，即为真正的COMMITTED状态，此tuple被该事务update或delete，此tuple不可见。
 
-> **Rule 10**: If Status(t_xmin) = COMMITTED ∧ Snapshot(t_xmin) = inactive ∧ Status(t_xmax) = COMMITTED ∧ Snapshot(t_xmax) ≠ active ⇒ Invisible
+> **Rule 10**: If Clog(t_xmin) = COMMITTED ∧ Snapshot(t_xmin) = inactive ∧ Clog(t_xmax) = COMMITTED ∧ Snapshot(t_xmax) ≠ active ⇒ Invisible
 
-#### 可见性检查
+#### 并发异常的处理
+
+**脏读（Dirty Reads, wr-conflicts）**
+
+脏读是指一个事务读取了另一个未提交事务的脏数据。
+
+```
++----+--------------------------+--------------------------+
+|    | txid = 101               | txid = 102               |
++----+--------------------------+--------------------------+
+| T1 | BEGIN;                   | BEGIN;                   |
+| T2 | UPDATE t SET data = 'B'; |                          |
+| T3 | SELECT * FROM t;         | SELECT * FROM t;         |
+| T4 | COMMIT;                  |                          |
+| T5 |                          | SELECT * FROM t;         |
++----+--------------------------+--------------------------+
+
+T1:
++---------+--------+--------+-------+--------+-----------+
+|         | t_xmin | t_xmax | t_cid | t_ctid | User Data |
++---------+--------+--------+-------+--------+-----------+
+| Tuple_1 | 100    | 0      | 0     | (0,1)  | 'A'       |
++---------+--------+--------+-------+--------+-----------+
+
+After T2:
++---------+--------+--------+-------+--------+-----------+
+|         | t_xmin | t_xmax | t_cid | t_ctid | User Data |
++---------+--------+--------+-------+--------+-----------+
+| Tuple_1 | 100    | 101    | 0     | (0,2)  | 'A'       |
++---------+--------+--------+-------+--------+-----------+
+| Tuple_2 | 101    | 0      | 0     | (0,2)  | 'B'       |
++---------+--------+--------+-------+--------+-----------+
+```
+
+在T3时刻，不论事务隔离级别被如何设置，两个事务拿到的snapshot是“100:100:”，clog是Clog(100)=COMMITTED，Clog(101)=IN_PROGRESS，Clog(102)=IN_PROGRESS。那么，根据上文所述的可见性规则，txid为101的事务可见的是Tuple_2，txid为102的事务可见的是Tuple_1。
+
+可以看出，在PostgreSQL中，无论何种事务隔离级别，不会出现一个事务读取另一个未提交事务的脏数据的情况，这样就避免了脏读。
+
+**重复读（Repeatable Reads）**
+
+重复读是指一个事务中两次读取到的数据内容出现了差异。
+
+继续使用上述示例，
+
+**幻读（Phantom Reads）**
+
+**丢失更新（Lost Updates）**
 
 ### PostgreSQL的扩展
 
