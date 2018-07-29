@@ -400,7 +400,7 @@ After T3:
 
 可以看出，在PostgreSQL中，READ COMMITTED隔离级别可能会导致一个事务中两次读取到的数据条数出现差异，但是在REPEATABLE READ隔离级别中，不会出现这一情况，这样就避免了幻读异常。
 
-**丢失更新（Lost Updates）**
+**丢失更新（Lost Updates, ww-conflict）**
 
 ### PostgreSQL的扩展
 
