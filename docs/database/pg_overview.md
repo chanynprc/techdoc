@@ -402,6 +402,20 @@ After T3:
 
 **丢失更新（Lost Updates, ww-conflict）**
 
+丢失更新是指两个事务对同一条数据进行更新操作会导致更新被覆盖的问题。
+
+分3种情况来讨论：
+
+1. 目标数据正在被更新：即目标数据被一个另外的事务更新，但该事务仍然IN_PROGRESS。这种情况下，当前事务会等待更新目标数据的事务结束，然后进行情况2或情况3的操作。
+2. 目标数据已被更新：如果更新目标数据的事务被正确提交，那么目标数据已被更改。在READ COMMITTED隔离级别下，会进行update操作，此时就出现了丢失更新。在REPEATABLE READ或SERIALIZABLE隔离级别下，当前事务会被abort，从而避免丢失更新。
+3. 目标数据未被更新：数据可被正常update。
+
+在PostgreSQL中，SI使用first-updater-win，而SSI使用first-committer-win。从而在丢失更新的处理中，情况1的当前事务会进行等待。
+
+#### Serializable Snapshot Isolation (SSI)
+
+
+
 ### PostgreSQL的扩展
 
 #### Postgres-XL
