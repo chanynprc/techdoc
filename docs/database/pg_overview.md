@@ -414,6 +414,16 @@ After T3:
 
 #### Serializable Snapshot Isolation (SSI)
 
+从PostgreSQL 9.1版本后，引入了Serializable Snapshot Isolation (SSI)以实现了真正的可串行化（SERIALIZABLE）隔离级别。这里只以Write-Skew（串行化异常的一种）为例作简要讨论。
+
+这里引入依赖图（precedence graph, dependency graph或serialization graph）对串行化异常问题进行描述。如果依赖图中出现了环，则表示出现了串行化异常。
+
+SSI的总体思想是：
+
+1. 将所有对tuple、page、relation的访问记SIREAD锁
+2. 当数据被写入时，根据SIREAD锁检测rw-conflicts
+3. 当检测到串行化异常时，中止事务
+
 
 
 ### PostgreSQL的扩展
