@@ -1,4 +1,4 @@
-## XGBoost入门
+## XGBoost使用入门
 
 ### 导入库
 
@@ -8,7 +8,7 @@ import xgboost as xgb
 
 ### 导入数据
 
-XGBoost支持多种数据格式，我们这里使用的是LibSVM的数据格式。每行1个样本，第1列是标签列，表示
+XGBoost支持多种数据格式，我们这里使用的是LibSVM的数据格式。每行1个样本，第1列是标签列，表示目标分类，后续的每列格式为i:x形式，其中i表示第i个特征，x表示该样本的第i个特征值为x。
 
 ```python
 dtrain = xgb.DMatrix('train.txt')
