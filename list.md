@@ -4,6 +4,8 @@
 
 [Naive Bayes分类器](/techdoc/docs/ml/naive_bayes)
 
+[XGBoost使用入门](/techdoc/docs/ml/xgboost)
+
 ----------
 
 ### Tag：算法
