@@ -424,7 +424,9 @@ SSI的总体思想是：
 2. 当数据被写入时，根据SIREAD锁检测rw-conflicts
 3. 当检测到串行化异常时，中止事务
 
+SIREAD锁，也叫predicate lock，形式为一个对象和一个虚拟txid，用来表示这个对象被谁访问。在SERIALIZABLE隔离级别下，DML语句会触发创建SIREAD锁。例如，如果txid为100的事务访问了Tuple_1，那么{Tuple_1, {100}}将被建立，如果txid为101的事务也访问了Tuple_1，那么这个SIREAD锁将被更新为{Tuple_1, {100, 101}}。SIREAD锁有3种级别，tupel、page和relation，会根据情况优先建立低级别的SIREAD锁，当需要锁的数据变多后，会对SIREAD锁进行合并，并升级为更高级别的SIREAD锁。在Index Scan中，会直接对index page加SIREAD锁，在sequential scan中，会直接对数据relation加SIREAD锁。
 
+rw_conflicts
 
 ### PostgreSQL的扩展
 
