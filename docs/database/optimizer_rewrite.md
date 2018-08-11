@@ -14,11 +14,11 @@ from t1
 where t1.b in (select t2.c from t2 where t2.d = 1);
 ```
 
-提升子链接：
+提升子链接，因为是IN操作符，需要对子查询的t2.c列加group by操作：
 
 ```sql
 select t1.a
-from t1, (select t2.c from t2 where t2.d = 1) as sub
+from t1, (select t2.c from t2 where t2.d = 1 group by t2.c) as sub
 where t1.b = sub.c;
 ```
 
