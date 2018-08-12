@@ -46,19 +46,29 @@ select * from t where NULL = NULL;
 
 某些语句可以根据表的主-外键情况或从语义上，对其部分join的表进行消除，直接跳过join的执行。
 
-例如：
+#### to-one inner join + not null foreign key
 
 ```sql
 select t1.* from t1 join t2 on t1.b = t2.a;
 ```
 
-如果t1.b是t1表的外键，t2.a是t2表的主键，t2.a和t1.b是主-外键关系，那么此语句可被重写为：
+如果t1.b是t1表的非空外键，t2.a是t2表的主键，t2.a和t1.b是主-外键关系，那么此语句可被重写为：
 
 ```sql
 select t1.* from t1;
 ```
 
 因为对于每个t1.b，有且仅有1个t2.a与之对应，且语句的输出列没有t2表中的列，所以t2表没有存在的意义，可以进行消除。
+
+#### to-one inner join + nullable foreign key
+
+还是上述语句，如果t1.b是t1表的外键，但是可以为空，t2.a是t2表的主键，那么此语句需要被重写为：
+
+```sql
+select t1.* from t1 where t1.b is not NULL;
+```
+
+#### 
 
 ### 提升子查询
 
