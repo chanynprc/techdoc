@@ -68,7 +68,31 @@ select t1.* from t1;
 select t1.* from t1 where t1.b is not NULL;
 ```
 
-#### 
+此时需要给t1.b加上is not NULL，因为原语句中t1.b为NULL的行会被剔除。
+
+#### to-one outer join + unique key
+
+```sql
+select t1.* from t1 left join t2 on t1.b = t2.a;
+```
+
+如果t1表在t1.b上有一个unique key，t2.a是t2表的主键，且join类型为outer join，则进行连接消除：
+
+```sql
+select t1.* from t1;
+```
+
+因为当t1.b非空时，要么对应于t2中的1行，要没有对应被left join补空保留，当t1.b为空时，被left join补空保留。所以查询中t2表可被消除。（此处真的需要在t1.b上有一个unique key？）
+
+#### to-many distinct outer join
+
+```sql
+select distinct b from t1 left join t2 on t1.a = t2.a;
+```
+
+```sql
+select distinct b from t;
+```
 
 ### 提升子查询
 
@@ -101,3 +125,9 @@ where t1.b = t2.c and t2.d = 1;
 ### 提升子链接：NOT IN
 
 ### 提升子链接：EXISTS
+
+### 引用
+
+[1] https://blog.jooq.org/2017/09/28/10-cool-sql-optimisations-that-do-not-depend-on-the-cost-model
+
+[2] https://blog.jooq.org/2017/09/01/join-elimination-an-essential-optimiser-feature-for-advanced-sql-usage/
