@@ -70,29 +70,33 @@ select t1.* from t1 where t1.b is not NULL;
 
 此时需要给t1.b加上is not NULL，因为原语句中t1.b为NULL的行会被剔除。
 
-#### to-one outer join + unique key
+#### to-one outer join
 
 ```sql
 select t1.* from t1 left join t2 on t1.b = t2.a;
 ```
 
-如果t1表在t1.b上有一个unique key，t2.a是t2表的主键，且join类型为outer join，则进行连接消除：
+如果t2.a是t2表的主键，且join类型为outer join，则进行连接消除：
 
 ```sql
 select t1.* from t1;
 ```
 
-因为当t1.b非空时，要么对应于t2中的1行，要没有对应被left join补空保留，当t1.b为空时，被left join补空保留。所以查询中t2表可被消除。（此处真的需要在t1.b上有一个unique key？）
+因为当t1.b非空时，要么对应于t2中的1行，在结果集中，要么在t2中没有对应，从而被left join补空保留。当t1.b为空时，被left join补空保留。所以查询中t2表可被消除。
 
 #### to-many distinct outer join
 
 ```sql
-select distinct b from t1 left join t2 on t1.a = t2.a;
+select distinct t1.b from t1 left join t2 on t1.a = t2.a;
 ```
 
+如果t2.a不是主键，且无unique key，则可能出现多个相同值的情况，这时候，如果join为outer join，且输出列上有distinct操作，则t2表可以被消除。
+
 ```sql
-select distinct b from t;
+select distinct b from t1;
 ```
+
+t1表中不能匹配的行会被left join保留，能匹配的行中，即使t1.a对应于多个t2.a，1行变了多行，也有distinct操作进行去重，从而可以对t2进行消除。
 
 ### 提升子查询
 
