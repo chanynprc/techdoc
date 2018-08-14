@@ -98,6 +98,10 @@ A = C
 
 t1表中不能匹配的行会被left join保留，能匹配的行中，即使t1.a对应于多个t2.a，1行变了多行，也有distinct操作进行去重，从而可以对t2进行消除。
 
+### 无用条件去除（Removing “Silly” Predicates）
+
+
+
 ### 提升子查询
 
 
