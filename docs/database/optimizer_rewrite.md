@@ -100,7 +100,39 @@ t1表中不能匹配的行会被left join保留，能匹配的行中，即使t1.
 
 ### 无用条件去除（Removing “Silly” Predicates）
 
+与恒假条件相反，这个重写规则主要处理“恒真”条件。
 
+#### 常数恒真条件
+
+```sql
+[in] select * from t where 1 = 1;
+```
+
+这种条件一看就为真，可以直接消除。
+
+#### 变量恒真
+
+再看下面的例子：
+
+```sql
+[in] select * from t where a = a;
+```
+
+这个条件我们不能直接删除，如果a列的值不为NULL时，```a = a```表达式为真，但是如果a列的值为NULL时，该表达式的值为NULL，会被认为是一个为假的条件。所以上述语句可被重写为：
+
+```sql
+[out] select * from t where a is not NULL;
+```
+
+#### 变量恒真 + not NULL
+
+上述例子中，如果在a列上有一个not NULL约束，那么条件可以被直接删除，语句可以被改写为：
+
+```sql
+[out] select * from t;
+```
+
+### （Projections in EXISTS Subqueries）
 
 ### 提升子查询
 
