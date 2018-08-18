@@ -2,6 +2,54 @@
 
 数据库优化器查询重写属于逻辑优化，通过对关系代数表达式进行等价变换，生成更优的关系代数表达式。
 
+### 恒假条件（Impossible Predicates and Unneeded Table Accesses）
+
+当查询条件中出现恒假条件时，可以跳过对表的扫描等操作。
+
+例如：
+
+```sql
+[in] select * from t where 1 = 0;
+
+[in] select * from t where NULL = NULL;
+```
+
+因为条件恒假，可对上述语句进行重写，直接跳过表扫描的执行。
+
+### 无用条件去除（Removing “Silly” Predicates）
+
+与恒假条件相反，这个重写规则主要处理“恒真”条件。
+
+#### 恒真常量条件
+
+```sql
+[in] select * from t where 1 = 1;
+```
+
+这种条件一看就为真，可以直接消除。
+
+#### 恒真变量条件
+
+再看下面的例子：
+
+```sql
+[in] select * from t where a = a;
+```
+
+这个条件我们不能直接删除，如果a列的值不为NULL时，```a = a```表达式为真，但是如果a列的值为NULL时，该表达式的值为NULL，会被认为是一个为假的条件。所以上述语句可被重写为：
+
+```sql
+[out] select * from t where a is not NULL;
+```
+
+#### 恒真变量条件 + not NULL
+
+上述例子中，如果在a列上有一个not NULL约束，那么条件可以被直接删除，语句可以被改写为：
+
+```sql
+[out] select * from t;
+```
+
 ### 传递闭包（Transitive Closure）
 
 某些操作符具有数学上的可传递性，传递闭包是利用这种可传递性的一种重写方式。最简单的传递闭包是：
@@ -27,20 +75,6 @@ A = C
 ```
 
 这样重写就可以将join条件转换为filter条件，可被下推到基表。此外，新生成的条件更方便优化器进行行数估算，可以减小行数估算误差。比如，在上述例子中，如果不添加```t2.a = 1```条件，则t2表可能按照a列各distinct值的平均行数来估计其行数。
-
-### 恒假条件（Impossible Predicates and Unneeded Table Accesses）
-
-当查询条件中出现恒假条件时，可以跳过对表的扫描等操作。
-
-例如：
-
-```sql
-[in] select * from t where 1 = 0;
-
-[in] select * from t where NULL = NULL;
-```
-
-因为条件恒假，可对上述语句进行重写，直接跳过表扫描的执行。
 
 ### 连接消除（JOIN Elimination）
 
@@ -97,40 +131,6 @@ A = C
 ```
 
 t1表中不能匹配的行会被left join保留，能匹配的行中，即使t1.a对应于多个t2.a，1行变了多行，也有distinct操作进行去重，从而可以对t2进行消除。
-
-### 无用条件去除（Removing “Silly” Predicates）
-
-与恒假条件相反，这个重写规则主要处理“恒真”条件。
-
-#### 常数恒真条件
-
-```sql
-[in] select * from t where 1 = 1;
-```
-
-这种条件一看就为真，可以直接消除。
-
-#### 变量恒真
-
-再看下面的例子：
-
-```sql
-[in] select * from t where a = a;
-```
-
-这个条件我们不能直接删除，如果a列的值不为NULL时，```a = a```表达式为真，但是如果a列的值为NULL时，该表达式的值为NULL，会被认为是一个为假的条件。所以上述语句可被重写为：
-
-```sql
-[out] select * from t where a is not NULL;
-```
-
-#### 变量恒真 + not NULL
-
-上述例子中，如果在a列上有一个not NULL约束，那么条件可以被直接删除，语句可以被改写为：
-
-```sql
-[out] select * from t;
-```
 
 ### （Projections in EXISTS Subqueries）
 
