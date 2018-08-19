@@ -132,7 +132,7 @@ A = C
 
 t1表中不能匹配的行会被left join保留，能匹配的行中，即使t1.a对应于多个t2.a，1行变了多行，也有distinct操作进行去重，从而可以对t2进行消除。
 
-### Exists子查询的投影（Projections in EXISTS Subqueries）
+### Exists子查询输出列投影（Projections in EXISTS Subqueries）
 
 在研究这个重写规则前，我们先研究一下Exists子查询的Target List。
 
@@ -150,7 +150,7 @@ select exists (select 1 / 0);
 可以看出，在第1条语句中，报了除0的错误，但是在第2条语句中，并没有报错，说明第2条语句的```1 / 0```没有真正执行。
 
 ```
-explain verbose  select exists (select 1 / 0);
+explain verbose select exists (select 1 / 0);
                     QUERY PLAN                    
 --------------------------------------------------
  Result  (cost=0.01..0.02 rows=1 width=1)
@@ -188,7 +188,7 @@ where exists
 (9 rows)
 ```
 
-可见，上述查询进行了Exists子查询投影和子链接提升的查询重写，其重写后的语句为：
+可见，上述查询进行了Exists子查询输出列投影和子链接提升的查询重写，其重写后的语句为：
 
 ```sql
 [out]
