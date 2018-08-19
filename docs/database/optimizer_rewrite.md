@@ -145,7 +145,11 @@ select exists (select 1 / 0);
 --------
  t
 (1 row)
+```
 
+可以看出，在第1条语句中，报了除0的错误，但是在第2条语句中，并没有报错，说明第2条语句的```1 / 0```没有真正执行。
+
+```
 explain verbose  select exists (select 1 / 0);
                     QUERY PLAN                    
 --------------------------------------------------
@@ -156,7 +160,7 @@ explain verbose  select exists (select 1 / 0);
 (4 rows)
 ```
 
-可以看出，在第1条语句中，报了除0的错误，但是在第2条语句中，并没有报错，说明第2条语句的```1 / 0```没有真正执行，在执行计划中，子查询仍然存在，但是没有提及Target List。所以说，在这种情况下，Exists子查询的Target List可以做投影消除。
+在第2条语句的执行计划中，子查询仍然存在，但是没有提及Target List。所以说，在这种情况下，Exists子查询的Target List可以做投影消除。
 
 来看个例子：
 
@@ -193,6 +197,8 @@ from t1 semi join (select a from t2) s on t1.a = s.a;
 ```
 
 原Exists子查询中的Target List被进行了投影操作，只输出了join列t2.a。
+
+### （Predicate Merging）
 
 ### 提升子查询
 
