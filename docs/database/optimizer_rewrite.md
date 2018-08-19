@@ -132,7 +132,67 @@ A = C
 
 t1表中不能匹配的行会被left join保留，能匹配的行中，即使t1.a对应于多个t2.a，1行变了多行，也有distinct操作进行去重，从而可以对t2进行消除。
 
-### （Projections in EXISTS Subqueries）
+### Exists子查询的投影（Projections in EXISTS Subqueries）
+
+在研究这个重写规则前，我们先研究一下Exists子查询的Target List。
+
+```sql
+select 1 / 0;
+ERROR:  division by zero
+
+select exists (select 1 / 0);
+ exists 
+--------
+ t
+(1 row)
+
+explain verbose  select exists (select 1 / 0);
+                    QUERY PLAN                    
+--------------------------------------------------
+ Result  (cost=0.01..0.02 rows=1 width=1)
+   Output: $0
+   InitPlan 1 (returns $0)
+     ->  Result  (cost=0.00..0.01 rows=1 width=0)
+(4 rows)
+```
+
+可以看出，在第1条语句中，报了除0的错误，但是在第2条语句中，并没有报错，说明第2条语句的```1 / 0```没有真正执行，在执行计划中，子查询仍然存在，但是没有提及Target List。所以说，在这种情况下，Exists子查询的Target List可以做投影消除。
+
+来看个例子：
+
+```sql
+[in]
+select * from t1
+where exists
+(select * from t2 where t1.a = t2.a);
+```
+
+它的查询计划是：
+
+```
+                             QUERY PLAN                              
+---------------------------------------------------------------------
+ Hash Semi Join  (cost=1.07..2.21 rows=6 width=16)
+   Output: t1.a, t1.b, t1.c, t1.d
+   Hash Cond: (t1.a = t2.a)
+   ->  Seq Scan on public.t1  (cost=0.00..1.06 rows=6 width=16)
+         Output: t1.a, t1.b, t1.c, t1.d
+   ->  Hash  (cost=1.03..1.03 rows=3 width=4)
+         Output: t2.a
+         ->  Seq Scan on public.t2  (cost=0.00..1.03 rows=3 width=4)
+               Output: t2.a
+(9 rows)
+```
+
+可见，上述查询进行了Exists子查询投影和子链接提升的查询重写，其重写后的语句为：
+
+```sql
+[out]
+select t1.*
+from t1 semi join (select a from t2) s on t1.a = s.a;
+```
+
+原Exists子查询中的Target List被进行了投影操作，只输出了join列t2.a。
 
 ### 提升子查询
 
