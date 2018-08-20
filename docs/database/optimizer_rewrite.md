@@ -14,7 +14,7 @@
 [in] select * from t where NULL = NULL;
 ```
 
-因为条件恒假，可对上述语句进行重写，直接跳过表扫描的执行。
+因为条件恒假，可对上述语句进行重写，直接跳过表扫描的执行。（注意：此处```NULL = NULL```表达式的值为NULL，被认为是一个为假的条件）
 
 ### 无用条件去除（Removing “Silly” Predicates）
 
@@ -225,7 +225,56 @@ select * from t where a between 99 and 100;
 
 当然，如果AND连接的IN条件或者范围条件没有公共部分，它们应该被转换为一个恒假的条件。如果OR连接的IN条件或者范围条件构成了值域上的全集，则应该被去除，并适当添加is not null的条件。
 
-### （Provably Empty Sets）
+### 可证的空集（Provably Empty Sets）
+
+#### is null on not null column
+
+当一个is null条件被应用于一个有not null约束的列上时，将产生空集。
+
+```sql
+[in]
+select a, b
+from t1 join (select * from t2 where a is null) s on t1.b = t2.b;
+```
+
+假设上述语句中，t2.a列有not null约束，那么子查询s的结果集为空，t1和s为inner join，其join的结果集也必定为空，所以上述语句可被重写为：
+
+```sql
+[out]
+select NULL as a, NULL as b
+where false;
+```
+
+#### empty set join
+
+在上面的例子中，如果inner join的一边为空，则join后的结果为空，还有其他情况，可总结为：
+
+- [empty] inner join t => [empty]
+- t inner join [empty] => [empty]
+- [empty] left join t => [empty]
+- t right join [empty] => [empty]
+- [empty] semi join t => [empty]
+- t semi join [empty] => [empty]
+- [empty] anti join t => [empty]
+- [empty] * join [empty] => [empty]
+
+#### null intersect not null
+
+当一个为null的包与一个含有not null约束的包进行intersect操作时，将产生空集。
+
+```sql
+[in]
+select NULL
+intersect
+select a from t;
+```
+
+假设上述语句中，t.a列有not null约束，那么intersect后的结果为空，所以上述语句可被重写为：
+
+```sql
+[out]
+select NULL where false;
+```
 
 ### 提升子查询
 
