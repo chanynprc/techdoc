@@ -241,8 +241,7 @@ from t1 join (select * from t2 where a is null) s on t1.b = t2.b;
 
 ```sql
 [out]
-select NULL as a, NULL as b
-where false;
+select NULL as a, NULL as b where false;
 ```
 
 #### empty set join
