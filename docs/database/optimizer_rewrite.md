@@ -198,7 +198,34 @@ from t1 semi join (select a from t2) s on t1.a = s.a;
 
 原Exists子查询中的Target List被进行了投影操作，只输出了join列t2.a。
 
-### （Predicate Merging）
+### 条件合并（Predicate Merging）
+
+这里的条件合并主要是指两类条件的合并：
+
+1. 多个IN条件的合并
+2. 多个范围条件的合并
+
+例如：
+
+```sql
+[in]
+select * from t where a in (1, 2, 3) and a in (2, 3, 4);
+
+[out]
+select * from t where a in (2, 3);
+```
+
+```sql
+[in]
+select * from t where a between 1 and 100 and a between 99 and 200;
+
+[out]
+select * from t where a between 99 and 100;
+```
+
+当然，如果AND连接的IN条件或者范围条件没有公共部分，它们应该被转换为一个恒假的条件。如果OR连接的IN条件或者范围条件构成了值域上的全集，则应该被去除，并适当添加is not null的条件。
+
+### （Provably Empty Sets）
 
 ### 提升子查询
 
