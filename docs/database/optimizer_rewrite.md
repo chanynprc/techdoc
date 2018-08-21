@@ -220,6 +220,8 @@ from t1 semi join (select a from t2) s on t1.a = s.a;
 
 ### 条件合并（Predicate Merging）
 
+#### IN条件、范围条件的合并
+
 这里的条件合并主要是指两类条件的合并：
 
 1. 多个IN条件的合并
@@ -245,13 +247,29 @@ select * from t where a between 99 and 100;
 
 当然，如果AND连接的IN条件或者范围条件没有公共部分，它们应该被转换为一个恒假的条件。如果OR连接的IN条件或者范围条件构成了值域上的全集，则应该被去除，并适当添加is not null的条件。
 
+#### 语句条件和CHECK条件的合并与化简
+
+假设t.a上有一个CHECK约束：```CHECK(a in (1, 2, 3))```，那么如果有如下查询：
+
+```sql
+[in] select * from t where a not in (2, 3);
+```
+
+如果被重写为：
+
+```sql
+[out] select * from t where a = 1;
+```
+
+将大大简化条件执行的复杂度，并且，如果t.a列上有索引，上述语句进行索引扫描比顺序扫描可能更有优势。
+
 ### 可证的空集（Provably Empty Sets）
 
 #### 为假的条件
 
-在前文中已讨论条件为假情况的语句的重写，条件为假的语句将输出空集。
+在前文中已讨论条件为假的语句的重写，条件为假的语句将输出空集。
 
-#### empty set join
+#### 空集参与join
 
 ```sql
 [in]
@@ -297,7 +315,13 @@ select NULL where false;
 
 ### 使用CHECK约束（CHECK Constraints）
 
+#### 条件与CHECK约束冲突
 
+在前文讨论条件为假的语句的重写时，有提到条件和CHECK约束冲突从而导致条件为假的情况，可根据假条件语句的情况，对语句进行重写。
+
+#### 条件与CHECK约束可merge
+
+在前文讨论条件合并时，提到语句中的条件与CHECK约束进行合并的例子。其实CHECK约束也是条件的一种，可考虑将CHECH约束与语句中的条件综合在一起考虑进行优化。
 
 ### 提升子查询
 
