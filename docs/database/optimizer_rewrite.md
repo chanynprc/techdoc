@@ -6,7 +6,7 @@
 
 当查询条件中出现恒假条件时，可以跳过对表的扫描等操作。
 
-例如：
+#### 显而易见的恒假条件
 
 ```sql
 [in] select * from t where 1 = 0;
@@ -15,6 +15,26 @@
 ```
 
 因为条件恒假，可对上述语句进行重写，直接跳过表扫描的执行。（注意：此处```NULL = NULL```表达式的值为NULL，被认为是一个为假的条件）
+
+#### 需推理的恒假条件：is null + not null约束
+
+当一个is null条件被应用于一个有not null约束的列上时，条件恒假，将产生空集。
+
+```sql
+[in] select * from t where a is null;
+```
+
+假设上述语句中，t.a列有not null约束，那么条件```a is null```恒假，查询的结果集为空，所以上述语句执行时可直接跳过表扫描等操作。
+
+#### 需推理的恒假条件：predicates + CHECK约束
+
+假设t.a上有一个CHECK约束：```CHECK(a in (1, 2, 3))```，那么如果有如下查询：
+
+```sql
+[in] select * from t where a = 4;
+```
+
+条件```a = 4```可被证明是恒假条件，上述语句应被重写并跳过表扫描等操作。
 
 ### 无用条件去除（Removing “Silly” Predicates）
 
@@ -227,26 +247,26 @@ select * from t where a between 99 and 100;
 
 ### 可证的空集（Provably Empty Sets）
 
-#### is null on not null column
+#### 为假的条件
 
-当一个is null条件被应用于一个有not null约束的列上时，将产生空集。
+在前文中已讨论条件为假情况的语句的重写，条件为假的语句将输出空集。
+
+#### empty set join
 
 ```sql
 [in]
 select a, b
-from t1 join (select * from t2 where a is null) s on t1.b = t2.b;
+from t1 join (select * from t2 where false) s on t1.b = t2.b;
 ```
 
-假设上述语句中，t2.a列有not null约束，那么子查询s的结果集为空，t1和s为inner join，其join的结果集也必定为空，所以上述语句可被重写为：
+上述语句中，子查询s的结果集为空，t1和s为inner join，其join的结果集也必定为空，所以上述语句可被重写为：
 
 ```sql
 [out]
 select NULL as a, NULL as b where false;
 ```
 
-#### empty set join
-
-在上面的例子中，如果inner join的一边为空，则join后的结果为空，还有其他情况，可总结为：
+对于其他join类型的情况，可总结为：
 
 - [empty] inner join t => [empty]
 - t inner join [empty] => [empty]
@@ -274,6 +294,10 @@ select a from t;
 [out]
 select NULL where false;
 ```
+
+### 使用CHECK约束（CHECK Constraints）
+
+
 
 ### 提升子查询
 
