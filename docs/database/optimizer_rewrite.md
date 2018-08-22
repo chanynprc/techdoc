@@ -36,6 +36,8 @@
 
 条件```a = 4```可被证明是恒假条件，上述语句应被重写并跳过表扫描等操作。
 
+> 在PostgreSQL中，把constraint_exclusion参数设置为on，可使用此重写规则。
+
 ### 无用条件去除（Removing “Silly” Predicates）
 
 与恒假条件相反，这个重写规则主要处理“恒真”条件。
@@ -152,6 +154,28 @@ A = C
 
 t1表中不能匹配的行会被left join保留，能匹配的行中，即使t1.a对应于多个t2.a，1行变了多行，也有distinct操作进行去重，从而可以对t2进行消除。
 
+#### 多余的self-join
+
+在查询语句较为复杂，或者使用较多视图的时候，此查询重写规则可能会派上用场。
+
+如果出现了self-join的情况，并且连接条件在其primary key上，则可对多余的self-join进行消除。
+
+假设t.a是表t的primary key，看如下示例：
+
+```sql
+[in] select t1.a, t1.b from t t1 join t t2 on t1.a = t2.a;
+
+[out] select t.a, t.b from t;
+```
+
+更进一步，可以利用传递闭包原理，对过滤条件和输出列进行调整。
+
+```sql
+[in] select t1.a, t2.b from t t1 join t t2 on t1.a = t2.a;
+
+[out] select t.a, t.b from t;
+```
+
 ### Exists子查询输出列投影（Projections in EXISTS Subqueries）
 
 在研究这个重写规则前，我们先研究一下Exists子查询的Target List。
@@ -261,7 +285,7 @@ select * from t where a between 99 and 100;
 [out] select * from t where a = 1;
 ```
 
-将大大简化条件执行的复杂度，并且，如果t.a列上有索引，上述语句进行索引扫描比顺序扫描可能更有优势。
+将大大简化条件执行的复杂度，并且，如果t.a列上有索引，上述语句进行索引扫描比顺序扫描可能更有优势。如果语句的输出列不是```*```，而是```count(*)```，重写后的语句甚至只需要扫描索引，不需要扫描数据页面。
 
 ### 可证的空集（Provably Empty Sets）
 
@@ -322,6 +346,61 @@ select NULL where false;
 #### 条件与CHECK约束可merge
 
 在前文讨论条件合并时，提到语句中的条件与CHECK约束进行合并的例子。其实CHECK约束也是条件的一种，可考虑将CHECH约束与语句中的条件综合在一起考虑进行优化。
+
+### 条件下推（Predicate Pushdown）
+
+条件下推是指将外层的条件尽可能地下推到基表执行，以便在基表层面过滤掉尽可能多的行数。并且，如果基表有索引，可以考虑使用索引扫描。
+
+```sql
+[in]
+select *
+from (select a, b from t) s
+where s.a = 1;
+```
+
+上述语句中的条件可被推向基表t：
+
+```sql
+[out]
+select *
+from (select a, b from t where t.a = 1);
+```
+
+进一步地，外部查询也可被消除，最终被重写为：
+
+```sql
+[out] select a, b from t where t.a = 1;
+```
+
+同理，对于含有union的子查询：
+
+```sql
+[in]
+select * from
+(
+      select a, b from t1
+      union all
+      select a, b from t2
+) s
+where s.a = 1;
+```
+
+可被重写为：
+
+```sql
+[out]
+select * from
+(
+      select a, b from t1 where t1.a = 1
+      union all
+      select a, b from t2 where t2.a = 1
+) s;
+
+[out]
+select a, b from t1 where t1.a = 1
+union all
+select a, b from t2 where t2.a = 1;
+```
 
 ### 提升子查询
 
