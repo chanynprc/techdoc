@@ -36,6 +36,8 @@
 
 [PostgreSQL的扩展统计信息](/techdoc/docs/database/pg_ext_stat)
 
+[Presto概览](/techdoc/docs/database/presto_overview)
+
 ----------
 
 ### Tag：论文笔记
@@ -63,5 +65,7 @@
 ### Basic
 
 [Linux Basic](/techdoc/docs/basic/linux)
+
+[Mac Basic](/techdoc/docs/basic/mac)
 
 [GDB Basic](/techdoc/docs/basic/gdb)
