@@ -25,7 +25,7 @@ Presto的数据源有这么几个概念：```Connector```、```Catalog```、```S
 - **Connector**：```Connector```是指Presto的数据源连接器，每一种数据源有一个```Connector```与之对应
 - **Catalog**：```Catalog```相当于是```Connector```的实例，它的一个重要属性是其```Connector```的名字。在Presto中，一个查询可以跨```Catalog```
 - **Schama**：```Schema```类似于数据库中scheme的概念，是一系列表的集合
-- ***Table***：数据表。在Presto中，数据表的完整表示形式是catalog_name.schema_name.table_name
+- **Table**：数据表。在Presto中，数据表的完整表示形式是catalog_name.schema_name.table_name
 
 ### 查询执行模型
 
