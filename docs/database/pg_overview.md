@@ -426,7 +426,20 @@ SSI的总体思想是：
 
 SIREAD锁，也叫predicate lock，形式为一个对象和一个虚拟txid，用来表示这个对象被谁访问。在SERIALIZABLE隔离级别下，DML语句会触发创建SIREAD锁。例如，如果txid为100的事务访问了Tuple_1，那么{Tuple_1, {100}}将被建立，如果txid为101的事务也访问了Tuple_1，那么这个SIREAD锁将被更新为{Tuple_1, {100, 101}}。SIREAD锁有3种级别，tupel、page和relation，会根据情况优先建立低级别的SIREAD锁，当需要锁的数据变多后，会对SIREAD锁进行合并，并升级为更高级别的SIREAD锁。在Index Scan中，会直接对index page加SIREAD锁，在sequential scan中，会直接对数据relation加SIREAD锁。
 
-rw_conflicts
+rw_conflicts（TBA）
+
+#### 维护流程
+
+PostgreSQL需要以下的维护流程，来保证并发控制的有效性。
+
+- 移除dead tuple，并相应更新索引
+- 移除CLog中的冗余内容
+- Freeze过老的txid
+- 更新FSM、VM和统计信息
+
+以上大部分流程在Vacuum逻辑中处理。
+
+对于Freeze过老的txid，由于txid是有限的，会存在翻转的问题，比如一个tuple数据很久未被更新，其txid面临失效的风险，会导致该航数据不可见。对于这种长时间未更新的tuple，需要对器txid进行处理，保证在可见性判断算法中不会出错。在9.4版本之前，txid年龄大于vacuum_freeze_min_age的tuple的t_xmin会在Vacuum逻辑中置为2。从9.4版本开始，t_infomask列XMIN_FROZEN列会被置1。
 
 ### PostgreSQL的扩展
 
