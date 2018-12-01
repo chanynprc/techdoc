@@ -441,6 +441,41 @@ PostgreSQL需要以下的维护流程，来保证并发控制的有效性。
 
 对于Freeze过老的txid，由于txid是有限的，会存在翻转的问题，比如一个tuple数据很久未被更新，其txid面临失效的风险，会导致该航数据不可见。对于这种长时间未更新的tuple，需要对器txid进行处理，保证在可见性判断算法中不会出错。在9.4版本之前，txid年龄大于vacuum_freeze_min_age的tuple的t_xmin会在Vacuum逻辑中置为2。从9.4版本开始，t_infomask列XMIN_FROZEN列会被置1。
 
+### Vacuum
+
+Vacuum的主要任务是移除dead tuple和Freeze过老的txid。Vacuum分为两种：
+
+- Vacuum（Concurrent Vacuum）：为每个数据页移除dead tuple，此表对其他查询可读。
+- Vacuum full：移除dead tuple并且重新整理数据文件，此表对其他查询不可读。
+
+#### (Concurrent) Vacuum
+
+Vacuum的总体流程是：
+
+1. 对目标表加ShareUpdateExclusiveLock锁
+1. 扫描所有的数据Page，将dead tuple存到一个列表中（内存大小受maintenance_work_mem控制），并且freeze dead tuple
+1. 更新指向dead tuple的索引
+1. 对每个数据Page，移除dead tuple并整理数据Page的heap tuples部分（line pointers部分的dead tuple指针并不移除），更新FSM和VM
+1. 如果最后一个数据Page没有元组了，将其truncate
+1. 更新统计信息和系统表相关信息
+1. 清理无用的CLog
+
+#### Visibility Map
+
+Visibility Map被设计用来加快Vacuum的过程，它标记了哪些数据Page有dead tuple（VM中标记为0），哪些数据Page没有dead tuple（VM中标记为1），当某数据Page对应的VM值为1时，Vacuum会直接跳过该数据Page。
+
+#### Freeze处理逻辑
+
+Freeze处理有两种模式，lazy mode和eager mode。在lazy mode下，Vacuum只扫描被VM标记含有dead tuple的数据Page。在eager mode下，Vacuum扫描所有的数据Page。
+
+1、Lazy mode
+
+在lazy mode下，Vacuum只扫描被VM标记含有dead tuple的数据Page（VM=0）。
+
+当某数据Page的VM=0时，表示该数据Page含有dead page，该Page上的所有元组会被扫描，当目标元组的xmin < freezeLimit_txid时，该元组会被标记为frozen。其中freezeLimit_txid = OldestXmin - vacuum_freeze_min_age。OldestXmin为当前所有运行的事务的最小txid，如果除了Vacuum外没有其他事务，OldestXmin就是Vacuum事务的txid。vacuum_freeze_min_age是一个系统参数。
+
+当某数据Page的VM=1时，表示该数据Page没有dead tuple，则该Page不会被扫描，若这个数据Page上的远足的txid < freezeLimit_txid时，也不会被标记frozen。
+
 ### PostgreSQL的扩展
 
 #### Postgres-XL
