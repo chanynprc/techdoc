@@ -4,6 +4,8 @@
 
 PostgreSQL是一个被广泛应用的开源数据库系统，由它也构筑了MySQL之外的又一开源数据库生态。PostgreSQL本身是一个单机数据库，有很多公司和组织基于PostgreSQL开发了分布式的数据库系统，比如Greenplum和Postgre-XL等。
 
+[TOC]
+
 ### 逻辑结构和物理结构
 
 #### 逻辑结构
@@ -445,8 +447,8 @@ PostgreSQL需要以下的维护流程，来保证并发控制的有效性。
 
 Vacuum的主要任务是移除dead tuple和Freeze过老的txid。Vacuum分为两种：
 
-- Vacuum（Concurrent Vacuum）：为每个数据页移除dead tuple，此表对其他查询可读。
-- Vacuum full：移除dead tuple并且重新整理数据文件，此表对其他查询不可读。
+- Vacuum（Concurrent Vacuum）：为每个数据页移除dead tuple，此表对其他查询可读
+- Vacuum full：移除dead tuple并且重新整理数据文件，此表对其他查询不可读
 
 #### (Concurrent) Vacuum
 
@@ -457,7 +459,9 @@ Vacuum的总体流程是：
 1. 更新指向dead tuple的索引
 1. 对每个数据Page，移除dead tuple并整理数据Page的heap tuples部分（line pointers部分的dead tuple指针并不移除），更新FSM和VM
 1. 如果最后一个数据Page没有元组了，将其truncate
-1. 更新统计信息和系统表相关信息
+1. 更新和目标表相关的统计信息和系统表信息
+1. 释放目标表的ShareUpdateExclusiveLock锁
+1. 更新和Vacuum处理过程相关的统计信息和系统表信息
 1. 清理无用的CLog
 
 #### Visibility Map
