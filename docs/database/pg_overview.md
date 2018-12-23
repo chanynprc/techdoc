@@ -522,11 +522,22 @@ pg_database.datfrozenxid是pg_database表的datfrozenxid列，表示当前databa
 
 #### AutoVacuum
 
-
+AutoVacuum守护进程会启动自动的Vacuum。默认情况下，会开启3个autovacuum_worker后台进程，启动多少进程由参数autovacuum_max_workers确定，这些进程会每隔1min睡眠一次，由参数autovacuum_naptime确定。
 
 #### Full Vacuum
 
+Concurrent VACUUM有一些不足，比如它不能缩小表大小。因为只有当最后一个Page中全部为dead tuple时，最后一个Page才会被移除，但是，如果Tuple都零星地分布在中间的Page上时，这些Page不会被移除。这样在查询时会带来性能问题。
 
+Full Vacuum执行逻辑如下：
+
+1. 给表加AccessExclusiveLock锁
+2. 创建一个新的数据文件
+3. 将live tuple拷贝到新的数据文件，如果有必要，Freeze相应Tuple
+4. 移除旧的数据文件，重建索引，更新FSM、VM、统计信息和相关系统表
+5. 释放AccessExclusiveLock锁
+6. 更新CLog
+
+需要注意，在Full Vacuum的时候，表不可读不可写。在执行过程中，可能会占用两倍于表的大小，需要提前检查磁盘空间。
 
 ### PostgreSQL的扩展
 
