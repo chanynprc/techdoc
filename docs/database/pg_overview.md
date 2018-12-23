@@ -4,8 +4,6 @@
 
 PostgreSQL是一个被广泛应用的开源数据库系统，由它也构筑了MySQL之外的又一开源数据库生态。PostgreSQL本身是一个单机数据库，有很多公司和组织基于PostgreSQL开发了分布式的数据库系统，比如Greenplum和Postgre-XL等。
 
-[TOC]
-
 ### 逻辑结构和物理结构
 
 #### 逻辑结构
@@ -466,7 +464,7 @@ Vacuum的总体流程是：
 
 #### Visibility Map
 
-Visibility Map被设计用来加快Vacuum的过程，它标记了哪些数据Page有dead tuple（VM中标记为0），哪些数据Page没有dead tuple（VM中标记为1），当某数据Page对应的VM值为1时，Vacuum会直接跳过该数据Page。
+Visibility Map被设计用来加快Vacuum的过程，它标记了哪些数据Page有dead tuple（VM中标记为0），哪些数据Page没有dead tuple（VM中标记为1），当某数据Page对应的VM值为1时（表示无dead tuple），Vacuum会直接跳过该数据Page。
 
 #### Freeze处理逻辑
 
@@ -476,9 +474,45 @@ Freeze处理有两种模式，lazy mode和eager mode。在lazy mode下，Vacuum�
 
 在lazy mode下，Vacuum只扫描被VM标记含有dead tuple的数据Page（VM=0）。
 
-当某数据Page的VM=0时，表示该数据Page含有dead page，该Page上的所有元组会被扫描，当目标元组的xmin < freezeLimit_txid时，该元组会被标记为frozen。其中freezeLimit_txid = OldestXmin - vacuum_freeze_min_age。OldestXmin为当前所有运行的事务的最小txid，如果除了Vacuum外没有其他事务，OldestXmin就是Vacuum事务的txid。vacuum_freeze_min_age是一个系统参数。
+当某数据Page的VM=0时，表示该数据Page含有dead page，该Page上的所有元组会被扫描，当目标元组的xmin < freezeLimit_txid时，该元组会被标记为frozen。其中：
 
-当某数据Page的VM=1时，表示该数据Page没有dead tuple，则该Page不会被扫描，若这个数据Page上的远足的txid < freezeLimit_txid时，也不会被标记frozen。
+```
+freezeLimit_txid = OldestXmin - vacuum_freeze_min_age
+```
+
+OldestXmin为当前所有运行的事务的最小txid，如果除了Vacuum外没有其他事务，OldestXmin就是Vacuum事务的txid。vacuum_freeze_min_age是一个系统参数，默认值是50,000,000。
+
+当某数据Page的VM=1时，表示该数据Page没有dead tuple，则该Page不会被扫描，若这个数据Page上的元组的txid < freezeLimit_txid时，也不会被标记frozen。
+
+所以，在Lazy mode下，因为会根据VM跳过一些没有dead tuple的Page，会导致这些Page中的元组不会被Freeze。
+
+2、Eager mode（version <= 9.5）
+
+Eager mode时Lazy mode的补充，它扫描所有Page的所有Tuple。Vacuum时，它在满足以下条件时触发：
+
+```
+pg_database.datfrozenxid < (OldestXmin − vacuum_freeze_table_age)
+```
+
+pg_database.datfrozenxid是pg_database表的datfrozenxid列，表示当前database最老的frozen txid。vacuum_freeze_table_age是一个系统参数，默认值为150,000,000。
+
+当Eager mode被触发后，具体哪些Tuple需要被Freeze，和Lazy mode一致，只是所有的Page都会被扫描。
+
+在某表执行完Eager mode的Freeze后，需要额外对两个系统表进行更新：pg_class（relfrozenxid列）和pg_database（datfrozenxid列）。pg_class.relfrozenxid表示当前表最近一次Eager mode Freeze执行的freezeLimit_txid，目标表中所有x_min小于pg_class.relfrozenxid的Tuple都已经被Freeze。每次Eager mode Freeze后，需要把当次的freezeLimit_txid写入pg_class.relfrozenxid。pg_database.datfrozenxid表示当前Database中所有表的pg_class.relfrozenxid的最小值，当一个表的pg_class.relfrozenxid更新后，pg_database.datfrozenxid并不一定会更新。
+
+此外，Vacuum还有个Freeze的选项，如果该选项被打开，则所有x_min < OldestXmin的Tuple都会被Freeze。
+
+3、Eager mode（version >= 9.6）
+
+在9.5版本前，Eager mode扫描了所有的Page，其实，有些Page是不需要扫描的。
+
+在9.6版以后，VM中不光标记了Page中是否含有dead tuple，而且还标记了Page中的Tuple是否全部被Freeze了。若所有Tuple被Freeze了，VM_f=1，若有Tuple未被Freeze，VM_f=0。
+
+在Eager mode中，若所有Tuple已经被Freeze了（VM_f=1），则Freeze的过程会跳过该Page。
+
+4、Lazy mode和Eager mode的图示
+
+![](/techdoc/docs/database/images/lazy_eager_mode.jpg)
 
 ### PostgreSQL的扩展
 
