@@ -543,6 +543,14 @@ Full Vacuum执行逻辑如下：
 
 可以使用pg_freespacemap分析何时需要进行Full Vacuum。
 
+### Index Scan相关特性
+
+#### Heap Only Tuple (HOT)
+
+
+
+#### Index-Only Scans
+
 ### PostgreSQL的扩展
 
 #### Postgres-XL
