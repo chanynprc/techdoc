@@ -506,13 +506,27 @@ pg_database.datfrozenxid是pg_database表的datfrozenxid列，表示当前databa
 
 在9.5版本前，Eager mode扫描了所有的Page，其实，有些Page是不需要扫描的。
 
-在9.6版以后，VM中不光标记了Page中是否含有dead tuple，而且还标记了Page中的Tuple是否全部被Freeze了。若所有Tuple被Freeze了，VM_f=1，若有Tuple未被Freeze，VM_f=0。
+在9.6版以后，VM中不光标记了Page中是否含有dead tuple，而且还标记了Page中的Tuple是否全部被Freeze了。若所有Tuple被Freeze了，VM(freeze)=1，若有Tuple未被Freeze，VM(freeze)=0。
 
-在Eager mode中，若所有Tuple已经被Freeze了（VM_f=1），则Freeze的过程会跳过该Page。
+在Eager mode中，若所有Tuple已经被Freeze了（VM(freeze)=1），则Freeze的过程会跳过该Page。
 
 4、Lazy mode和Eager mode的图示
 
 ![](/techdoc/docs/database/images/lazy_eager_mode.jpg)
+
+#### 清理CLog
+
+前面有介绍CLog，是一个数组结构，下标为txid，值为事务状态。在磁盘上，按照8KB一个Page，256KB一个文件存储。
+
+在Vacuum时，所有Database的最小pg_database.datfrozenxid所在CLog文件之前的CLog文件都可以被删除，因为在Database Cluster级别（包括所有Database），这之前的txid都已经被Freeze。
+
+#### AutoVacuum
+
+
+
+#### Full Vacuum
+
+
 
 ### PostgreSQL的扩展
 
