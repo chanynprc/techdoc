@@ -547,9 +547,51 @@ Full Vacuum执行逻辑如下：
 
 #### Heap Only Tuple (HOT)
 
+设计HOT的目的是为了减少Vacuum。当更新一个Tuple时，如果更新的Tuple和原Tuple在同一个Page中时，可以使用HOT。
 
+1、没有HOT的行为
+
+当没有HOT时，如果要更新一个带索引的表时，需要同时向索引的相应Page和数据的相应Page都插入一个Tuple。这样就导致索引Page和数据Page都存在一个dead tuple，会增加更新和Vacuum的代价。
+
+2、有HOT的行为
+
+有HOT时，如果未更新索引列，并且新Tuple和老Tuple在同一个数据Page上时，就可以避免更改索引Page。HOT通过t_informask2字段的HEAP_HOT_UPDATED位和HEAP_ONLY_TUPLE位标记老Tuple和新Tuple。步骤如下：
+
+1. 索引不变，依然指向老Tuple
+2. 在数据Page的line pointers区域增加一个单元，并且在heap tuples区域写入新Tuple，line pointers的这个新单元指向新Tuple
+3. 让老Tuple的ctid指向新Tuple
+4. 标记老Tuple的t_informask2字段的HEAP_HOT_UPDATED位，标记新Tuple的t_informask2字段HEAP_ONLY_TUPLE位
+
+```
+假设目标Tuple在第5个Page的第1个Tuple位置，更新的txid是100
+
+更新前：
++--------+--------+--------+------------------+-----------+
+| t_xmin | t_xmax | t_ctid |     t_informask2 | User Data |
++--------+--------+--------+------------------+-----------+
+|     99 |      0 |  (5,1) |                  |     1,'A' |
++--------+--------+--------+------------------+-----------+
+
+更新后：
++--------+--------+--------+------------------+-----------+
+| t_xmin | t_xmax | t_ctid |     t_informask2 | User Data |
++--------+--------+--------+------------------+-----------+
+|     99 |    100 |  (5,2) | HEAP_HOT_UPDATED |     1,'A' |
++--------+--------+--------+------------------+-----------+
+|    100 |      0 |  (5,2) |  HEAP_ONLY_TUPLE |     1,'B' |
++--------+--------+--------+------------------+-----------+
+```
+
+在当前的操作后，如果需要读取这个新Tuple，会首先找到索引，然后通过索引找到老Tuple，通过并发控制（concurrency control）判断可见性，找到新Tuple。但是，如果老Tuple被当成dead tuple移除后，新Tuple将无法被访问到，所以，PostgreSQL设计了Pruning来解决这个问题：
+
+5. Pruning：在合适的时间（决策较为复杂）将老Tuple的line pointer指向新Tuple的line pointer
+6. defragmentation：在Pruning后，老Tuple就可以被移除了（因为无需操作索引，所以defragmentation过程比Vacuum轻量）
+
+使用HOT，可以减少索引Page和数据Page的大小，减少Vacuum的次数，同时，在更新和Vacuum时，也可以减少对索引操作，提升了性能。
 
 #### Index-Only Scans
+
+
 
 ### PostgreSQL的扩展
 
