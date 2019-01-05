@@ -591,6 +591,17 @@ Full Vacuum执行逻辑如下：
 
 #### Index-Only Scans
 
+如果Target list的所有列都包含在索引列中，就可以使用Index-Only Scan。这时候，一个查询只需要扫描索引的Page就可以了。
+
+但是，因为索引不包含事务信息（没有heap tuple的t_xmin、t_xmax信息），所以通过只扫描索引，并无法获知数据的可见性。
+
+这时候，可以依赖Visibility Map来进行辅助。Visibility Map标记了各数据Page是否有dead tuple（没有标1，有标0）。所以：
+
+- 对于没有dead tuple的Page，直接使用索引数据即可，无需访问数据Page
+- 对于有dead tuple的Page，在扫描索引后，需要访问相应数据Page，进行可见性判断
+
+### 缓存管理（Buffer Manager）
+
 
 
 ### PostgreSQL的扩展
