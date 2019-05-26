@@ -604,18 +604,32 @@ Full Vacuum执行逻辑如下：
 
 #### 概述
 
-Buffer Manager主要对shared memory和持久化存储间的数据传输。Buffer Manager由buffer table、buffer descriptor、buffer pool组成。
+Buffer Manager主要对shared memory和持久化存储间的数据传输进行管理。Buffer Manager由buffer table、buffer descriptor、buffer pool组成。
 
 Buffer pool用于保存数据文件的Page（包括数据、索引、FM、VM）。Buffer pool是一个数组，每个元素的内容是一个Page，其数组下标被称为buffer_ids。
 
 在PostgreSQL中，每个数据Page都有一个标记，称为buffer_tag。buffer_tag的组成如下：
 
 ```
+# buffer_tag
+
 | RelFileNode                                  | fork number | block number |
 | tablespace oid | database oid | relation oid | fork number | block number |
 ```
 
-其中，fork number用于标记该Page是数据Page（0）或FM Page（1）还是VM Page（2），block number是指数据文件的第多少个block（page）。
+其中，
+
+- RelFileNode包含3部分，tablespace oid、database oid和relation oid
+- fork number用于标记该Page是数据Page（0）或FM Page（1）还是VM Page（2）
+- block number是指数据文件的第多少个block（page）
+
+当一个Backend进程请求一个页面的时候，逻辑如下：
+
+1. 将拼装好的buffer_tag发送给Buffer Manager
+2. 如果Buffer Manager中有相应数据页面，则返回buffer_ID，如果Buffer Manager中没有相应的数据页面，则会去持久化存储中读取相应页面，并返回buffer_ID
+3. Backend进程访问Buffer pool中buffer_ID下标的数据页
+
+当Backend进程请求的页面不在Buffer pool中，且Buffer pool中的页面已满，则需要用页面替换算法进行页面的替换。8.1版本前，PG使用LRU算法，从8.1版本起，使用clock sweep算法。
 
 ### PostgreSQL的扩展
 
