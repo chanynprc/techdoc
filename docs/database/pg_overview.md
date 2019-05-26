@@ -602,7 +602,20 @@ Full Vacuum执行逻辑如下：
 
 ### 缓存管理（Buffer Manager）
 
+#### 概述
 
+Buffer Manager主要对shared memory和持久化存储间的数据传输。Buffer Manager由buffer table、buffer descriptor、buffer pool组成。
+
+Buffer pool用于保存数据文件的Page（包括数据、索引、FM、VM）。Buffer pool是一个数组，每个元素的内容是一个Page，其数组下标被称为buffer_ids。
+
+在PostgreSQL中，每个数据Page都有一个标记，称为buffer_tag。buffer_tag的组成如下：
+
+```
+| RelFileNode                                  | fork number | block number |
+| tablespace oid | database oid | relation oid | fork number | block number |
+```
+
+其中，fork number用于标记该Page是数据Page（0）或FM Page（1）还是VM Page（2），block number是指数据文件的第多少个block（page）。
 
 ### PostgreSQL的扩展
 
