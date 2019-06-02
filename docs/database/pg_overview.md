@@ -604,9 +604,13 @@ Full Vacuum执行逻辑如下：
 
 #### 概述
 
-Buffer Manager主要对shared memory和持久化存储间的数据传输进行管理。Buffer Manager由buffer table、buffer descriptor、buffer pool组成。
+Buffer Manager主要对shared memory和持久化存储间的数据传输进行管理。Buffer Manager由buffer table、buffer descriptors、buffer pool组成。
 
-Buffer pool用于保存数据文件的Page（包括数据、索引、FM、VM）。Buffer pool是一个数组，每个元素的内容是一个Page，其数组下标被称为buffer_ids。
+- Buffer pool用于保存数据文件的Page（包括数据、索引、FM、VM）。Buffer pool是一个数组，每个元素的内容是一个Page，其数组下标被称为buffer_ids
+- Buffer descriptors保存Buffer pool中Page的元数据信息，是一个与Buffer pool一一对应的数组，所以其数组下标也是buffer_ids
+- Buffer table保存了buffer_tags（数据页面标记信息，下面介绍）和buffer_ids的对应关系，是一个hash表
+
+#### 页面的请求
 
 在PostgreSQL中，每个数据Page都有一个标记，称为buffer_tag。buffer_tag的组成如下：
 
