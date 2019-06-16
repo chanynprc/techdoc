@@ -606,11 +606,11 @@ Full Vacuum执行逻辑如下：
 
 Buffer Manager主要对shared memory和持久化存储间的数据传输进行管理。Buffer Manager由buffer table、buffer descriptors、buffer pool组成。
 
-- Buffer pool用于保存数据文件的Page（包括数据、索引、FM、VM）。Buffer pool是一个数组，每个元素的内容是一个Page，其数组下标被称为buffer_ids
-- Buffer descriptors保存Buffer pool中Page的元数据信息，是一个与Buffer pool一一对应的数组，所以其数组下标也是buffer_ids
-- Buffer table保存了buffer_tags（数据页面标记信息，下面介绍）和buffer_ids的对应关系，是一个hash表
+- **Buffer pool**：用于保存数据文件的Page（包括数据、索引、FM、VM）。Buffer pool是一个数组，每个元素的内容是一个Page，其数组下标被称为buffer_ids
+- **Buffer descriptors**：保存Buffer pool中Page的元数据信息，是一个与Buffer pool一一对应的数组，所以其数组下标也是buffer_ids
+- **Buffer table**：保存了buffer_tags（数据页面标记信息，下面介绍）和buffer_ids的对应关系，主体是一个hash表，能够由buffer_tag得到buffer_id
 
-#### 页面的请求
+#### buffer_tag
 
 在PostgreSQL中，每个数据Page都有一个标记，称为buffer_tag。buffer_tag的组成如下：
 
@@ -627,6 +627,8 @@ Buffer Manager主要对shared memory和持久化存储间的数据传输进行�
 - fork number用于标记该Page是数据Page（0）或FM Page（1）还是VM Page（2）
 - block number是指数据文件的第多少个block（page）
 
+#### 页面的请求
+
 当一个Backend进程请求一个页面的时候，逻辑如下：
 
 1. 将拼装好的buffer_tag发送给Buffer Manager
@@ -634,6 +636,24 @@ Buffer Manager主要对shared memory和持久化存储间的数据传输进行�
 3. Backend进程访问Buffer pool中buffer_ID下标的数据页
 
 当Backend进程请求的页面不在Buffer pool中，且Buffer pool中的页面已满，则需要用页面替换算法进行页面的替换。8.1版本前，PG使用LRU算法，从8.1版本起，使用clock sweep算法。
+
+#### 数据结构
+
+Buffer descriptor的主要结构有：
+
+- tag：即数据页面的buffer_tag
+- buffer_id：即数据页面在Buffer pool的下标buffer_id
+- refcount：记录数据页正在被多少个进程访问，有新进程访问该数据页时需+1，访问结束后-1
+- usage_count：数据页被换入buffer pool后被引用了的次数，用于数据页换入换出算法
+- context_lock、io_in_progress_lock：用于做访问控制
+- flag：标记数据页的状态。标记数据页是否为脏页、是否是合法的，以及是否正在进行IO读写
+- freeNext：freelist的下一个元素
+
+Buffer descriptors有3种状态：
+
+- Empty：refcount和usage_count均为0
+- Pinned：refcount和usage_count大于等于1
+- Unpinned：usage_count大于等于1，但refcount为0
 
 ### PostgreSQL的扩展
 
