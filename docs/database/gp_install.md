@@ -1,8 +1,6 @@
 ## Greenplum安装
 
-### Centos 7
-
-- 安装OS层面需要的库
+- 安装OS层面需要的库 (CentOS 7 only)
 
 ```bash
 # enable network, onboot = on
@@ -48,7 +46,7 @@ export MASTER_DATA_DIRECTORY=$GP_DATA_FOLDER/gpseg-1
 source $GP_INSTALL/greenplum_path.sh
 ```
 
-- 安装依赖以及ORCA、GP
+- 下载源代码
 
 ```bash
 export CMAKE_VERSION="3.13.3"
@@ -63,26 +61,24 @@ export GPDB_VERSION="6.0.0-beta.3"
 mkdir $HOME/usr
 cd $HOME/usr
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-wget https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION.tar.gz -O cmake-$CMAKE_VERSION.tar.gz
 wget https://github.com/ninja-build/ninja/archive/v$NINJA_VERSION.tar.gz -O ninja-$NINJA_VERSION.tar.gz
+wget https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION.tar.gz -O cmake-$CMAKE_VERSION.tar.gz
 wget https://github.com/greenplum-db/gp-xerces/archive/v$XERCES_VERSION.tar.gz -O gp-xerces-$XERCES_VERSION.tar.gz
 wget https://github.com/greenplum-db/gporca/archive/v$ORCA_VERSION.tar.gz -O gporca-$ORCA_VERSION.tar.gz
 wget https://github.com/greenplum-db/gpdb/archive/$GPDB_VERSION.tar.gz -O gpdb-$GPDB_VERSION.tar.gz
+```
 
+- 安装依赖 (CentOS 7)
+
+```bash
 # python
 yum install python-devel.x86_64 -y
 python $HOME/usr/get-pip.py
 #yum -y install epel-release
 
-# gcc, g++, cmake
+# gcc, g++
 yum install gcc -y
 yum install gcc-c++ -y
-cd $HOME/usr
-tar zxvf cmake-$CMAKE_VERSION.tar.gz
-cd cmake-$CMAKE_VERSION
-./bootstrap
-make
-make install
 
 # ninja
 cd $HOME/usr
@@ -112,6 +108,60 @@ yum install libcurl-devel.x86_64 --enablerepo="city*" -y # no need for CentOS
 
 # dependencies (Greenplum 6 only)
 yum install libzstd-devel.x86_64 -y
+```
+
+- 安装依赖 (Ubuntu)
+
+```bash
+# python
+sudo apt install python -y
+sudo apt install python-dev -y
+sudo python $HOME/usr/get-pip.py
+
+# gcc, g++, make
+sudo apt install gcc -y
+sudo apt install g++ -y
+sudo apt install make -y
+
+# ninja
+cd $HOME/usr
+tar zxvf ninja-$NINJA_VERSION.tar.gz
+cd ninja-$NINJA_VERSION
+./configure.py --bootstrap
+sudo cp ninja /usr/bin/
+
+# dependencies
+sudo apt install libreadline-dev -y
+sudo apt install zlib1g-dev -y
+sudo apt install libkrb5-dev -y
+sudo pip install gssapi
+sudo apt install libapr1-dev -y
+sudo apt install libevent-dev -y
+sudo apt install libxml2-dev -y
+sudo apt install libcurl4-openssl-dev -y
+sudo apt install libbz2-dev -y
+sudo apt install bison -y
+sudo apt install flex -y
+sudo apt install libperl-dev -y
+sudo apt install libssl-dev -y
+sudo pip install paramiko
+sudo pip install psutil
+sudo pip install lockfile
+
+# dependencies (Greenplum 6 only)
+sudo apt install libzstd-dev -y
+```
+
+- 安装cmake, gp-xerces, ORCA, GP
+
+```bash
+# cmake
+cd $HOME/usr
+tar zxvf cmake-$CMAKE_VERSION.tar.gz
+cd cmake-$CMAKE_VERSION
+./bootstrap
+make
+make install
 
 # gp-xerces (user)
 cd $HOME/usr
@@ -138,20 +188,24 @@ cd gpdb-$GPDB_VERSION
 make -j8
 make -j8 install
 
-# clear gssapt
-sudo pip uninstall gssapi # no need for CentOS
+# clear gssapt (no need for CentOS)
+sudo pip uninstall gssapi
 ```
 
 - 调整环境参数
 
 ```bash
-sudo echo "127.0.0.1 ${HOSTNAME}" >> /etc/hosts # use vim
+# add hostname to hosts
+# sudo echo "127.0.0.1 ${HOSTNAME}" >> /etc/hosts
+vim /etc/hosts
+
 # modify $GP_INSTALL/greenplum_path.sh, add environment variables
+vim $GP_INSTALL/greenplum_path.sh
 ```
 
 - 新建GP实例
 
-```
+```bash
 mkdir $GP_DATA_FOLDER
 
 source $GP_INSTALL/greenplum_path.sh
