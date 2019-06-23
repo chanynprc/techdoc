@@ -38,6 +38,8 @@
 
 [Presto概览](/techdoc/docs/database/presto_overview)
 
+[Greenplum安装](/techdoc/docs/database/gp_install)
+
 ----------
 
 ### Tag：论文笔记
