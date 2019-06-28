@@ -108,6 +108,10 @@ yum install libcurl-devel.x86_64 --enablerepo="city*" -y # no need for CentOS
 
 # dependencies (Greenplum 6 only)
 yum install libzstd-devel.x86_64 -y
+
+# dependencies (make check)
+yum install perl-Env
+yum install 'perl(Data::Dumper)'
 ```
 
 - 安装依赖 (Ubuntu)
@@ -234,5 +238,9 @@ rm -Rf $GP_DATA_FOLDER/gpseg*
 gpinitsystem -c $GP_DATA_FOLDER/gpinitsystem_config -h $GP_DATA_FOLDER/hostfile_segments
 ```
 
+- make check
 
+```bash
+make installcheck-world
+```
 
