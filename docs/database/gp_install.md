@@ -201,6 +201,15 @@ vim /etc/hosts
 
 # modify $GP_INSTALL/greenplum_path.sh, add environment variables
 vim $GP_INSTALL/greenplum_path.sh
+
+# open file limit
+vim /etc/security/limits.conf
+* soft nofile 65535
+* hard nofile 65535
+
+# sem(信号量)
+vim /etc/sysctl.conf
+kernel.sem = 250 512000 100 2048
 ```
 
 - 新建GP实例
