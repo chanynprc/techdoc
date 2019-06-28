@@ -225,8 +225,7 @@ source $GP_INSTALL/greenplum_path.sh
 cp $GPHOME/docs/cli_help/gpconfigs/gpinitsystem_config $GP_DATA_FOLDER/gpinitsystem_config
 sed -i "s/MASTER_HOSTNAME=mdw/MASTER_HOSTNAME=${HOSTNAME}/g" $GP_DATA_FOLDER/gpinitsystem_config
 sed -i "s#MASTER_DIRECTORY=/data/master#MASTER_DIRECTORY=$GP_DATA_FOLDER#g" $GP_DATA_FOLDER/gpinitsystem_config
-sed -i "s#/data1/primary /data1/primary /data1/primary#$GP_DATA_FOLDER#g" $GP_DATA_FOLDER/gpinitsystem_config
-sed -i "s#/data2/primary /data2/primary /data2/primary#$GP_DATA_FOLDER#g" $GP_DATA_FOLDER/gpinitsystem_config
+sed -i "s#/data1/primary /data1/primary /data1/primary /data2/primary /data2/primary /data2/primary#$GP_DATA_FOLDER $GP_DATA_FOLDER $GP_DATA_FOLDER#g" $GP_DATA_FOLDER/gpinitsystem_config
 
 echo "${HOSTNAME}" > $GP_DATA_FOLDER/hostfile_exkeys
 echo "${HOSTNAME}" > $GP_DATA_FOLDER/hostfile_segments
