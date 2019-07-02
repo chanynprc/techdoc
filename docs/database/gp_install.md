@@ -23,7 +23,7 @@ wget http://mirrors.163.com/.help/CentOS7-Base-163.repo
 ```bash
 export WORKSPACES=$HOME/workspaces
 
-export XERCES_INSTALL=$WORKSPACES/A_install_gp_xerces
+export XERCES_INSTALL=$HOME/usr/A_install_gp_xerces
 export LD_LIBRARY_PATH=$XERCES_INSTALL/lib:$LD_LIBRARY_PATH
 export LIBRARY_PATH=$XERCES_INSTALL/lib:$LIBRARY_PATH
 export C_INCLUDE_PATH=$XERCES_INSTALL/include:$C_INCLUDE_PATH
@@ -32,6 +32,8 @@ export CMAKE_LIBRARY_PATH=$XERCES_INSTALL/lib:$CMAKE_LIBRARY_PATH
 export CMAKE_INCLUDE_PATH=$XERCES_INSTALL/include:$CMAKE_INCLUDE_PATH
 export PATH=$XERCES_INSTALL/bin:$PATH
 
+export ORCA_SRC_FOLDERNAME=gporca
+export ORCA_SRC=$WORKSPACES/$ORCA_SRC_FOLDERNAME
 export ORCA_INSTALL=$WORKSPACES/A_install_gporca
 export LD_LIBRARY_PATH=$ORCA_INSTALL/lib:$LD_LIBRARY_PATH
 export LIBRARY_PATH=$ORCA_INSTALL/lib:$LIBRARY_PATH
@@ -39,6 +41,8 @@ export C_INCLUDE_PATH=$ORCA_INSTALL/include:$C_INCLUDE_PATH
 export CPLUS_INCLUDE_PATH=$ORCA_INSTALL/include:$CPLUS_INCLUDE_PATH
 
 export CFLAGS='-O0 -g'
+export GP_SRC_FOLDERNAME=gpdb
+export GP_SRC=$WORKSPACES/$GP_SRC_FOLDERNAME
 export GP_INSTALL=$WORKSPACES/A_install_gpdb
 export GP_DATA_FOLDER=$WORKSPACES/A_install_data
 export MASTER_DATA_DIRECTORY=$GP_DATA_FOLDER/gpseg-1
@@ -57,15 +61,29 @@ export XERCES_VERSION="3.1.2-p1"
 export ORCA_VERSION="3.39.0"
 export GPDB_VERSION="6.0.0-beta.3"
 
-# download
+# download dependencies
 mkdir $HOME/usr
 cd $HOME/usr
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 wget https://github.com/ninja-build/ninja/archive/v$NINJA_VERSION.tar.gz -O ninja-$NINJA_VERSION.tar.gz
 wget https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION.tar.gz -O cmake-$CMAKE_VERSION.tar.gz
 wget https://github.com/greenplum-db/gp-xerces/archive/v$XERCES_VERSION.tar.gz -O gp-xerces-$XERCES_VERSION.tar.gz
+
+# download orca and gpdb
+cd $WORKSPACES
 wget https://github.com/greenplum-db/gporca/archive/v$ORCA_VERSION.tar.gz -O gporca-$ORCA_VERSION.tar.gz
 wget https://github.com/greenplum-db/gpdb/archive/$GPDB_VERSION.tar.gz -O gpdb-$GPDB_VERSION.tar.gz
+tar zxvf gporca-$ORCA_VERSION.tar.gz
+mv gporca-$ORCA_VERSION $ORCA_SRC_FOLDERNAME
+tar zxvf gpdb-$GPDB_VERSION.tar.gz
+mv gpdb-$GPDB_VERSION $GP_SRC_FOLDERNAME
+
+# clone orca and gpdb
+cd $WORKSPACES
+git clone https://github.com/greenplum-db/gporca.git
+git clone https://github.com/greenplum-db/gpdb.git
+mv gporca $ORCA_SRC_FOLDERNAME
+mv gpdb $GP_SRC_FOLDERNAME
 ```
 
 - 安装依赖 (CentOS 7)
@@ -178,16 +196,12 @@ make
 make install
 
 # orca (user)
-cd $HOME/usr
-tar zxvf gporca-$ORCA_VERSION.tar.gz
-cd gporca-$ORCA_VERSION
+cd $ORCA_SRC
 cmake -GNinja -H. -Bbuild -DCMAKE_INSTALL_PREFIX=$ORCA_INSTALL
 ninja install -C build
 
 # gp (user)
-cd $HOME/usr
-tar zxvf gpdb-$GPDB_VERSION.tar.gz
-cd gpdb-$GPDB_VERSION
+cd $GP_SRC
 ./configure --with-perl --with-python --with-libxml --with-gssapi --prefix=$GP_INSTALL --enable-debug --enable-cassert
 make -j8
 make -j8 install
