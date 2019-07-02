@@ -21,9 +21,10 @@ wget http://mirrors.163.com/.help/CentOS7-Base-163.repo
 - 新增需要的环境变量
 
 ```bash
+export INSTALLS=$HOME/usr
 export WORKSPACES=$HOME/workspaces
 
-export XERCES_INSTALL=$HOME/usr/A_install_gp_xerces
+export XERCES_INSTALL=$INSTALLS/A_install_gp_xerces
 export LD_LIBRARY_PATH=$XERCES_INSTALL/lib:$LD_LIBRARY_PATH
 export LIBRARY_PATH=$XERCES_INSTALL/lib:$LIBRARY_PATH
 export C_INCLUDE_PATH=$XERCES_INSTALL/include:$C_INCLUDE_PATH
@@ -34,7 +35,7 @@ export PATH=$XERCES_INSTALL/bin:$PATH
 
 export ORCA_SRC_FOLDERNAME=gporca
 export ORCA_SRC=$WORKSPACES/$ORCA_SRC_FOLDERNAME
-export ORCA_INSTALL=$WORKSPACES/A_install_gporca
+export ORCA_INSTALL=$INSTALLS/A_install_gporca
 export LD_LIBRARY_PATH=$ORCA_INSTALL/lib:$LD_LIBRARY_PATH
 export LIBRARY_PATH=$ORCA_INSTALL/lib:$LIBRARY_PATH
 export C_INCLUDE_PATH=$ORCA_INSTALL/include:$C_INCLUDE_PATH
@@ -43,8 +44,8 @@ export CPLUS_INCLUDE_PATH=$ORCA_INSTALL/include:$CPLUS_INCLUDE_PATH
 export CFLAGS='-O0 -g'
 export GP_SRC_FOLDERNAME=gpdb
 export GP_SRC=$WORKSPACES/$GP_SRC_FOLDERNAME
-export GP_INSTALL=$WORKSPACES/A_install_gpdb
-export GP_DATA_FOLDER=$WORKSPACES/A_install_data
+export GP_INSTALL=$INSTALLS/A_install_gpdb
+export GP_DATA_FOLDER=$INSTALLS/A_install_data
 export MASTER_DATA_DIRECTORY=$GP_DATA_FOLDER/gpseg-1
 
 source $GP_INSTALL/greenplum_path.sh
