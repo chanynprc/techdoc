@@ -95,6 +95,29 @@ hwclock --systohc
 hwclock --hctosys
 ```
 
+### VirtualBox挂载共享文件夹
+
+首先需要安装VirtualBox Guest Additions，安装过程中可能需要kernal-devel。
+
+```bash
+# 查找VirtualBox Guest Additions光盘
+ls -l /dev | grep cdrom
+
+# 挂载
+mount /dev/cdrom /mnt/
+
+# 安装
+sh VBoxLinuxAdditions.run
+```
+
+挂载共享文件夹
+
+```bash
+mount -t vboxsf -o uid=1000,gid=1000 workspaces /home/cyn/workspaces
+```
+
+其中uid和gid分别为普通用户的User ID和Group ID。
+
 ### 挂载ISO文件
 
 ```bash
