@@ -97,7 +97,7 @@ hwclock --hctosys
 
 ### VirtualBox挂载共享文件夹
 
-首先需要安装VirtualBox Guest Additions，安装过程中可能需要kernal-devel。
+首先需要安装VirtualBox Guest Additions，安装过程中可能需要kernal-devel。如果需要创建软连接，需要额外的命令允许。
 
 ```bash
 # 查找VirtualBox Guest Additions光盘
@@ -106,8 +106,11 @@ ls -l /dev | grep cdrom
 # 挂载
 mount /dev/cdrom /mnt/
 
-# 安装
+# 安装（可能失败，需安装kernal-devel）
 sh VBoxLinuxAdditions.run
+
+# 允许创建软链接（需重启VirtualBox）
+VBoxManage setextradata vm_name VBoxInternal2/SharedFoldersEnableSymlinksCreate/share_name 1
 ```
 
 挂载共享文件夹
