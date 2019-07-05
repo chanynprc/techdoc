@@ -18,6 +18,23 @@ mv CentOS-Base.repo CentOS-Base.repo.bak
 wget http://mirrors.163.com/.help/CentOS7-Base-163.repo
 ```
 
+- 调整环境参数
+
+```bash
+# add hostname to hosts
+# sudo echo "127.0.0.1 ${HOSTNAME}" >> /etc/hosts
+vim /etc/hosts
+
+# open file limit
+vim /etc/security/limits.conf
+* soft nofile 65535
+* hard nofile 65535
+
+# sem(信号量)
+vim /etc/sysctl.conf
+kernel.sem = 250 512000 100 2048
+```
+
 - 新增需要的环境变量
 
 ```bash
@@ -210,26 +227,6 @@ cat $WORKSPACES/gp_path_exports.txt >> $GP_INSTALL/greenplum_path.sh
 
 # clear gssapt (no need for CentOS)
 sudo pip uninstall gssapi
-```
-
-- 调整环境参数
-
-```bash
-# add hostname to hosts
-# sudo echo "127.0.0.1 ${HOSTNAME}" >> /etc/hosts
-vim /etc/hosts
-
-# modify $GP_INSTALL/greenplum_path.sh, add environment variables
-vim $GP_INSTALL/greenplum_path.sh
-
-# open file limit
-vim /etc/security/limits.conf
-* soft nofile 65535
-* hard nofile 65535
-
-# sem(信号量)
-vim /etc/sysctl.conf
-kernel.sem = 250 512000 100 2048
 ```
 
 - 新建GP实例
