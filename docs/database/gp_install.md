@@ -206,6 +206,7 @@ cd $GP_SRC
 ./configure --with-perl --with-python --with-libxml --with-gssapi --prefix=$GP_INSTALL --enable-debug --enable-cassert
 make -j8
 make -j8 install
+cat $WORKSPACES/gp_path_exports.txt >> $GP_INSTALL/greenplum_path.sh
 
 # clear gssapt (no need for CentOS)
 sudo pip uninstall gssapi
