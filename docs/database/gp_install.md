@@ -138,6 +138,7 @@ yum install flex -y
 yum install perl-ExtUtils-Embed -y
 yum install openssl-devel.x86_64 -y
 yum install apr-util-devel.x86_64 -y
+yum install mxml-devel.x86_64 -y
 pip install paramiko
 pip install psutil
 pip install lockfile
