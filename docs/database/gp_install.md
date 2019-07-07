@@ -137,10 +137,11 @@ yum install bison -y
 yum install flex -y
 yum install perl-ExtUtils-Embed -y
 yum install openssl-devel.x86_64 -y
+yum install apr-util-devel.x86_64 -y
 pip install paramiko
 pip install psutil
 pip install lockfile
-yum install libcurl-devel.x86_64 --enablerepo="city*" -y # no need for CentOS
+#yum install libcurl-devel.x86_64 --enablerepo="city*" -y # no need for CentOS
 
 # dependencies (Greenplum 6 only)
 yum install libzstd-devel.x86_64 -y
