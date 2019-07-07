@@ -18,7 +18,7 @@
 
 ----------
 
-### Tag：数据库综合
+### Tag：数据库技术专题
 
 [优化器：查询优化框架](/techdoc/docs/database/optimizer_framework)
 
@@ -30,15 +30,23 @@
 
 [专题：子查询](/techdoc/docs/database/topic_sub_query)
 
+### Tag：PostgreSQL
+
 [PostgreSQL概览](/techdoc/docs/database/pg_overview)
 
 [Postgres-XL优化器代码架构](/techdoc/docs/database/pg_optimizer)
 
 [PostgreSQL的扩展统计信息](/techdoc/docs/database/pg_ext_stat)
 
-[Presto概览](/techdoc/docs/database/presto_overview)
+### Tag：Greenplum
 
 [Greenplum安装](/techdoc/docs/database/gp_install)
+
+[Greenplum的使用与运维](/techdoc/docs/database/gp_usage_ops)
+
+### Tag：其他数据库
+
+[Presto概览](/techdoc/docs/database/presto_overview)
 
 ----------
 
@@ -50,7 +58,7 @@
 
 ----------
 
-### Database System Implementation 读书笔记
+### 《Database System Implementation》读书笔记
 
 [DBMS系统概述](/techdoc/docs/database/dsi_intro)
 
