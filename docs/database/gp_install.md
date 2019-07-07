@@ -225,6 +225,11 @@ make -j8
 make -j8 install
 cat $WORKSPACES/gp_path_exports.txt >> $GP_INSTALL/greenplum_path.sh
 
+# extensions
+cd $GP_SRC/contrib/postgres_fdw
+make
+make install
+
 # clear gssapt (no need for CentOS)
 sudo pip uninstall gssapi
 ```
