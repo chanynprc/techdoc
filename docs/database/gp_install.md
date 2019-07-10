@@ -231,6 +231,9 @@ cat $WORKSPACES/gp_path_exports.txt >> $GP_INSTALL/greenplum_path.sh
 cd $GP_SRC/contrib/postgres_fdw
 make
 make install
+cd $GP_SRC/gpcontrib/gp_inject_fault
+make
+make install
 
 # clear gssapt (no need for CentOS)
 sudo pip uninstall gssapi
