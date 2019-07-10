@@ -234,6 +234,9 @@ make install
 cd $GP_SRC/gpcontrib/gp_inject_fault
 make
 make install
+cd $GP_SRC/gpcontrib/gp_debug_numsegments
+make
+make install
 
 # clear gssapt (no need for CentOS)
 sudo pip uninstall gssapi
