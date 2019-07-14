@@ -40,6 +40,8 @@
 
 ### Tag：Greenplum
 
+[Greenplum概览](/techdoc/docs/database/gp_orca_overview)
+
 [Greenplum安装](/techdoc/docs/database/gp_install)
 
 [Greenplum的使用与运维](/techdoc/docs/database/gp_usage_ops)
