@@ -266,6 +266,7 @@ gpinitsystem -c $GP_DATA_FOLDER/gpinitsystem_config -h $GP_DATA_FOLDER/hostfile_
 - make check
 
 ```bash
+cd $GP_SRC
 make installcheck-world
 ```
 
