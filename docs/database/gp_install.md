@@ -236,7 +236,8 @@ make install
 
 # orca
 cd $ORCA_SRC
-cmake -GNinja -H. -Bbuild -DCMAKE_INSTALL_PREFIX=$ORCA_INSTALL
+cmake -GNinja -H. -Bbuild -DCMAKE_INSTALL_PREFIX=$ORCA_INSTALL # release version
+cmake -GNinja -H. -Bbuild.debug -DCMAKE_INSTALL_PREFIX=$ORCA_INSTALL -DCMAKE_BUILD_TYPE=DEBUG # debug version
 ninja install -C build
 
 # gp
