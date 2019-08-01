@@ -71,6 +71,7 @@ source $GP_INSTALL/greenplum_path.sh
 - 下载源代码
 
 ```bash
+export MXML_VERSION="2.12"
 export CMAKE_VERSION="3.13.3"
 export NINJA_VERSION="1.9.0"
 export XERCES_VERSION="3.1.2-p1"
@@ -83,6 +84,7 @@ export GPDB_VERSION="6.0.0-beta.3"
 mkdir $HOME/usr
 cd $HOME/usr
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+wget https://github.com/michaelrsweet/mxml/releases/download/v$MXML_VERSION/mxml-$MXML_VERSION.tar.gz -O mxml-$MXML_VERSION.tar.gz
 wget https://github.com/ninja-build/ninja/archive/v$NINJA_VERSION.tar.gz -O ninja-$NINJA_VERSION.tar.gz
 wget https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION.tar.gz -O cmake-$CMAKE_VERSION.tar.gz
 wget https://github.com/greenplum-db/gp-xerces/archive/v$XERCES_VERSION.tar.gz -O gp-xerces-$XERCES_VERSION.tar.gz
@@ -116,12 +118,28 @@ python $HOME/usr/get-pip.py
 yum install gcc -y
 yum install gcc-c++ -y
 
+# cmake
+cd $HOME/usr
+tar zxvf cmake-$CMAKE_VERSION.tar.gz
+cd cmake-$CMAKE_VERSION
+./bootstrap
+make
+make install
+
 # ninja
 cd $HOME/usr
 tar zxvf ninja-$NINJA_VERSION.tar.gz
 cd ninja-$NINJA_VERSION
 ./configure.py --bootstrap
 cp ninja /usr/bin/
+
+# mxml v2
+cd $HOME/usr
+tar -zxvf mxml-$MXML_VERSION.tar.gz
+cd mxml-$MXML_VERSION
+./configure
+make
+make install
 
 # dependencies
 yum install readline-devel.x86_64 -y
@@ -138,7 +156,7 @@ yum install flex -y
 yum install perl-ExtUtils-Embed -y
 yum install openssl-devel.x86_64 -y
 yum install apr-util-devel.x86_64 -y
-yum install mxml-devel.x86_64 -y
+#yum install mxml-devel.x86_64 -y #OSS needs mxml v2
 yum install pigz -y
 pip install paramiko
 pip install psutil
@@ -165,6 +183,14 @@ sudo python $HOME/usr/get-pip.py
 sudo apt install gcc -y
 sudo apt install g++ -y
 sudo apt install make -y
+
+# cmake
+cd $HOME/usr
+tar zxvf cmake-$CMAKE_VERSION.tar.gz
+cd cmake-$CMAKE_VERSION
+./bootstrap
+make
+sudo make install
 
 # ninja
 cd $HOME/usr
@@ -195,18 +221,10 @@ sudo pip install lockfile
 sudo apt install libzstd-dev -y
 ```
 
-- 安装cmake, gp-xerces, ORCA, GP
+- 安装gp-xerces, ORCA, GP (普通用户)
 
 ```bash
-# cmake
-cd $HOME/usr
-tar zxvf cmake-$CMAKE_VERSION.tar.gz
-cd cmake-$CMAKE_VERSION
-./bootstrap
-make
-make install
-
-# gp-xerces (user)
+# gp-xerces
 cd $HOME/usr
 tar zxvf gp-xerces-$XERCES_VERSION.tar.gz
 cd gp-xerces-$XERCES_VERSION
@@ -216,12 +234,12 @@ cd build
 make
 make install
 
-# orca (user)
+# orca
 cd $ORCA_SRC
 cmake -GNinja -H. -Bbuild -DCMAKE_INSTALL_PREFIX=$ORCA_INSTALL
 ninja install -C build
 
-# gp (user)
+# gp
 cd $GP_SRC
 ./configure --with-perl --with-python --with-libxml --with-gssapi --prefix=$GP_INSTALL --enable-debug --enable-cassert
 make -j8
