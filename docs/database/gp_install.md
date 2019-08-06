@@ -33,6 +33,7 @@ vim /etc/security/limits.conf
 # sem(信号量)
 vim /etc/sysctl.conf
 kernel.sem = 250 512000 100 2048
+# sysctl -p
 ```
 
 - 新增需要的环境变量
