@@ -50,6 +50,10 @@
 
 [Presto概览](/techdoc/docs/database/presto_overview)
 
+### Tag：其他
+
+[一些SQL的高级用法](/techdoc/docs/database/sql_advanced)
+
 ----------
 
 ### Tag：论文笔记
@@ -57,6 +61,12 @@
 [Architecture of a Database System](/techdoc/docs/database/p_architecture_db_sys)
 
 [Orca: A Modular Query Optimizer Architecture for Big Data](/techdoc/docs/database/p_orca)
+
+----------
+
+### Tag：课程笔记
+
+[Database Systems (CMU 15445)](/techdoc/docs/database/course_cmu15445_database_systems)
 
 ----------
 
