@@ -90,6 +90,8 @@ Grouping sets是对Group by功能的扩展，相当于可以从多个维度进�
 ```sql
 select a, b, avg(c) from t group by grouping sets ((a), (b), ());
 
+-- 等价于
+
 select a, null, avg(c) from t group by a
 union all
 select null, b, avg(c) from t group by b
