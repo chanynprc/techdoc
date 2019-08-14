@@ -83,6 +83,132 @@ FROM empsalary;
 
 ### Grouping Sets
 
+Grouping sets是对Group by功能的扩展，相当于可以从多个维度进行Group by。
+
+下面两个查询等价：
+
+```sql
+select a, b, avg(c) from t group by grouping sets ((a), (b), ());
+
+select a, null, avg(c) from t group by a
+union all
+select null, b, avg(c) from t group by b
+union all
+select null, null, avg(c) from t;
+```
+
+结果：
+
+```sql
+select * from t order by c;
+ a | b  | c | d
+---+----+---+---
+ 1 | 11 | 1 | 1
+ 1 | 22 | 2 | 1
+ 2 | 11 | 3 | 1
+ 2 | 22 | 4 | 1
+(4 rows)
+
+select a, b, avg(c) from t group by grouping sets ((a), (b), ());
+ a | b  |        avg
+---+----+--------------------
+   |    | 2.5000000000000000
+   | 11 | 2.0000000000000000
+   | 22 | 3.0000000000000000
+ 1 |    | 1.5000000000000000
+ 2 |    | 3.5000000000000000
+(5 rows)
+```
+
+可以在Target List中使用grouping函数，来查看某列是否为当前结果行的grouping set成员（0表示是当前grouping set成员）：
+
+```sql
+select grouping(a) as a_flag, grouping(b) as b_flag, a, b, avg(c) from t group by grouping sets ((a), (b), ());
+
+ a_flag | b_flag | a | b  |        avg
+--------+--------+---+----+--------------------
+      1 |      1 |   |    | 2.5000000000000000
+      1 |      0 |   | 11 | 2.0000000000000000
+      1 |      0 |   | 22 | 3.0000000000000000
+      0 |      1 | 1 |    | 1.5000000000000000
+      0 |      1 | 2 |    | 3.5000000000000000
+(5 rows)
+```
+
+此外，还有rollup和cube，它们和grouping sets之间有如下等价关系：
+
+```sql
+ROLLUP ( e1, e2, e3, ... )
+
+-- 等价于
+
+GROUPING SETS (
+    ( e1, e2, e3, ... ),
+    ...
+    ( e1, e2 ),
+    ( e1 ),
+    ( )
+)
+```
+
+```sql
+CUBE ( a, b, c )
+
+-- 等价于
+
+GROUPING SETS (
+    ( a, b, c ),
+    ( a, b    ),
+    ( a,    c ),
+    ( a       ),
+    (    b, c ),
+    (    b    ),
+    (       c ),
+    (         )
+)
+```
+
+其他等价例子如下：
+
+```sql
+ROLLUP ( a, (b, c), d )
+
+-- 等价于
+
+GROUPING SETS (
+    ( a, b, c, d ),
+    ( a, b, c    ),
+    ( a          ),
+    (            )
+)
+```
+
+```sql
+CUBE ( (a, b), (c, d) )
+
+-- 等价于
+
+GROUPING SETS (
+    ( a, b, c, d ),
+    ( a, b       ),
+    (       c, d ),
+    (            )
+)
+```
+
+```sql
+GROUP BY a, CUBE (b, c), GROUPING SETS ((d), (e))
+
+-- 等价于
+
+GROUP BY GROUPING SETS (
+    (a, b, c, d), (a, b, c, e),
+    (a, b, d),    (a, b, e),
+    (a, c, d),    (a, c, e),
+    (a, d),       (a, e)
+)
+```
+
 ### Recursive CTE
 
 ### Select for Update
@@ -90,4 +216,5 @@ FROM empsalary;
 ### 引用
 
 [1] https://www.postgresql.org/docs/current/tutorial-window.html
-
+[2] https://www.postgresql.org/docs/11/queries-table-expressions.html#QUERIES-GROUPING-SETS
+[3] http://www.postgresqltutorial.com/postgresql-grouping-sets/
