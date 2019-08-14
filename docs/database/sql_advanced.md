@@ -216,5 +216,7 @@ GROUP BY GROUPING SETS (
 ### 引用
 
 [1] https://www.postgresql.org/docs/current/tutorial-window.html
+
 [2] https://www.postgresql.org/docs/11/queries-table-expressions.html#QUERIES-GROUPING-SETS
+
 [3] http://www.postgresqltutorial.com/postgresql-grouping-sets/
