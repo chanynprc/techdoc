@@ -62,8 +62,8 @@ FROM empsalary;
 例3：当OVER子句中无partition by但有order by时，Agg函数会计算从第1条记录到当前记录（包括当前记录所有相同值）的Agg值
 
 ```sql
-SELECT salary, sum(salary)
-       OVER (ORDER BY salary)
+SELECT salary,
+       sum(salary) OVER (ORDER BY salary)
 FROM empsalary;
 
  salary |  sum  
