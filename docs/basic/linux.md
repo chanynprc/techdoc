@@ -106,11 +106,15 @@ ls -l /dev | grep cdrom
 # 挂载
 mount /dev/cdrom /mnt/
 
-# 安装（可能失败，需安装kernal-devel）
+# 升级内核（如有必要）
+yum update kernel -y
+yum install kernel-headers kernel-devel gcc make -y
+
+# 安装（可能失败，需安装kernel-devel）
 sh VBoxLinuxAdditions.run
 
 # 允许创建软链接（需重启VirtualBox）
-VBoxManage setextradata vm_name VBoxInternal2/SharedFoldersEnableSymlinksCreate/share_name 1
+VBoxManage setextradata <vm_name> VBoxInternal2/SharedFoldersEnableSymlinksCreate/<share_name> 1
 ```
 
 挂载共享文件夹
