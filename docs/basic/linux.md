@@ -146,6 +146,15 @@ passwd username
 userdel username
 ```
 
+### CentOS给普通用户加sudo权限
+
+使用root修改/etc/sudoers文件，在`root    ALL=(ALL)       ALL`后添加：
+
+``` bash
+root    ALL=(ALL)       ALL
+newuser     ALL=(ALL)       ALL
+```
+
 ### 引用
 
 [1] http://www.cnblogs.com/sunleecn/archive/2011/11/01/2232210.html
