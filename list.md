@@ -48,6 +48,8 @@
 
 ### Tag：其他数据库
 
+[ClickHouse概览](/techdoc/docs/database/ck_overview)
+
 [Presto概览](/techdoc/docs/database/presto_overview)
 
 ### Tag：其他
