@@ -2,6 +2,12 @@
 
 ### 基本操作
 
+查看集群情况
+
+```sql
+select * from system.clusters;
+```
+
 建表
 
 ```sql
