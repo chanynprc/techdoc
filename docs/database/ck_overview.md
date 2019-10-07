@@ -5,7 +5,7 @@
 建表
 
 ```sql
-CREATE TABLE t3 (`a` Int32, `b` Int32, `c` Int32, `d` Int32)
+CREATE TABLE t3 (a int, b int, c int, d int)
 ENGINE = MergeTree()
 PARTITION BY b
 ORDER BY b;
