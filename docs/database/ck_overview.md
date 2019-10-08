@@ -5,7 +5,15 @@
 查看集群情况
 
 ```sql
-select * from system.clusters;
+SELECT * FROM system.clusters;
+```
+
+查看partition情况
+
+```sql
+SELECT table, name, partition, active
+FROM system.parts
+WHERE database='default';
 ```
 
 建表
