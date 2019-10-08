@@ -6,7 +6,7 @@
 - 数据文件目录下按照database级别划分目录，每个database一个目录。如有两个database：default和system，则data目录下有两个文件夹default和system
 - database目录下按照table级别划分目录，每个table一个目录。目录名为table名
 - table目录下按照partition级别划分目录，每个partition一个目录。目录名为一个有规律的组合字符串
-- partition目录下按照column级别划分文件，每个column两个文件，分别为`columnname.bin`文件和`columnname.mrk2`文件，此外还包含`checksums.txt`、`columns.txt`、`count.txt`、`minmax_b.idx`、`partition.dat`、`primary.idx`文件
+- partition目录下按照column级别划分文件，每个column两个文件，分别为`columnname.bin`文件和`columnname.mrk2`文件，此外还包含`checksums.txt`、 `columns.txt`、 `count.txt`、 `minmax_b.idx`、 `partition.dat`、 `primary.idx`文件
 
 ### 基本操作
 
