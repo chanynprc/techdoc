@@ -14,6 +14,47 @@
 - 后台会定期做`optimize`操作，将需要合并的partition合并到一起，`optimize`操作也可以手动触发。合并后，原被合并分区会被标记非active
 - 后台会定期清理非active的partition的目录
 
+### 建立ClickHouse集群
+
+这里以在同一台物理机上搭建2个shard为例。步骤如下：
+
+1. 拷贝`/etc/clickhouse-server`目录下的config.xml，命名为config_s2.xml
+2. 修改config_s2.xml文件中的log、errorlog、http_port、tcp_port、interserver_http_port、path、tmp_path、user_files_path、format_schema_path等
+3. 在config.xml文件中的remote_servers节点添加如下配置：
+
+```xml
+        <test_cluster_two_shards_2_localhost>
+            <shard>
+                <replica>
+                    <host>localhost</host>
+                    <port>9000</port>
+                    <password>cyncyn</password>
+                </replica>
+            </shard>
+            <shard>
+                <replica>
+                    <host>localhost</host>
+                    <port>9010</port>
+                    <password>cyncyn</password>
+                </replica>
+            </shard>
+        </test_cluster_two_shards_2_localhost>
+```
+
+4. 启动两个ClickHouse的shard的命令为：
+
+```bash
+sudo -u clickhouse /usr/bin/clickhouse-server --config=/etc/clickhouse-server/config.xml
+sudo -u clickhouse /usr/bin/clickhouse-server --config=/etc/clickhouse-server/config_s2.xml
+```
+
+5. 连接两个shard的命令为：
+
+```bash
+clickhouse-client --password cyncyn --port 9000
+clickhouse-client --password cyncyn --port 9010
+```
+
 ### 基本操作
 
 查看集群情况
@@ -36,8 +77,14 @@ WHERE database='default';
 CREATE TABLE t3 (a int, b int, c int, d int)
 ENGINE = MergeTree()
 PARTITION BY b
-ORDER BY b;
+ORDER BY c;
 
 CREATE TABLE t3_d AS t3
-ENGINE = Distributed(test_cluster_two_shards_localhost, default, t3, a);
+ENGINE = Distributed(test_cluster_two_shards_2_localhost, default, t3, a);
+
+-- 报错，网上说需要zk
+CREATE TABLE IF NOT EXISTS t6_d
+ON CLUSTER test_cluster_two_shards_2_localhost
+(a int, b int, c int, d int)
+ENGINE = Distributed(test_cluster_two_shards_2_localhost, default, t6, a);
 ```
