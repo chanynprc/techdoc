@@ -83,6 +83,12 @@ PostgreSQL借助词法分析工具Lex和语法分析工具Yacc来进行词法解
 
 查询处理是整个数据库中最为深奥复杂的一部分，尤其是作为数据库大脑的优化器部分，此处不作展开，笔者将在其他文章中作重点阐述。
 
+### Foreign Data Wrappers（FDW）
+
+PostgreSQL从9.1版本开始支持SQL Management of External Data (SQL/MED，从SQL 2003成为标准，用于访问远程数据)。在SQL/MED中，远程的数据表成为外表（foreign table），在PostgreSQL中，可以像访问本地表一样访问外表。
+
+
+
 ### 并发控制（Concurrency Control）
 
 并发控制是为处理一致性（consistency）和隔离性（isolation）所设计的机制。有3种主流的并发控制技术：
