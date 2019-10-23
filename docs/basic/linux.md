@@ -27,6 +27,15 @@ find /home/user/downloads -iname filename
 
 `-iname`指定要查找的文件名，但忽略大小写。
 
+### Linux软件包操作
+
+Ubuntu：
+
+```bash
+# 列出已安装的包
+dpkg -l | grep postgres
+```
+
 ### 清除SVN未被版本控制的文件
 
 ``` bash
