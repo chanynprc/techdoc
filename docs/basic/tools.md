@@ -2,6 +2,13 @@
 
 ### Git
 
+同步远程Tag（先删除所有Tag，再进行同步）
+
+```bash
+git tag -l | xargs git tag -d
+git fetch
+```
+
 查看本地分支和追踪情况
 
 ```bash
