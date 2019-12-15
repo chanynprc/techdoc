@@ -13,7 +13,7 @@ GPORCA有4个组件：
 
 ### 入口
 
-在Greenplum中，从优化器的standard_planner函数中，对optimizer参数等进行了判断。如果满足使用ORCA的条件，则调用optimize_query函数，这是ORCA在Greenplum中的主入口。在Greenplum测，调用关系比较简单，调用顺序和关系如下：
+在Greenplum中，从优化器的standard_planner函数中，对optimizer参数等进行了判断。如果满足使用ORCA的条件，则调用optimize_query函数，这是ORCA在Greenplum中的主入口。在Greenplum侧，调用关系比较简单，调用顺序和关系如下：
 
 - optimize_query：在optimize_query函数中，
 	1. 对Query树进行处理（preprocess_query_optimizer），目前只是进行常量折叠
