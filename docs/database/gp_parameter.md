@@ -32,6 +32,15 @@
 **gp_enable_agg_distinct**
 
 - 默认值：true
-- 含义：
+- 含义：[true]对单个agg+distinct开启2阶段聚集，[false]关闭2阶段聚集
 
+**gp_enable_agg_distinct_pruning**
+
+- 默认值：true
+- 含义：[true]对agg+distinct+group by和多agg+distinct使用3阶段聚集或Join，[false]不使用3阶段聚集或Join
+
+**gp_enable_groupext_distinct_pruning**
+
+- 默认值：true
+- 含义：
 
