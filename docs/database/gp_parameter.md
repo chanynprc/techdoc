@@ -44,3 +44,44 @@
 - 默认值：true
 - 含义：
 
+**gp_enable_groupext_distinct_gather**
+
+**gp_eager_agg_distinct_pruning**
+
+**gp_eager_one_phase_agg**
+
+- 默认值：false
+- 含义：[true]忽略代价，而尽量使用1阶段聚集，[false]按照代价进行选择
+
+**gp_eager_two_phase_agg**
+
+- 默认值：false
+- 含义：[true]忽略代价，而尽量使用2阶段聚集，[false]按照代价进行选择
+
+
+**gp_enable_sort_limit**
+
+**gp_enable_sort_distinct**
+
+**gp_enable_mk_sort**
+
+**gp_enable_motion_mk_sort**
+
+**gp_hashagg_streambottom**
+
+**gp_adjust_selectivity_for_outerjoins**
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
