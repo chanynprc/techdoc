@@ -30,8 +30,6 @@
 
 [专题：子查询](/techdoc/docs/database/topic_sub_query)
 
-[GPORCA概览](/techdoc/docs/database/gp_orca_overview)
-
 ### Tag：PostgreSQL
 
 [PostgreSQL概览](/techdoc/docs/database/pg_overview)
@@ -40,11 +38,17 @@
 
 [PostgreSQL的扩展统计信息](/techdoc/docs/database/pg_ext_stat)
 
+[PostgreSQL的FDW](/techdoc/docs/database/pg_fdw)
+
 ### Tag：Greenplum
 
 [Greenplum安装](/techdoc/docs/database/gp_install)
 
 [Greenplum的使用与运维](/techdoc/docs/database/gp_usage_ops)
+
+[Greenplum参数](/techdoc/docs/database/gp_parameter)
+
+[GPORCA概览](/techdoc/docs/database/gp_orca_overview)
 
 ### Tag：其他数据库
 
@@ -91,5 +95,7 @@
 [Linux Basic](/techdoc/docs/basic/linux)
 
 [Mac Basic](/techdoc/docs/basic/mac)
+
+[Tools Basic](/techdoc/docs/basic/tools)
 
 [GDB Basic](/techdoc/docs/basic/gdb)
