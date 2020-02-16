@@ -40,6 +40,8 @@
 
 [PostgreSQL的FDW](/techdoc/docs/database/pg_fdw)
 
+[PostgreSQL的FDW](/techdoc/docs/database/pg_insert_on_conflict)
+
 ### Tag：Greenplum
 
 [Greenplum安装](/techdoc/docs/database/gp_install)
