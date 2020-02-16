@@ -38,9 +38,9 @@
 
 [PostgreSQL的扩展统计信息](/techdoc/docs/database/pg_ext_stat)
 
-[PostgreSQL的FDW](/techdoc/docs/database/pg_fdw)
+[PostgreSQL FDW](/techdoc/docs/database/pg_fdw)
 
-[PostgreSQL的FDW](/techdoc/docs/database/pg_insert_on_conflict)
+[PostgreSQL Insert on Conflict](/techdoc/docs/database/pg_insert_on_conflict)
 
 ### Tag：Greenplum
 
