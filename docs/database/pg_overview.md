@@ -653,10 +653,10 @@ Buffer descriptor的主要结构有：
 
 - tag：即数据页面的buffer_tag
 - buffer_id：即数据页面在Buffer pool的下标buffer_id
-- refcount：记录数据页正在被多少个进程访问，有新进程访问该数据页时需+1，访问结束后-1
+- refcount：也叫pin count，记录数据页正在被多少个进程访问，有新进程访问该数据页时需+1，访问结束后-1
 - usage_count：数据页被换入buffer pool后被引用了的次数，用于数据页换入换出算法
 - context_lock、io_in_progress_lock：用于做访问控制
-- flag：标记数据页的状态。标记数据页是否为脏页、是否是合法的，以及是否正在进行IO读写
+- flag：标记数据页的状态。标记数据页是否为脏页、是否是合法的，以及是否正在进行IO读写，由相应的标记位标记
 - freeNext：freelist的下一个元素
 
 Buffer descriptors有3种状态：
@@ -664,6 +664,20 @@ Buffer descriptors有3种状态：
 - Empty：refcount和usage_count均为0
 - Pinned：refcount和usage_count大于等于1
 - Unpinned：usage_count大于等于1，但refcount为0
+
+在初始状态，Buffer descriptors中的每个元素都是Empty状态，他们被一个freelist串起来。当有一个页面请求到来时，将进行如下步骤：
+
+1. 在Buffer descriptors的freelist中申请一个Empty的descriptor，并pin它
+1. 在Buffer table中插入一个buffer_tag - buffer_id对
+1. 从存储中加载一个Page到Buffer pool
+1. 将这个Page的元信息存入申请的Buffer descriptor
+
+Buffer descriptors中的descriptor不会轻易地被返回到freelist中，在下面情况会被返回freelist：
+
+- 表、索引、数据库被DROP
+- 表、索引被VACUUM FULL
+
+Buffer pool是一个Page数组，元素大小为8KB，和数据Page的大小一致。
 
 ### PostgreSQL的扩展
 
