@@ -679,6 +679,14 @@ Buffer descriptors中的descriptor不会轻易地被返回到freelist中，在�
 
 Buffer pool是一个Page数组，元素大小为8KB，和数据Page的大小一致。
 
+#### 锁
+
+1、Buffer table的锁
+
+BufMappingLock是Buffer table上的一个锁，保证了整个Buffer table的数据一致性。在查找一个页面中的内容时，backend进程持有shared BufMappingLock，在插入/删除一个页面中的内容时，backend进程持有exclusive BufMappingLock。
+
+BufMappingLock被分成多个区域（默认128个区域），来减少在Buffer table上的锁冲突。每个BufMappingLock管理Buffer table中Hash table的一部分bucket。
+
 ### PostgreSQL的扩展
 
 #### Postgres-XL
