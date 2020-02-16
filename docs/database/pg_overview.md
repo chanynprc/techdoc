@@ -614,10 +614,6 @@ Buffer Manager主要对shared memory和持久化存储间的数据传输进行�
 
 ![](/techdoc/docs/database/images/pg_buffer_pool.png)
 
-aa
-
-<img src="/techdoc/docs/database/images/pg_buffer_pool.png" width="500"/>
-
 - **Buffer pool**：用于保存数据文件的Page（包括数据、索引、FM、VM）。Buffer pool是一个数组，每个元素的内容是一个Page，其数组下标被称为buffer_ids
 - **Buffer descriptors**：保存Buffer pool中Page的元数据信息，是一个与Buffer pool一一对应的数组，所以其数组下标也是buffer_ids
 - **Buffer table**：保存了buffer_tags（数据页面标记信息，下面介绍）和buffer_ids的对应关系，主体是一个hash表，能够由buffer_tag得到buffer_id
@@ -650,6 +646,8 @@ aa
 当Backend进程请求的页面不在Buffer pool中，且Buffer pool中的页面已满，则需要用页面替换算法进行页面的替换。8.1版本前，PG使用LRU算法，从8.1版本起，使用clock sweep算法。
 
 #### 数据结构
+
+Buffer table：负责将buffer_tag映射成buffer_id。内部是一个Hash表结构，由hash function、bucket slots、data entries组成。
 
 Buffer descriptor的主要结构有：
 
