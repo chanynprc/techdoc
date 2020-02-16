@@ -647,7 +647,11 @@ Buffer Manager主要对shared memory和持久化存储间的数据传输进行�
 
 #### 数据结构
 
+1、Buffer table
+
 Buffer table：负责将buffer_tag映射成buffer_id。内部是一个Hash表结构，由hash function、bucket slots、data entries组成。
+
+2、Buffer descriptor
 
 Buffer descriptor的主要结构有：
 
@@ -676,6 +680,8 @@ Buffer descriptors中的descriptor不会轻易地被返回到freelist中，在�
 
 - 表、索引、数据库被DROP
 - 表、索引被VACUUM FULL
+
+3、Buffer pool
 
 Buffer pool是一个Page数组，元素大小为8KB，和数据Page的大小一致。
 
