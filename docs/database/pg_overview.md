@@ -687,6 +687,30 @@ BufMappingLock是Buffer table上的一个锁，保证了整个Buffer table的数
 
 BufMappingLock被分成多个区域（默认128个区域），来减少在Buffer table上的锁冲突。每个BufMappingLock管理Buffer table中Hash table的一部分bucket。
 
+2、Buffer descriptor的锁
+
+每个Buffer descriptor使用content_lock和io_in_progress_lock来控制对应Buffer pool slot的访问。当Buffer descriptor中的值被读取或改变时，还需要使用spinlock。
+
+- content_lock用于访问控制，有shared和exclusive两种模式。在读取一个Page时，会在相应的Buffer descriptor上加shared content_lock。在插入/删除/更新/Vacuum/HOT/Freezing的时候，会加exclusive content_lock
+- io_in_progress_lock用于等待buffer上的IO操作。在从存储中加载或写入Page时，会在相应的Buffer descriptor上加exclusive io_in_progress_lock
+- spinlock用于Buffer descriptor自身被读取或修改的时候，一般步骤是加spinlock，修改Buffer descriptor，然后解锁。在PG 9.6版本中，spinlock被改为原子操作
+
+#### Buffer Manager的工作流程
+
+当一个backend进程想要访问一个Page时，需要调用ReadBufferExtended方法。此方法基于下面的几个应用场景。
+
+1、访问一个在Buffer pool中的Page
+
+2、将一个Page从存储中加载到空slot中
+
+3、将一个Page从存储中加载到需替换的slot中
+
+#### Clock Sweep算法
+
+#### Ring Buffer
+
+#### 刷脏页
+
 ### PostgreSQL的扩展
 
 #### Postgres-XL
