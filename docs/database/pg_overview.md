@@ -616,7 +616,7 @@ Buffer Manager主要对shared memory和持久化存储间的数据传输进行�
 
 aa
 
-<img src="/techdoc/docs/database/images/pg_buffer_pool.png" width="400"/>
+<img src="/techdoc/docs/database/images/pg_buffer_pool.png" width="500"/>
 
 - **Buffer pool**：用于保存数据文件的Page（包括数据、索引、FM、VM）。Buffer pool是一个数组，每个元素的内容是一个Page，其数组下标被称为buffer_ids
 - **Buffer descriptors**：保存Buffer pool中Page的元数据信息，是一个与Buffer pool一一对应的数组，所以其数组下标也是buffer_ids
