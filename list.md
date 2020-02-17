@@ -94,6 +94,8 @@
 
 ### Basic
 
+[Perf Basic](/techdoc/docs/basic/perf)
+
 [Linux Basic](/techdoc/docs/basic/linux)
 
 [Mac Basic](/techdoc/docs/basic/mac)
