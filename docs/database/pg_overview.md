@@ -714,9 +714,9 @@ BufMappingLock被分成多个区域（默认128个区域），来减少在Buffer
 其步骤如下：
 
 1. 查找buffer_tag
-    1.1 为目标Page创建一个buffer_tag，并通过Buffer table的hash函数计算出相应的hash bucket slot
-    1.1 在Buffer table的对应区域加shared BufMappingLock
-    1.1 在Buffer table中得到与buffer_tag对应的buffer_id
+   1. 为目标Page创建一个buffer_tag，并通过Buffer table的hash函数计算出相应的hash bucket slot
+   1. 在Buffer table的对应区域加shared BufMappingLock
+   1. 在Buffer table中得到与buffer_tag对应的buffer_id
 1. Pin相应的Buffer descriptor，将Buffer descriptor的refcount和usage_count都加一
 1. 释放Buffer table的对应区域的shared BufMappingLock
 1. 访问Buffer pool中buffer_id对应的slot，如果是读取Page，需在Buffer descriptor上加shared content_lock，如果写/修改Page，需在Buffer descriptor上加exclusive content_lock，并修改Buffer descriptor的脏页标记
@@ -746,7 +746,7 @@ BufMappingLock被分成多个区域（默认128个区域），来减少在Buffer
 1. 释放Buffer table的对应区域的shared BufMappingLock
 1. 利用Clock Sweep算法选择一个待替换的slot，并Pin它的Buffer descriptor
 1. 如果这个Page是脏页，flush这个Page的数据
-
+1. 
 
 #### Clock Sweep算法
 
