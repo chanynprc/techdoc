@@ -699,13 +699,27 @@ BufMappingLock被分成多个区域（默认128个区域），来减少在Buffer
 
 - content_lock用于访问控制，有shared和exclusive两种模式。在读取一个Page时，会在相应的Buffer descriptor上加shared content_lock。在插入/删除/更新/Vacuum/HOT/Freezing的时候，会加exclusive content_lock
 - io_in_progress_lock用于等待buffer上的IO操作。在从存储中加载或写入Page时，会在相应的Buffer descriptor上加exclusive io_in_progress_lock
-- spinlock用于Buffer descriptor自身被读取或修改的时候，一般步骤是加spinlock，修改Buffer descriptor，然后解锁。在PG 9.6版本中，spinlock被改为原子操作
+- spinlock用于Buffer descriptor自身被读取或修改的时候，一般步骤是加spinlock，修改Buffer descriptor（包括refcount、usage_count等），然后解锁。在PG 9.6版本中，spinlock被改为原子操作
 
 #### Buffer Manager的工作流程
 
 当一个backend进程想要访问一个Page时，需要调用ReadBufferExtended方法。此方法基于下面的几个应用场景。
 
+1. 访问一个在Buffer pool中的Page
+1. 将一个Page从存储中加载到空slot中
+1. 将一个Page从存储中加载到需替换的slot中
+
 1、访问一个在Buffer pool中的Page
+
+其步骤如下：
+
+1. 为目标Page创建一个buffer_tag，并通过Buffer table的hash函数计算出相应的hash bucket slot
+1. 在Buffer table的对应区域加shared BufMappingLock
+1. 在Buffer table中得到与buffer_tag对应的buffer_id
+1. Pin相应的Buffer descriptor，将Buffer descriptor的refcount和usage_count都加一
+1. 释放BufMappingLock
+1. 访问Buffer pool中buffer_id对应的slot，如果是读取Page，需在Buffer descriptor上加shared content_lock，如果写/修改Page，需在Buffer descriptor上加exclusive content_lock，并修改Buffer descriptor的脏页标记
+1. 访问结束后，修改Buffer descriptor的refcount，做减一操作
 
 2、将一个Page从存储中加载到空slot中
 
