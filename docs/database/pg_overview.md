@@ -672,7 +672,7 @@ Buffer descriptors有3种状态：
 在初始状态，Buffer descriptors中的每个元素都是Empty状态，他们被一个freelist串起来。当有一个页面请求到来时，将进行如下步骤：
 
 1. 在Buffer descriptors的freelist中申请一个Empty的descriptor，并pin它
-1. 在Buffer table中插入一个buffer_tag - buffer_id对
+1. 在Buffer table中插入一个<buffer_tag, buffer_id>对
 1. 从存储中加载一个Page到Buffer pool
 1. 将这个Page的元信息存入申请的Buffer descriptor
 
@@ -706,7 +706,7 @@ BufMappingLock被分成多个区域（默认128个区域），来减少在Buffer
 当一个backend进程想要访问一个Page时，需要调用ReadBufferExtended方法。此方法基于下面的几个应用场景。
 
 1. 访问一个在Buffer pool中的Page
-1. 将一个Page从存储中加载到空slot中
+1. 访问一个在Buffer pool中的没有的Page，并将该Page从存储中加载到空slot中
 1. 将一个Page从存储中加载到需替换的slot中
 
 1、访问一个在Buffer pool中的Page
@@ -717,11 +717,25 @@ BufMappingLock被分成多个区域（默认128个区域），来减少在Buffer
 1. 在Buffer table的对应区域加shared BufMappingLock
 1. 在Buffer table中得到与buffer_tag对应的buffer_id
 1. Pin相应的Buffer descriptor，将Buffer descriptor的refcount和usage_count都加一
-1. 释放BufMappingLock
+1. 释放Buffer table的对应区域的shared BufMappingLock
 1. 访问Buffer pool中buffer_id对应的slot，如果是读取Page，需在Buffer descriptor上加shared content_lock，如果写/修改Page，需在Buffer descriptor上加exclusive content_lock，并修改Buffer descriptor的脏页标记
 1. 访问结束后，修改Buffer descriptor的refcount，做减一操作
 
-2、将一个Page从存储中加载到空slot中
+2、访问一个在Buffer pool中的没有的Page，并将该Page从存储中加载到空slot中
+
+1. 为目标Page创建一个buffer_tag，并通过Buffer table的hash函数计算出相应的hash bucket slot
+1. 在Buffer table的对应区域加shared BufMappingLock
+1. 在Buffer table中查找与buffer_tag对应的buffer_id，但没找到
+1. 释放Buffer table的对应区域的shared BufMappingLock
+1. 从freelist中获取一个空的Buffer descriptor，并Pin它
+1. 在Buffer table的对应区域加exclusive BufMappingLock 
+1. 创建一个<buffer_tag, buffer_id>对，并插入Buffer table
+1. 在相应Buffer descriptor上加exclusive io_in_progress_lock锁
+1. 设置Buffer descriptor的io_in_progress标记为1
+1. 将存储中的Page加载到Buffer pool中对应的slot
+1. 修改Buffer descriptor，将io_in_progress标记置0，valid标记置1（是不是还要修改refcount和usage_count？）
+1. 释放Buffer table的对应区域的exclusive BufMappingLock
+1. 访问数据
 
 3、将一个Page从存储中加载到需替换的slot中
 
