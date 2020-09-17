@@ -5,7 +5,7 @@
 - Query：优化器的输入，关系代数表达式树
 - Plan：优化器的输出，执行计划
 
-### 关键函数
+### PostgreSQL Planner关键函数
 
 - planner：优化器的入口函数。在此函数中选择使用用户自定义优化器或自带优化器
 - standard_planner：自带优化器的入口函数。在此函数中判断是否使用ORCA，若不使用，继续走PostgreSQL Planner流程
@@ -22,4 +22,49 @@
 - sort_inner_and_outer、match_unsorted_outer、hash_inner_and_outer：根据Join的不同形式，对分支进行处理，然后尝试各种Join实现
 - try_nestloop_path、try_mergejoin_path、try_hashjoin_path：生成各种Join的路径
 - create_plan：根据生成的路径转换成计划
+
+### GPORCA关键类
+
+CTask
+
+COptimizer
+
+CEngine
+
+CScheduler
+
+CJob
+ -> CJobGroup
+     -> CJobGroupExploration
+     -> CJobGroupImplementation
+     -> CJobGroupOptimization
+ -> CJobGroupExpression
+     -> CJobGroupExpressionExploration
+     -> CJobGroupExpressionImplementation
+     -> CJobGroupExpressionOptimization
+ -> CJobTransformation
+
+CXform
+ -> CXformExploration
+ -> CXformImplementation
+
+CGroup
+
+CGroupExpression
+
+COperator
+ -> CLogical
+ -> CPhysical
+ -> CScalar
+
+CCostModelGPDB
+
+### GPDB调用GPORCA的过程
+
+- standard_planner
+- optimize_query (orca.c)
+- GPOPTOptimizedPlan (CGPOptimizer.cpp)
+- CGPOptimizer::GPOPTOptimizedPlan (CGPOptimizer.cpp)
+- COptTasks::GPOPTOptimizedPlan (COptTasks.cpp)
+- COptTasks::Execute (COptTasks.cpp)
 
