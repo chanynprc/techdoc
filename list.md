@@ -28,6 +28,8 @@
 
 [优化器：查询重写](/techdoc/docs/database/optimizer_rewrite)
 
+[优化器：Greenplum优化器代码走读](/techdoc/docs/database/gp_optimizer_code)
+
 [专题：子查询](/techdoc/docs/database/topic_sub_query)
 
 ### Tag：PostgreSQL
