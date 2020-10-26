@@ -754,6 +754,124 @@ BufMappingLock被分成多个区域（默认128个区域），来减少在Buffer
 
 #### 刷脏页
 
+
+### WAL (Write Ahead Log)
+
+#### 事务日志WAL
+
+- 概念：数据库系统中所有变更和行为的历史记录
+- 目的：在系统出现故障时，通过重放事务日志中的变更与行为恢复数据库，确保数据不会丢失
+- 历史：在PG 7.1中首次实现
+
+#### 没有WAL情况下的故障
+
+如果没有事务日志，那么会有如下故障场景：
+
+1. 数据页被从磁盘加载到shared buffer中
+2. 向数据页中插入数据，此时数据被写入到shared buffer中，形成脏页
+3. 系统出现故障，此时脏页没有刷盘，数据丢失
+
+#### 有WAL情况下的故障与恢复
+
+为了应对系统故障，PG将WAL数据（或称为Xlog）写入持久化存储中。在IUD等变更发生时，PG会将Xlog写入WAL buffer，当事务提交时，会立即被写入到持久化的WAL segment文件中。Xlog的日志序列号（LSN，Log Sequence Number）标记了该记录在事务日志中的位置，被作为唯一标识符。
+
+另一个重要概念是检查点（checkpoint），在系统做checkpoint时，会将脏页刷盘，进行持久化。同时，checkpoint也会产生一个redo point，作为故障恢复点。
+
+假设如下故障过程：
+
+1. 进行checkpoint，产生redo point，并写入WAL
+2. 数据页被从磁盘加载到shared buffer中（假设LSN_0）
+3. 向数据页中插入数据，创建一条LSN_1的Xlog，写入WAL buffer
+4. 事务提交，创建一条事务提交的Xlog，写入WAL buffer，并将WAL buffer中的所有Xlog写入WAL segment文件
+5. 系统发生故障
+
+在系统恢复时：
+
+1. 重启PG，会自动进入recovery mode，PG会从redo point开始按顺序读取WAL segment文件，并重放其中的Xlog
+2. PG读取WAL segment文件中的一条Xlog，从磁盘中加载相应页面到shared buffe中
+3. 比较页面的LSN和Xlog的LSN，如果页面LSN小于Xlog的LSN，则重放该Xlog
+4. 继续回放WAL segment文件中的其他Xlog
+
+#### 刷脏页过程中的故障恢复手段（整页写入）
+
+在将脏页写回磁盘的过程中，如果系统出现了故障，会导致脏页页面数据的损坏。
+
+为了解决这个问题，PostgreSQL引入了整页写入（Full Page Writes）功能。
+
+- 在每个检查点（checkpoint）后，页面第一次发生更改时，会将整个页面及其首部元信息字段作为一条XLOG写入，这个XLOG记录被称为备份区块（backup block 或 full-page image）。
+- 在需要进行恢复时，如果识别出一个XLOG记录是备份区块时，XLOG记录的数据部分会直接覆盖掉被加载进shared buffer的页面，且无视之前页面的LSN，然后更新该页面的LSN为XLOG的LSN。
+
+#### WAL segment文件
+
+WAL segment文件的地址长度为8个字节（16位十六进制），可以表示16EB的数据。如果用1个文件表示，那文件就太大了，所以，PostgreSQL对WAL segment进行了划分。
+
+PostgreSQL的WAL segment被划分为16MB的大小的文件。在PG 11及以后的版本中，在initdb时可以使用--wal-segsize参数指定WAL segment文件的大小。
+
+WAL segment文件的文件名是一个24位十六进制数字（12字节），其中timeline占8位（4字节），LSN部分占16位（8字节）。文件名的组成形式是：
+
+| 高8位（十六进制） | 中8位（十六进制） | 低8位（十六进制） |
+| -------- | -------- | -------- |
+| timeline | $$ \frac{LSN - 1}{16M} / 256  $$ | $$ \frac{LSN - 1}{16M} % 256 $$ |
+
+所以WAL segment文件的文件名规律为（无空格，空格只是为了便于阅读）：
+
+```
+# 第1个文件
+00000001 00000000 00000001
+# 第2个文件
+00000001 00000000 00000002
+...
+# 第256个文件
+00000001 00000000 000000FF
+# 第256个文件
+00000001 00000001 00000000
+```
+
+可以看出：
+
+- WAL segment文件的文件名可以看成由3段组成，timeline 1段，LSN 2段
+- LSN的前一段，8位十六进制都被利用
+- LSN的后一段，只有低2位十六进制被利用
+- LSN的后一段低2位满FF以后，将直接进位至LSN的前一段
+- LSN的后一段未被利用的6位补0，对应于1个WAL segment 16MB的寻址空间
+
+#### Greenplum WAL segment文件
+
+PostgreSQL的WAL segment被划分为64MB的大小的文件。
+
+WAL segment文件的文件名是一个24位十六进制数字（12字节），其中timeline占8位（4字节），LSN部分占16位（8字节）。文件名的组成形式是：
+
+| 高8位（十六进制） | 中8位（十六进制） | 低8位（十六进制） |
+| -------- | -------- | -------- |
+| timeline | $$ \frac{LSN - 1}{64M} / 64  $$ | $$ \frac{LSN - 1}{64M} % 64 $$ |
+
+那么，可以看出，在Greenplum中，LSN的后一段将与PostgreSQL有所区别，不在是从00 \~ FF了，而是从00 \~ 3F，有效二进制位为6位。
+
+#### LSN与WAL segment文件名之间的转换
+
+可以使用pg_xlogfile_name（9.6及更低版本）或pg_walfile_name（10.0及更高版本）查找到包含特定LSN的WAL segment文件。
+
+LSN是一个16位十六进制（64位二进制）数，大体上与WAL segment文件名之间有如下对应关系：
+
+【图】
+
+#### WAL segment文件内部结构
+
+在WAL segment文件内部，被划分成一系列8KB大小的页面，共2048个页面。第一个页面的头部是XLogLongPageHeaderData结构，后续页面的头部是XLogPageHeaderData结构。在页面中，顺序写入了XLOG Record信息。图示如下：
+
+【图】
+
+#### XLOG Record内部结构（暂略）
+
+#### WAL Record的写入
+
+
+
+#### 检查点checkpoint
+
+- 历史：在PG 7.1中首次实现
+
+
 ### PostgreSQL的扩展
 
 #### Postgres-XL
