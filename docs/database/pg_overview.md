@@ -853,7 +853,7 @@ WAL segment文件的文件名是一个24位十六进制数字（12字节），�
 
 LSN是一个16位十六进制（64位二进制）数，大体上与WAL segment文件名之间有如下对应关系：
 
-【图】
+![](/techdoc/docs/database/images/lsn_wal_filename.png)
 
 #### WAL segment文件内部结构
 
