@@ -168,6 +168,14 @@ root    ALL=(ALL)       ALL
 newuser     ALL=(ALL)       ALL
 ```
 
+### 查看文件的编码格式
+
+在vim中可以查看文件的编码格式：
+
+```
+:set fileencoding
+```
+
 ### 引用
 
 [1] http://www.cnblogs.com/sunleecn/archive/2011/11/01/2232210.html
