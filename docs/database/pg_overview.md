@@ -865,12 +865,93 @@ LSN是一个16位十六进制（64位二进制）数，大体上与WAL segment�
 
 #### WAL Record的写入
 
+下面以一条INSERT语句的执行过程来说明WAL Record的写入。
 
+1. ExtendCLOG：向CLOG中写入当前事务的状态（IN_PROGRESS）
+2. heap_insert：向shared buffer pool中的目标页插入tuple，并且创建xlog记录，并调用XLogInsert函数
+    1. XLogInsert：向WAL buffer中的LSN_1位置写入xlog记录，更新shared buffer pool中的目标页的pd_lsn字段为LSN_1
+4. finish_xact_command：发起commit操作，创建commit的xlog记录，并调用XLogInsert函数
+    1. XLogInsert：向WAL buffer中的LSN_2位置写入XLOG记录
+    2. XLogWrite：将WAL buffer中的所有XLOG写入（flush）到WAL segment文件中
+6. TransactionIdCommitTree：将CLOG中当前事务的状态从IN_PROGRESS改为COMMITTED
 
-#### 检查点checkpoint
+以下的一些操作会触发XLOG写入WAL segment文件：
+
+- 事务的提交和回滚
+- WAL buffer被写满（WAL buffer大小可以使用wal_buffers进行配置）
+- WAL writer进程的周期性写入
+
+不光DML语句会写XLOG，一些非DML的语句，比如commit、checkpoint语句也会写XLOG，甚至一些select语句，比如HOT场景，也会写XLOG。
+
+#### WAL writer进程
+
+WAL writer进程会定期将WAL buffer中的XLOG写入WAL segment文件，它的目的是防止大量数据提交带来的写入WAL segment文件的瓶颈。这个进程触发的时间周期由wal_writer_delay控制，默认200毫秒。
+
+#### checkpoint检查点进程
 
 - 历史：在PG 7.1中首次实现
+- 功能：checkpoint有2个功能，（1）为数据库恢复做准备，（2）清理shared buffer pool里面的脏页
 
+checkpoint的处理逻辑如下：
+
+1. 在内存中记录一个REDO point，这个REDO point是当前写XLOG的点，也是数据库恢复的起始点
+2. 在WAL buffer中记录一个checkpoint的XLOG，这个XLOG record中记录了第1步的REDO point信息
+3. shared memory中的所有信息（包括CLOG等）被刷盘
+4. shared buffer pool中的脏页被刷盘
+5. 更新pg_control文件，包含checkpoint的位置等基础信息
+
+checkpoint进程在以下情况下会自动触发后台的checkpoint：
+
+- checkpoint时间间隔到了（可通过checkpoint_timeout设置，默认5分钟）
+- 生成了一定数量的WAL segment文件后（9.4及之前版本，可通过checkpoint_segments设置，默认3个文件）
+- pg_xlog/pg_wal目录下的文件总和超过了一定大小后（9.5及之后版本，可通过max_wal_size设置，默认1GB，即64个文件）
+- 在smart或fast模式下停止实例
+
+此外，当superuser发起checkpoint命令的时候，也会触发进行checkpoint。
+
+#### pg_control文件
+
+pg_control文件中记录了checkpoint位置等信息，用于数据库的恢复。
+
+pg_control文件的位置为数据目录的global/pg_control，是一个二进制文件，可以通过以下命令查看pg_control文件的内容：
+
+```bash
+pg_controldata /path/to/pg/data/folder
+```
+
+其中记录了40多项内容，其中主要的几项内容是：
+
+- Database cluster state：最近一次checkpoint时，系统的状态，包含7种，start up表示系统正在启动，shut down表示系统被正常关闭，in production表示系统在正常运行
+- Latest checkpoint location：最近一次checkpoint的LSN点
+- Prior checkpoint location：前一次checkpoint的LSN点（PG 11版本后被去除）
+
+#### 数据库恢复
+
+在PG启动的时候，会读取pg_control文件，具体的恢复流程如下：
+
+1. 启动时，读取pg_control文件，如果state是shut down，将走正常启动流程，如果state是in production，则表明系统非正常关闭，将走恢复流程
+2. 在恢复流程中，根据pg_control文件，从WAL segment文件中读取最近一次checkpoint的XLOG，然后获取其中记录的REDO point。如果最近一次的checkpoint有效，则使用该checkpoint内容，如果无效，则使用前一次checkpoint的内容，如果两次checkpoint都无效，则系统会放弃恢复，但是注意，PG 11以后，只记录最近一次checkpoint了
+3. 从REDO point开始回放XLOG，直至最近的WAL segment文件。当回放的XLOG包含backup block时，数据页将直接被覆盖，当回放的XLOG包含非backup block时，将对比XLOG的LSN以及数据页的pd_lsn，如果XLOG的LSN大于数据页的pd_lsn，该XLOG将被回放
+
+#### WAL segment文件的管理
+
+WAL segment文件的管理，在PG 9.4之前，PG 9.5~PG  10，以及PG 11以后均有不同。从9.5开始，管理逻辑优化了很多，PG 9.5~PG  10和PG 11之后版本的总体逻辑类似。
+
+以下几种情况会出现WAL segment文件的switch
+
+- WAL segment文件被写满时
+- 函数pg_switch_xlog/pg_switch_wal被调用时
+- WAL日志归档被打开，并且归档时间到时
+
+在WAL segment文件被switch时，旧文件将被重命名。从实验中看来，pg_xlog/pg_wal目录中最后一个WAL segment文件并不是当前需要写入的文件，而是预留了几个空文件。
+
+WAL segment文件生命周期管理的相关内容，暂略。
+
+#### 日志归档
+
+当WAL segment文件发生switch时，这个文件就会被归档。这个特性主要用于hot physical backup and PITR (Point-in-Time Recovery)。
+
+具体的归档命令使用了archive\_command进行定义，可以是cp、scp命令，也可以是其他命令。此外，PG不会再管理归档后的日志，需要用户自己解决，也可以使用pg_archivecleanup工具来辅助处理。
 
 ### PostgreSQL的扩展
 
