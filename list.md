@@ -10,9 +10,11 @@
 
 [专题：优化器 之 查询重写](/techdoc/docs/database/optimizer_rewrite)
 
-[专题：子查询](/techdoc/docs/database/topic_sub_query)
+[专题：优化器 之 统计信息](/techdoc/docs/database/optimizer_statistics)
 
-[专题：Outer Join](/techdoc/docs/database/topic_outer_join)
+[专题：SQL 之 子查询](/techdoc/docs/database/topic_sub_query)
+
+[专题：SQL 之 Outer Join](/techdoc/docs/database/topic_outer_join)
 
 [专题：高可用](/techdoc/docs/database/topic_ha)
 
