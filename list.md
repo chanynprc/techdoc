@@ -1,23 +1,5 @@
 ## 文章列表
 
-### Tag：机器学习
-
-[Naive Bayes分类器](/techdoc/docs/ml/naive_bayes)
-
-[XGBoost使用入门](/techdoc/docs/ml/xgboost)
-
-----------
-
-### Tag：算法
-
-[Bloom Filter](/techdoc/docs/algo/bloom_filter)
-
-[Questions in Interview](/techdoc/docs/algo/interview)
-
-[Questions of LeetCode](/techdoc/docs/algo/leetcode)
-
-----------
-
 ### Tag：数据库技术专题
 
 [优化器：查询优化框架](/techdoc/docs/database/optimizer_framework)
@@ -28,21 +10,23 @@
 
 [优化器：查询重写](/techdoc/docs/database/optimizer_rewrite)
 
-[优化器：Greenplum优化器代码走读](/techdoc/docs/database/gp_optimizer_code)
-
 [专题：子查询](/techdoc/docs/database/topic_sub_query)
+
+[专题：Outer Join](/techdoc/docs/database/topic_outer_join)
+
+[专题：高可用](/techdoc/docs/database/topic_ha)
 
 ### Tag：PostgreSQL
 
 [PostgreSQL概览](/techdoc/docs/database/pg_overview)
-
-[Postgres-XL优化器代码架构](/techdoc/docs/database/pg_optimizer)
 
 [PostgreSQL的扩展统计信息](/techdoc/docs/database/pg_ext_stat)
 
 [PostgreSQL FDW](/techdoc/docs/database/pg_fdw)
 
 [PostgreSQL Insert on Conflict](/techdoc/docs/database/pg_insert_on_conflict)
+
+[PostgreSQL的高可用](/techdoc/docs/database/pg_ha)
 
 ### Tag：Greenplum
 
@@ -53,6 +37,14 @@
 [Greenplum参数](/techdoc/docs/database/gp_parameter)
 
 [GPORCA概览](/techdoc/docs/database/gp_orca_overview)
+
+[Greenplum的2PC](/techdoc/docs/database/gp_2p)
+
+### Tag：代码走读
+
+[Greenplum优化器代码走读](/techdoc/docs/database/gp_optimizer_code)
+
+[Postgres-XL优化器代码走读](/techdoc/docs/database/pg_optimizer)
 
 ### Tag：其他数据库
 
@@ -91,6 +83,24 @@
 [查询执行](/techdoc/docs/database/dsi_query_execution)
 
 [查询编译器](/techdoc/docs/database/dsi_query_compiler)
+
+----------
+
+### Tag：机器学习
+
+[Naive Bayes分类器](/techdoc/docs/ml/naive_bayes)
+
+[XGBoost使用入门](/techdoc/docs/ml/xgboost)
+
+----------
+
+### Tag：算法
+
+[Bloom Filter](/techdoc/docs/algo/bloom_filter)
+
+[Questions in Interview](/techdoc/docs/algo/interview)
+
+[Questions of LeetCode](/techdoc/docs/algo/leetcode)
 
 ----------
 
