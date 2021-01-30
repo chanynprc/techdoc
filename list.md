@@ -2,13 +2,13 @@
 
 ### Tag：数据库技术专题
 
-[优化器：查询优化框架](/techdoc/docs/database/optimizer_framework)
+[专题：优化器 之 查询优化框架](/techdoc/docs/database/optimizer_framework)
 
-[优化器：行数估算](/techdoc/docs/database/optimizer_cardinality_estimation)
+[专题：优化器 之 行数估算](/techdoc/docs/database/optimizer_cardinality_estimation)
 
-[优化器：代价模型](/techdoc/docs/database/optimizer_cost_model)
+[专题：优化器 之 代价模型](/techdoc/docs/database/optimizer_cost_model)
 
-[优化器：查询重写](/techdoc/docs/database/optimizer_rewrite)
+[专题：优化器 之 查询重写](/techdoc/docs/database/optimizer_rewrite)
 
 [专题：子查询](/techdoc/docs/database/topic_sub_query)
 
