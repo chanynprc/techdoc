@@ -402,11 +402,27 @@ select a from t;
 select NULL where false;
 ```
 
-### 提升子查询
+### 消除NestLoop
 
+#### in list
 
+当条件中包含形如“a in (1, 2, 3, ..., N)”，且值列表很多时，查询执行一般是取a的一个数值，然后去扫描值列表中的值，找到即返回，整个执行过程类似于一个NestLoop。可以将值列表中的数值转成一个表，再与主表进行Join，这样在执行中，可以使用Hash Join，执行效率会提升。例如：
 
-### 提升子链接：IN
+```sql
+[in] select * from t where a in (1,2,3);
+```
+
+可转换为：
+
+```sql
+[out] select * from t where a in (values (1),(2),(3));
+```
+
+在查询优化过程中，上述in list先被转换成相关子查询，然后再进行子查询提升，与主表进行了Join。
+
+### 子查询相关
+
+#### 提升子链接：IN
 
 ```sql
 select t1.a 
@@ -430,9 +446,9 @@ from t1, t2
 where t1.b = t2.c and t2.d = 1;
 ```
 
-### 提升子链接：NOT IN
+#### 提升子链接：NOT IN
 
-### 提升子链接：EXISTS
+#### 提升子链接：EXISTS
 
 ### 引用
 
