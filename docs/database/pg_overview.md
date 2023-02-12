@@ -21,7 +21,7 @@ PostgreSQL是一个被广泛应用的开源数据库系统，由它也构筑了M
 #### Table Space
 Table Space被用于在```PGDATA```目录外存放数据文件。建立一个Table Space后，PostgreSQL将在```PGDATA/pg_tblspc```目录下建立一个以此Table Space的Oid命名的链接，指向用户指定的Table Space的目录。在用户指定的Table Space的目录下，会先建立一个与PostgreSQL版本号相关的文件夹，形如“PG_11_201809051”，此版本号文件夹类似于内部文件目录```base```，在版本号文件夹下是表示Database的文件夹。如果对象被建立在一个已有的Database中，那么版本号文件夹下会出现一个同名（Database的OID）的文件夹，如果对象被建立在一个新的Database中，则会使用新的Database的OID作为文件夹名字。
 
-> 使用pg_relation_filepath函数可以查看一个表的路径，对于一个在用户自定义Table Space中的表，它的路径会显示为形如“pg_tblspc/16390/PG_11_201809051/13287/16391”。
+> 使用pg_relation_filepath函数可以查看一个表的路径，对于一个在用户自定义Table Space中的表，它的路径会显示为形如“pg_tblspc/16390/PG_11_201809051/13287/16391”，其中16390是Table Space的Oid，13287是Database的Oid，16391是表的Oid。
 
 #### 对象文件
 
