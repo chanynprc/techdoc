@@ -46,7 +46,9 @@ Table Space被用于在```PGDATA```目录外存放数据文件。建立一个Tab
 
 Tuple Identifier（TID）被用于标记每一个Tuple，由两个数字组成，Block Number（Page在数据文件中的偏移）和Offset Number（Tuple在Page中的偏移）。在索引的叶节点中，存放着目标数值（Key）和它的TID，通过这个TID可以直接定位到目标数据的Tuple。
 
-当一个Tuple的大小超过2K时，PostgreSQL采用TOAST（The Oversized-Attribute Storage Technique）技术进行存储。
+当一个tuple的大小超过2K时，PostgreSQL采用TOAST（The Oversized-Attribute Storage Technique）技术进行存储。
+
+> 当一个tuple的大小超过```TOAST_TUPLE_THRESHOLD```时，将会采用压缩和TOAST表方式存储。在代码逻辑中，允许一个页面存储4个TOAST tuple（```TOAST_TUPLES_PER_PAGE```），通过计算，在PG中，tuple超过2K时会采用TOAST方式存储，在GP中，由于页面大小为32K，tuple超过8K时会采用TOAST方式存储（有待验证）。
 
 ### 进程结构
 
