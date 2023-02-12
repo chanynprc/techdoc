@@ -412,7 +412,7 @@ select NULL where false;
 [in] select * from t where a in (1,2,3);
 ```
 
-可转换为：
+可被重写为：
 
 ```sql
 [out] select * from t where a in (values (1),(2),(3));
