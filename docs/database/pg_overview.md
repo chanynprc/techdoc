@@ -31,6 +31,19 @@ Table Space被用于在```PGDATA```目录外存放数据文件。建立一个Tab
 
 ![](/techdoc/docs/database/images/pg_heap_table_file.png)
 
+- heap tuple：是tuple的实际数据，从页面的最后向前开始摆放
+- line pointer：形成一个数组，每个line pointer为4字节，指向一个tuple，它的值从1开始递增
+- header data：通过数据结构PageHeaderData定义，共24字节，包含如下信息：
+  - pd_lsn：最近一次修改此页面的LSN，一个功能是确保写xlog在刷脏页之前
+  - pd_checksum：页面的checksum
+  - pd_flags：标志位
+  - pd_lower：指向line pointers的结尾，即free space的开头（低地址侧）
+  - pd_upper：指向heap tuples的开头，即free space的结尾（高地址侧）
+  - pd_special：与索引相关
+  - pd_pagesize_version：包含了page size和page version
+  - pd_prune_xid：指代prune是否可用的标记
+- enpty space：line pointers和heap tuples之间的空洞
+
 Tuple Identifier（TID）被用于标记每一个Tuple，由两个数字组成，Block Number（Page在数据文件中的偏移）和Offset Number（Tuple在Page中的偏移）。在索引的叶节点中，存放着目标数值（Key）和它的TID，通过这个TID可以直接定位到目标数据的Tuple。
 
 当一个Tuple的大小超过2K时，PostgreSQL采用TOAST（The Oversized-Attribute Storage Technique）技术进行存储。
