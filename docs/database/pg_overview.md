@@ -42,9 +42,9 @@ Table Space被用于在```PGDATA```目录外存放数据文件。建立一个Tab
   - pd_special：与索引相关
   - pd_pagesize_version：包含了page size和page version
   - pd_prune_xid：指代prune是否可用的标记
-- enpty space：line pointers和heap tuples之间的空洞
+- empty space：line pointers和heap tuples之间的空洞
 
-Tuple Identifier（TID）被用于标记每一个Tuple，由两个数字组成，Block Number（Page在数据文件中的偏移）和Offset Number（Tuple在Page中的偏移）。在索引的叶节点中，存放着目标数值（Key）和它的TID，通过这个TID可以直接定位到目标数据的Tuple。
+在写一个Heap Tuple时，会在页面的heap tuples区域后写入tuple数据，并添加一个line pointer指向这个新tuple，同时会调整pd_lower和pd_upper的指向的位置，header中的其他属性也被设置为响应的值。在读数据时，Seq Scan会顺序扫描页面，在页面内部顺序扫描line pointers，并访问line pointer指向的内容。在索引的叶节点中，存放着目标数值（Key）和它的Tuple Identifier（TID），TID被用于标记每一个Tuple，由两个数字组成，Block Number（Page在数据文件中的偏移）和Offset Number（Tuple在Page中的偏移），通过这个TID可以直接定位到目标数据的Tuple。当使用索引读取数据时，index scan会从索引数据文件中拿到要查找数值对应的Tuple Identifier（TID），从而进一步定位到具体的数据页和页面中的line pointer，从而进一步读取到数据。
 
 当一个tuple的大小超过2K时，PostgreSQL采用TOAST（The Oversized-Attribute Storage Technique）技术进行存储。
 
