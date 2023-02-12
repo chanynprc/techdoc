@@ -19,11 +19,11 @@ PostgreSQL是一个被广泛应用的开源数据库系统，由它也构筑了M
 > 在编译PostgreSQL代码时，可以通过指定--with-segsize来设置数据文件大小，默认1GB。在程序内部，并不会直接通过文件大小来管理，而是将文件大小转换成每个数据文件的页面数来进行管理。在PG中页面大小默认8K，那么默认每个数据文件有131072个页面（1 * 1024 * 1024 / 8），在GP中页面大小默认32K，那么默认每个数据文件有32768个页面（1 * 1024 * 1024 / 32）。
 
 #### TableSpace
-TableSpace被用于在```PGDATA```目录外存放数据文件。建立一个TableSpace后，PostgreSQL将在```PGDATA/pg_tblspc```目录下建立一个链接，指向TableSpace的目录。在TableSpace的目录下，会先建立一个与PostgreSQL版本号相关的文件夹，此版本号文件夹类似于内部文件目录```base```，在版本号文件夹下是表示Database的文件夹。如果对象被建立在一个已有的Database中，那么版本号文件夹下会出现一个同名（Database的OID）的文件夹，如果对象被建立在一个新的Database中，则会使用新的Database的OID作为文件夹名字。
+TableSpace被用于在```PGDATA```目录外存放数据文件。建立一个TableSpace后，PostgreSQL将在```PGDATA/pg_tblspc```目录下建立一个链接，指向用户指定的TableSpace的目录。在用户指定的TableSpace的目录下，会先建立一个与PostgreSQL版本号相关的文件夹，形如“PG_11_201809051”，此版本号文件夹类似于内部文件目录```base```，在版本号文件夹下是表示Database的文件夹。如果对象被建立在一个已有的Database中，那么版本号文件夹下会出现一个同名（Database的OID）的文件夹，如果对象被建立在一个新的Database中，则会使用新的Database的OID作为文件夹名字。
 
 #### 对象文件
 
-对象文件内部由Page/Block组成，它们的大小是固定的（PG默认8K，GP默认32K，在代码编译时通过configure的参数--with-blocksize来设定）。对象文件和Page的组织形式如图所示：
+对象文件内部由Page/Block组成，它们的大小是固定的，PG默认8K，GP默认32K，在代码编译时通过configure的参数--with-blocksize来设定。对象文件和Page的组织形式如图所示：
 
 ![](/techdoc/docs/database/images/pg_heap_table_file.png)
 
