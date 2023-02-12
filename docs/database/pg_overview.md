@@ -14,16 +14,16 @@ PostgreSQL是一个被广泛应用的开源数据库系统，由它也构筑了M
 
 物理结构是指数据库中Database和对象的存储方式。在初始化数据库后，在```PGDATA```目录下有一个目录```base```文件夹被用来存储数据文件。在这个```base```文件夹中有多个表示Database的文件夹，每个Database一个文件夹，文件夹的名字是Database的OID。每个Database中的对象的文件都存放于其属于的Database的文件夹中。
 
-与Database不同，Database中的对象并不直接使用OID作为它们的文件名，而是使用一个```relfilenode```来作为对象的文件名。一般情况下，```relfilenode```与对象的OID相同，但是在一些特殊的操作后（如TRUNCATE、REINDEX、CLUSTER），```relfilenode```可能会发生改变，从而不等于对象的OID。每个对象文件的大小也有规定，可以在代码编译时通过configure的参数```--with-segsize```设定，默认值为1GB，对象文件大小超过一定阈值后，一个新的文件将产生，名字为```relfilenode.1```，如果再超过阈值，第3个名为```relfilenode.2```新文件将产生。除此之外，还有表示Free Space Map的```relfilenode_fsm```文件和表示Visibility Map的```relfilenode_vm```文件。所以，一个对象可能有多个文件与之对应。
+与Database不同，Database中的对象并不直接使用OID作为它们的文件名，而是使用一个```relfilenode```来作为对象的文件名。一般情况下，```relfilenode```与对象的OID相同，但是在一些特殊的操作后（如TRUNCATE、REINDEX、CLUSTER），```relfilenode```可能会发生改变，从而不等于对象的OID。每个对象文件的大小也有规定，可以在代码编译时通过configure的参数```--with-segsize```设定，默认值为1GB，可通过GUC参数```segment_size```查看。对象文件大小超过一定阈值后，一个新的文件将产生，名字为```relfilenode.1```，如果再超过阈值，第3个名为```relfilenode.2```新文件将产生。除此之外，还有表示Free Space Map的```relfilenode_fsm```文件和表示Visibility Map的```relfilenode_vm```文件。所以，一个对象可能有多个文件与之对应。
 
-> 在编译PostgreSQL代码时，可以通过指定```--with-segsize```来设置数据文件大小，默认1GB。在程序内部，并不会直接通过文件大小来管理，而是将文件大小转换成每个数据文件的页面数来进行管理。在PG中页面大小默认8K，那么默认每个数据文件有131072个页面（1 * 1024 * 1024 / 8），在GP中页面大小默认32K，那么默认每个数据文件有32768个页面（1 * 1024 * 1024 / 32）。
+> 在编译PostgreSQL代码时，可以通过指定```--with-segsize```来设置数据文件大小，默认1GB。在程序内部，并不会直接通过文件大小来管理，而是将文件大小转换成每个数据文件的页面数来进行管理，这个值在编译时被固化为宏定义```RELSEG_SIZE```，并可通过GUC参数```segment_size```查看（单位为block数）。在PG中页面大小默认8K，那么默认每个数据文件有131072个页面（1 * 1024 * 1024 / 8），在GP中页面大小默认32K，那么默认每个数据文件有32768个页面（1 * 1024 * 1024 / 32）。
 
 #### TableSpace
 TableSpace被用于在```PGDATA```目录外存放数据文件。建立一个TableSpace后，PostgreSQL将在```PGDATA/pg_tblspc```目录下建立一个链接，指向用户指定的TableSpace的目录。在用户指定的TableSpace的目录下，会先建立一个与PostgreSQL版本号相关的文件夹，形如“PG_11_201809051”，此版本号文件夹类似于内部文件目录```base```，在版本号文件夹下是表示Database的文件夹。如果对象被建立在一个已有的Database中，那么版本号文件夹下会出现一个同名（Database的OID）的文件夹，如果对象被建立在一个新的Database中，则会使用新的Database的OID作为文件夹名字。
 
 #### 对象文件
 
-对象文件内部由Page/Block组成，它们的大小是固定的，PG默认8K，GP默认32K，在代码编译时通过configure的参数```--with-blocksize```来设定。对象文件和Page的组织形式如图所示：
+对象文件内部由Page/Block组成，它们的大小是固定的，PG默认8K，GP默认32K，在代码编译时通过configure的参数```--with-blocksize```来设定，可通过GUC参数```block_size```查看。对象文件和Page的组织形式如图所示：
 
 ![](/techdoc/docs/database/images/pg_heap_table_file.png)
 
