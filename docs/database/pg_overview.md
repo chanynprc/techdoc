@@ -49,7 +49,8 @@ Table Space被用于在```PGDATA```目录外存放数据文件。建立一个Tab
 当一个tuple的大小超过2K时，PostgreSQL采用TOAST（The Oversized-Attribute Storage Technique）技术进行存储。
 
 > 当一个tuple的大小超过```TOAST_TUPLE_THRESHOLD```时，将会采用压缩和TOAST表方式存储。在代码逻辑中，允许一个页面存储4个TOAST tuple（```TOAST_TUPLES_PER_PAGE```），通过计算，在PG中，tuple超过2K时会采用TOAST方式存储，在GP中，由于页面大小为32K，tuple超过8K时会采用TOAST方式存储（有待验证）。
-> TOAST相关的表，会在创建主表的时候被创建，和主表属性的数据类型相关。TOAST辅助表的表名为```pg_toast.pg_toast_xxxxx```，其中xxxxx为主表的OID。
+
+> TOAST相关的表，会在创建主表的时候被创建，和主表属性的数据类型相关。TOAST辅助表的表名为```pg_toast.pg_toast_xxxxx```，其中xxxxx为主表的OID。是否创建TOAST表的逻辑是：（1）外表不创建TOAST表，（2）所有列的```attstorage```都是是plain的表不创建TOAST表，（3）对于每一列，会尝试计算列的宽度，列宽度可以从attlen获取，如果无法直接从attlen获取，则尝试根据atttypid和atttypmod去计算，比如对于一个varchar(10)的列，其atttypmod是14（VARHDRSZ+10），numeric也有类似计算逻辑，若未指定具体列atttypmod属性，则可能无法计算列宽度，包含无法计算宽度的列的表需要创建TOAST表，（4）在计算完所有列的列宽后，如果所有列宽之和再加上头部长度之后超过了```TOAST_TUPLE_THRESHOLD```，则会创建TOAST表。
 
 ### 进程结构
 
