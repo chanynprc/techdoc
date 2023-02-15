@@ -55,26 +55,37 @@ Table Space被用于在```PGDATA```目录外存放数据文件。建立一个Tab
 PostgreSQL是一个多进程的架构，它的进程主要有：
 
 - Server Process：所有其他进程的父进程，负责对整个系统的管理
-- Background Processes：针对于每个独立功能的进程，如Vacuum进程、Checkpoint进程
-- Replication Associated Processes：用于处理主备流复制
+- Backend Process：处理来自客户端的连接，处理查询请求，针对每个连接，都有一个独立的Backend Process
+- Background Process：针对于每个独立功能的进程，如Vacuum进程、Checkpoint进程
+- Replication Associated Process：用于处理主备流复制
 - Background Worker Process：用于处理一些用户定义的后台任务
-- Backend Processes：处理来自客户端的连接，处理查询请求，针对每个连接，都有一个独立的Backend Process
 
-在老版本的PostgreSQL开始，Server Process被称为Postmaster，是所有进程的父进程。当使用pg_ctl命令启动（start）数据库时，Server Process就被启动了，然后它会在内存中申请一块Shared Memory，并启动Background Processes、Replication Associatied Processes和Background Worker Process。Server Process会监听网络端口，默认是5432端口，当收到来自客户端的连接请求时，启动Backend Process。
+在老版本的PostgreSQL开始，Server Process被称为Postmaster，是所有进程的父进程。当使用pg_ctl命令启动（start）数据库时，Server Process就被启动了，然后它会在内存中申请一块Shared Memory，并启动Background Process、Replication Associatied Process和Background Worker Process。Server Process会监听网络端口，默认是5432端口，当收到来自客户端的连接请求时，启动Backend Process。
 
 Backend Process也被称为Postgres进程，它被启动用于处理来自一个客户端的所有查询请求，通过TCP协议与客户端通讯，在客户端关闭连接时被销毁。一个Backend Process只被允许访问一个Database实例，所以在客户端连接PostgreSQL的服务端时，需要指定连接哪一个数据库。PostgreSQL允许多个客户端同时连接服务端，但有一个参数```max_connections```控制最大连接数。因为PostgreSQL没有实现连接池的机制，当服务端频繁连接和断连服务端时，性能会因建连接和启动Backend Process而降低，但有一些第三方中间件（比如pgbouncer、pgpool-II等）可用于处理连接池问题。
 
-Background Processes用于一些独立而特殊的功能：
+Background Process用于一些独立而特殊的功能：
 
-- Background Writer：将Shared Buffer Pool中的脏页持久化
-- Checkpointer：处理Check Point相关的操作
-- AutoVacuum Launcher：定期进行Vacuum
-- WAL Writer：定期将WAL Buffer中的WAL数据持久化
-- Statistics Collector：进行统计信息收集
-- Logging Collector：将日志信息写入Log文件
-- Archiver：进行日志归档
+- Background Writer （writer process）：将Shared Buffer Pool中的脏页持久化
+- Checkpointer （checkpointer process）：处理Check Point相关的操作
+- AutoVacuum Launcher （autovacuum launcher process）：定期进行Vacuum
+- WAL Writer （wal writer process）：定期将WAL Buffer中的WAL数据持久化
+- Statistics Collector （stats collector process）：进行统计信息收集
+- Logging Collector （logger process，GP的master有master logger process）：将日志信息写入Log文件
+- Archiver （archiver process）：进行日志归档
 
-> 为了防止因Server Failure而丢失数据，PostgreSQL支持了WAL机制，WAL数据也被称为XLOG，是PostgreSQL的事务日志
+为了防止因Server Failure而丢失数据，PostgreSQL支持了WAL机制，WAL数据也被称为XLOG，是PostgreSQL的事务日志。Replication Associated Process是处理日志复制相关操作的进程：
+
+- WAL sender （wal sender process）
+- WAL receiver （wal receiver process）
+- Startup （startup process）
+
+Background Worker Process的进程名一般是bgworker: xxx，用户可以根据需要进行定制，在GP的master上，有个bgworker是```bgworker: ftsprobe process```，用户对segment节点的健康状态进行监控，其他常见的bgworker还有：
+
+- bgworker: sweeper process
+- bgworker: logical replication launcher
+- bgworker: ftsprobe process
+- bgworker: global deadlock detector process
 
 ### 内存结构
 
