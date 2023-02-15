@@ -66,21 +66,21 @@ Backend Process也被称为Postgres进程，它被启动用于处理来自一个
 
 Background Process用于一些独立而特殊的功能：
 
-- Background Writer （writer process）：将Shared Buffer Pool中的脏页持久化
-- Checkpointer （checkpointer process）：处理Check Point相关的操作
-- AutoVacuum Launcher （autovacuum launcher process）：定期进行Vacuum
-- WAL Writer （wal writer process）：定期将WAL Buffer中的WAL数据持久化
-- Statistics Collector （stats collector process）：进行统计信息收集
-- Logging Collector （logger process，GP的master有master logger process）：将日志信息写入Log文件
-- Archiver （archiver process）：进行日志归档
+- Logging Collector （logger process，GP的master有master logger process）：将日志信息写入Log文件。在PostgresMain、ServerLoop、reaper中会启动
+- Checkpointer （checkpointer process）：处理Check Point相关的操作。在ServerLoop、reaper、sigusr1_handler中会启动
+- Background Writer （writer process）：将Shared Buffer Pool中的脏页持久化。在ServerLoop、reaper、sigusr1_handler中会启动
+- WAL Writer （wal writer process）：定期将WAL Buffer中的WAL数据持久化。在ServerLoop、reaper中会启动
+- AutoVacuum Launcher （autovacuum launcher process）：定期进行Vacuum。在ServerLoop、reaper中会启动
+- Statistics Collector （stats collector process）：进行统计信息收集。在ServerLoop、reaper、sigusr1_handler中会启动
+- Archiver （archiver process）：进行日志归档。在ServerLoop、reaper、sigusr1_handler中会启动
 
 为了防止因Server Failure而丢失数据，PostgreSQL支持了WAL机制，WAL数据也被称为XLOG，是PostgreSQL的事务日志。Replication Associated Process是处理日志复制相关操作的进程：
 
 - WAL sender （wal sender process）
-- WAL receiver （wal receiver process）
-- Startup （startup process）
+- WAL receiver （wal receiver process）：在ServerLoop、sigusr1_handler中会启动
+- Startup （startup process）：在PostmasterMain及PostmasterStateMachine中会启动
 
-Background Worker Process的进程名一般是bgworker: xxx，用户可以根据需要进行定制，在GP的master上，有个bgworker是```bgworker: ftsprobe process```，用户对segment节点的健康状态进行监控，其他常见的bgworker还有：
+Background Worker Process的进程名一般是bgworker: xxx，用户可以根据需要进行定制，这些进程在PostgresMain、ServerLoop、reaper、sigusr1_handler中会启动。常见的bgworker还有：
 
 - bgworker: sweeper process
 - bgworker: logical replication launcher
