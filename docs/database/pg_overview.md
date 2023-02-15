@@ -87,6 +87,8 @@ Background Worker Process的进程名一般是bgworker: xxx，用户可以根据
 - bgworker: ftsprobe process
 - bgworker: global deadlock detector process
 
+> sigusr1_handler由SIGUSR1中断触发，表示有来自子进程的消息。
+
 ### 内存结构
 
 PostgreSQL的内存主要分为两大类，每个Backend Process的私有内存，以及所有进程共用的共享内存。
