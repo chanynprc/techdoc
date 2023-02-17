@@ -107,7 +107,7 @@ PostgreSQL的内存主要分为两大类，每个Backend Process的私有内存�
 
 > CLOG（Commit Log）用于记录并发控制（Concurrency Control，CC）机制的事务状态（in_progress、committed、aborted等）
 
-此外，还有一些其他的共享内存用于访问控制（semaphores、lightweight locks、shared and exclusive locks等）、Background Processes、事务处理（save point、two phase commit等）。
+此外，还有一些其他的共享内存用于访问控制（semaphores、lightweight locks、shared and exclusive locks等）、Background Processes（checkpointer、autovacuum等）、事务处理（save point、two phase commit等）。
 
 ### 查询处理
 
