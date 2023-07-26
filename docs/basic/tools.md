@@ -21,3 +21,9 @@ git remote show origin
 git remote prune origin
 ```
 
+修改最后一次提交的作者信息
+
+```bash
+git commit --amend --reset-author
+```
+
