@@ -2,6 +2,22 @@
 
 ### Git
 
+从源代码安装git
+
+```bash
+wget https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.42.0.tar.gz --no-check-certificate
+tar zxvf git-2.42.0.tar.gz
+cd git-2.42.0
+
+# yum install expat-devel
+make -j prefix=/usr/local/git all
+make -j prefix=/usr/local/git install
+
+ln -s /usr/local/git/bin/git /usr/local/bin/
+
+git --version
+```
+
 同步远程Tag（先删除所有Tag，再进行同步）
 
 ```bash
