@@ -5,6 +5,8 @@
 从源代码安装git
 
 ```bash
+yum remove git
+
 wget https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.42.0.tar.gz --no-check-certificate
 tar zxvf git-2.42.0.tar.gz
 cd git-2.42.0
