@@ -6,7 +6,7 @@
 
 ```bash
 git tag -l | xargs git tag -d
-git fetch
+git fetch <repo_set_name>
 ```
 
 查看本地分支和追踪情况
