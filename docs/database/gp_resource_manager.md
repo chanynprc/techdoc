@@ -15,16 +15,24 @@ Resource Group可以设置每个资源分组内的CPU、内存、并发数的限
 
 和用户绑定的Resource Group使用Linux的cgroup（control group）进行CPU的资源管理，使用vmtracker去跟踪内存的使用。和外部组件绑定的Resource Group使用cgroup去进行CPU和内存的管理，要让内存管理生效，需要让cgroup是top-level的。
 
-#### 并发
+#### 并发管理
+
+可以通过`concurrency`属性去配置并发限制，用于限制一个资源分组内可以同时执行的并发Query数，默认值20。在每个资源分组内，资源被分成了`concurrency`个slot，基于这些slot去分配并发的Query以及内存。
+
+Resource Group采用先进先出的队列对资源分组内的并发Query进行管理，当资源分组内的并发Query数超过其`concurrency`时，新开始的Query将被加入等待队列，当一个Query执行结束后，最早进入队列中的Query会开始执行。
+
+#### Memory Auditor设置
+
+可以通过`memory_auditor`属性去配置内存管理方式，有2种选项：
+
+1. `vmtracker`：默认值，使用vmtracker去监测管理内存，用于和用户绑定的资源分组。使用这种方式，内存总量和内存的使用在Greenplum控制之下，当内存使用超过限制时，可以通过报错去停止Query的执行，不会造成OOM kill。
+2. `cgroup`：使用cgroup去监测管理内存，用于和外部组件绑定的资源分组。使用这种方式，将内存管理主动权交给了操作系统，当内存使用超过限制时，会有系统级的OOM kill。
+
+#### 内存管理
 
 
 
-#### Memory Auditor
-
-`memory_auditor`属性有2种选项：
-
-1. `vmtracker`：默认值，用于和用户绑定的资源分组
-2. `cgroup`：用于和外部组件绑定的资源分组
+### 附录
 
 其他参数
 
