@@ -21,6 +21,14 @@ Resource Group可以设置每个资源分组内的CPU、内存、并发数的限
 
 Resource Group采用先进先出的队列对资源分组内的并发Query进行管理，当资源分组内的并发Query数超过其`concurrency`时，新开始的Query将被加入等待队列，当一个Query执行结束后，最早进入队列中的Query会开始执行。
 
+可以通过参数`gp_resource_group_bypass`去bypass并发限制，让Query不进入队列而直接执行。此参数可以session级设置。
+
+可以通过参数`gp_resource_group_queuing_timeout`去设置队列中Query的等待时长，超过一定时间后自动取消查询。此参数默认值为0，将无限等待。
+
+#### CPU管理
+
+
+
 #### Memory Auditor设置
 
 可以通过`memory_auditor`属性去配置内存管理方式，有2种选项：
