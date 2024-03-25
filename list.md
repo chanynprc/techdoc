@@ -18,7 +18,7 @@
 
 [专题：高可用](/techdoc/docs/database/topic_ha)
 
-[专题：数据写入](/techdoc/docs/database/data_loading)
+[专题：数据写入](/techdoc/docs/database/topic_data_loading)
 
 ### Tag：PostgreSQL
 
