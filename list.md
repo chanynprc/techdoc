@@ -18,6 +18,8 @@
 
 [专题：高可用](/techdoc/docs/database/topic_ha)
 
+[专题：数据写入](/techdoc/docs/database/data_loading)
+
 ### Tag：PostgreSQL
 
 [PostgreSQL概览](/techdoc/docs/database/pg_overview)
@@ -39,6 +41,8 @@
 [Greenplum参数](/techdoc/docs/database/gp_parameter)
 
 [GPORCA概览](/techdoc/docs/database/gp_orca_overview)
+
+[Greenplum的资源管理](/techdoc/docs/database/gp_resource_manager)
 
 [Greenplum的2PC](/techdoc/docs/database/gp_2p)
 
