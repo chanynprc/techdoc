@@ -1,6 +1,6 @@
-## 数据导入
+## 数据写入
 
-### Starrocks的数据导入
+### Starrocks的数据写入
 
 | 导入方式        | 同步、异步 | 执行主体                           | 主要场景                          | 技术原理                                                     |
 | --------------- | ---------- | ---------------------------------- | --------------------------------- | ------------------------------------------------------------ |
@@ -13,11 +13,11 @@
 | Spark connector |            |                                    |                                   |                                                              |
 | Spark Load      |            |                                    |                                   |                                                              |
 
-### Snowflake数据导入
+### Snowflake数据写入
 
-#### Snowflake数据导入概述
+#### Snowflake数据写入概述
 
-Snowflake的数据导入，主要是基于数据文件的，数据文件可以存放于2种不同的位置，Snowflake把他们称为stage：
+Snowflake的数据写入，主要是基于数据文件的，数据文件可以存放于2种不同的位置，Snowflake把他们称为stage：
 
 - 外部存储（external stage）：可以从AWS S3、Google Cloud Storage、Microsoft Azure中加载数据，但不能加载存储在归档存储中的数据（比如Amazon S3 Glacier Flexible Retrieval、Glacier Deep Archive storage class、Microsoft Azure Archive Storage），此存储位置可以使用CREATE STAGE去创建。
 - 内部存储（internal stage）：在Snowflake内部维护了几个存储数据的位置，包括3种方式：用户（分别分配给了每个用户，用于单个用户的文件暂存和管理，不支持更新和删除）、表（分别分配给了每个表，可多个用户共用，不支持更新和删除）、命名（Named，可以被多个用户暂存和管理加到到多个表的文件，此方式可以使用CREATE STAGE去创建）。

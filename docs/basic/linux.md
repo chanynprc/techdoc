@@ -2,67 +2,54 @@
 
 <!--### Shell命令-->
 
-### 查找包含字符串的文件
+### 监控工具
 
-（1）当前目录下的所有文件中的字符串
+#### vmstat
 
-```bash
-grep -r "zh_CN" ./
-```
-
-（2）当前目录下的以pre开头的文件中的字符串
+用于监控进程、内存、内存交换空间、磁盘IO、系统事件、CPU
 
 ```bash
-grep -r "zh_CN" ./pre*
+# 常用命令，宽模式显示，每隔1秒刷新一次
+vmstat -w 1
 ```
 
-### 查找文件
+字段含义：
 
-```bash
-find . -name filename
-find /home/user/downloads -iname filename
-```
+| procs：有关进程的信息                                   | memory：内存使用情况，单位通常为KB                           | swap：交换分区的使用情况                                     | io：输入/输出统计                         | system：系统事件                                          | cpu：CPU使用情况的摘要                                       |
+| ------------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ----------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------ |
+| r: 等待运行的进程数<br/>b: 处于不可中断睡眠状态的进程数 | swpd: 使用的虚拟内存大小<br/>free: 空闲的物理内存大小<br/>buff: 作为文件缓存的内存大小<br/>cache: 作为缓存的内存大小（包括页缓存和Slab内存） | si: 从磁盘交换进内存的数据量<br/> so: 从内存交换到磁盘的数据量 | bi: 每秒读取的块数<br/>bo: 每秒写入的块数 | in: 每秒中断次数，包括时钟中断<br/>cs: 每秒上下文切换次数 | us: 用户态时间百分比<br/>sy: 系统态时间百分比<br/>id: 空闲时间百分比<br/>wa: 等待I/O的时间百分比<br/>st: 被偷走的时间百分比（在虚拟化环境中） |
 
-`-name`指定要查找的文件名，可模糊匹配，如：可利用file*来模糊匹配以file开头的文件。
+#### dstat
 
-`-iname`指定要查找的文件名，但忽略大小写。
+### 用户管理
 
-### Linux软件包操作
-
-Ubuntu：
-
-```bash
-# 列出已安装的包
-dpkg -l | grep postgres
-```
-
-### 清除SVN未被版本控制的文件
+#### 添加用户
 
 ``` bash
-svn st | grep '^?' | awk '{print $2}' | xargs rm -rf
+useradd -d /home/username -m username
+passwd username
 ```
 
-1. 第一个命令执行svn status
-2. 第二个命令查找?开头的行，没有加入版本控制的文件或目录开头显示?号
-3. 第三个命令获得第二个参数，是带路径的文件或目录名
-4. 第四个命令删除它
+其中，`-d`指定该用户的根目录，`-m`表示创建该用户根目录
 
-### 查看硬盘剩余空间和文件夹占用空间大小
+#### 删除用户
 
-（1）查看硬盘剩余空间
-
-```bash
-df -lh
+``` bash
+userdel username
 ```
 
-（2）查看某文件夹占用空间大小
+#### CentOS给普通用户加sudo权限
 
-```bash
-du -sh <folder>
-du -sh *
+使用root修改/etc/sudoers文件，在`root    ALL=(ALL)       ALL`后添加：
+
+``` bash
+root    ALL=(ALL)       ALL
+newuser     ALL=(ALL)       ALL
 ```
 
-### 建立SSH信任关系
+### 网络配置
+
+#### 建立SSH信任关系
 
 （1）在A机器生成公私钥对
 
@@ -82,29 +69,32 @@ cat id_rsa.pub >>  ~/.ssh/authorized_keys
 
 建立好SSH信任关系后，就可以免密（如果第一步没设置密码）SSH登录或SCP拷贝文件了。
 
-### 修改系统时间
+### 磁盘/存储管理
 
-（1）修改系统时间
+#### 查看硬盘剩余空间和文件夹占用空间大小
 
-```bash
-date -s 14:36:53
-date -s 08/28/2008
-```
-
-（2）同步系统时间到硬件时间
+（1）查看硬盘剩余空间
 
 ```bash
-hwclock -w
-hwclock --systohc
+df -lh
 ```
 
-（3）同步硬件时间到系统时间
+（2）查看某文件夹占用空间大小
 
 ```bash
-hwclock --hctosys
+du -sh <folder>
+du -sh *
 ```
 
-### VirtualBox挂载共享文件夹
+#### 挂载ISO文件
+
+```bash
+cd /mnt
+mkdir iso
+mount -o loop -t iso9660 isofile.iso /mnt/iso
+```
+
+#### VirtualBox挂载共享文件夹
 
 首先需要安装VirtualBox Guest Additions，安装过程中可能需要kernal-devel。如果需要创建软连接，需要额外的命令允许。
 
@@ -134,47 +124,84 @@ mount -t vboxsf -o uid=1000,gid=1000 workspaces /home/cyn/workspaces
 
 其中uid和gid分别为普通用户的User ID和Group ID。
 
-### 挂载ISO文件
+### 文件管理
+
+#### 查找包含字符串的文件
+
+（1）当前目录下的所有文件中的字符串
 
 ```bash
-cd /mnt
-mkdir iso
-mount -o loop -t iso9660 isofile.iso /mnt/iso
+grep -r "zh_CN" ./
 ```
 
-### 系统用户操作
+（2）当前目录下的以pre开头的文件中的字符串
 
-（1）添加用户
-
-``` bash
-useradd -d /home/username -m username
-passwd username
+```bash
+grep -r "zh_CN" ./pre*
 ```
 
-其中，`-d`指定该用户的根目录，`-m`表示创建该用户根目录
+#### 查找文件
 
-（2）删除用户
-
-``` bash
-userdel username
+```bash
+find . -name filename
+find /home/user/downloads -iname filename
 ```
 
-### CentOS给普通用户加sudo权限
+`-name`指定要查找的文件名，可模糊匹配，如：可利用file*来模糊匹配以file开头的文件。
 
-使用root修改/etc/sudoers文件，在`root    ALL=(ALL)       ALL`后添加：
+`-iname`指定要查找的文件名，但忽略大小写。
 
-``` bash
-root    ALL=(ALL)       ALL
-newuser     ALL=(ALL)       ALL
-```
-
-### 查看文件的编码格式
+#### 查看文件的编码格式
 
 在vim中可以查看文件的编码格式：
 
 ```
 :set fileencoding
 ```
+
+### 系统管理
+
+#### Linux软件包操作
+
+Ubuntu：
+
+```bash
+# 列出已安装的包
+dpkg -l | grep postgres
+```
+
+#### 修改系统时间
+
+（1）修改系统时间
+
+```bash
+date -s 14:36:53
+date -s 08/28/2008
+```
+
+（2）同步系统时间到硬件时间
+
+```bash
+hwclock -w
+hwclock --systohc
+```
+
+（3）同步硬件时间到系统时间
+
+```bash
+hwclock --hctosys
+```
+
+### 清除SVN未被版本控制的文件
+
+``` bash
+svn st | grep '^?' | awk '{print $2}' | xargs rm -rf
+```
+
+1. 第一个命令执行svn status
+2. 第二个命令查找?开头的行，没有加入版本控制的文件或目录开头显示?号
+3. 第三个命令获得第二个参数，是带路径的文件或目录名
+4. 第四个命令删除它
 
 ### 引用
 
