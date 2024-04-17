@@ -191,6 +191,22 @@ find /home/user/downloads -iname filename
 :set fileencoding
 ```
 
+### 软件管理
+
+#### 查看已安装的包
+
+```bash
+rpm -qa | grep apr
+```
+
+#### 升级yum源
+
+```bash
+# http://dl.fedoraproject.org/pub/epel/7/aarch64/
+wget https://dl.fedoraproject.org/pub/epel/7/aarch64/Packages/e/epel-release-7-12.noarch.rpm
+rpm -Uvh epel-release-7-12.noarch.rpm
+```
+
 ### 系统管理
 
 #### Linux软件包操作

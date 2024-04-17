@@ -215,6 +215,14 @@ GROUP BY GROUPING SETS (
 
 ### Select for Update
 
+### 按照拼音排序
+
+```sql
+-- Greenplum
+select * from (select '腾讯' as name union all select '华为' as name union all select '阿里巴巴' as name union all select '头条' as name) t
+order by convert(name::bytea, 'UTF8', 'EUC_CN');
+```
+
 ### 引用
 
 [1] https://www.postgresql.org/docs/current/tutorial-window.html
