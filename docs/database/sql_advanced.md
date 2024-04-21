@@ -215,10 +215,10 @@ GROUP BY GROUPING SETS (
 
 ### Select for Update
 
-### 按照拼音排序
+### 按照汉字拼音排序
 
 ```sql
--- Greenplum
+-- Greenplum：Greenplum不支持设置列的collate，不能在DDL定义或order by中直接在列名后接类似collate "en_US"的定义
 select * from (select '腾讯' as name union all select '华为' as name union all select '阿里巴巴' as name union all select '头条' as name) t
 order by convert(name::bytea, 'UTF8', 'EUC_CN');
 ```
