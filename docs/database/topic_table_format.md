@@ -16,7 +16,7 @@
   - 清单文件（manifest file）：除了跟踪数据文件，还记录了每个文件的统计信息和其他详细信息，也包含数据文件的格式信息。此文件是Avro格式
 - Data Layer：每个清单文件跟踪一组数据文件
 
-![](/techdoc/docs/database/images/iceberg-architecture.png)
+![](/techdoc/docs/database/images/iceberg_arch.png)
 
 ### Catalog概述
 
