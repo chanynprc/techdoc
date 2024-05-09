@@ -10,6 +10,14 @@
 | net.ipv4.tcp_keepalive_intvl  | 在前一个TCP keepalive探测未被应答时，系统是在多少秒后再次发送探测包<br/>单位：秒<br/>默认值：75（75秒） |
 | net.ipv4.tcp_keepalive_probes | 在认定TCP连接为“死链接”之前，发送多少个TCP keepalive探测包。如果对端在此期间仍未应答，则系统认为连接已断开<br/>单位：次<br/>默认值：9（9次） |
 
+![](/techdoc/docs/basic/images/tcpkeepalive1.png)
+
+在正常情况下，当TCP连接在tcp_keepalive_time后没有任何数据传输时，会发送keepalive探测包，并且一直发送下去。
+
+![](/techdoc/docs/basic/images/tcpkeepalive2.png)
+
+在出现网络异常情况下，当TCP连接在tcp_keepalive_time秒后没有任何数据传输时，会发送第1个keepalive探测包，这时候对端无应答，系统是在tcp_keepalive_intvl秒后再次发送探测包，直到发送tcp_keepalive_probes次，如果对端一直无应答，则系统认为连接已断开。
+
 ```bash
 # 临时修改
 sysctl -w net.ipv4.tcp_keepalive_time=7200
