@@ -45,3 +45,18 @@ git remote prune origin
 git commit --amend --reset-author
 ```
 
+### SVN
+
+清除SVN未被版本控制的文件
+
+``` bash
+svn st | grep '^?' | awk '{print $2}' | xargs rm -rf
+```
+
+1. 第一个命令执行svn status
+2. 第二个命令查找?开头的行，没有加入版本控制的文件或目录开头显示?号
+3. 第三个命令获得第二个参数，是带路径的文件或目录名
+4. 第四个命令删除它
+
+
+

@@ -5,18 +5,45 @@
 - 官网：https://iceberg.apache.org/
 - SDK：Java、Go、Python、Rust
 - Catalog支持：Hive MetaStore、Glue、JDBC
-- OCC
 
-元数据和数据的组织分为3层：
-
-- Iceberg Catalog：存储元数据的位置，指向当前的metadata file。存储Iceberg Catalog的存储必须支持原子操作
-- Metadata Layer：包含元数据文件（metadata file）、清单列表（manifest list）、清单文件（manifest file）
-  - 元数据文件（metadata file）：包含表的表模式、分区、快照以及当前快照的信息，每次数据操作都会生成一个新的文件。此文件是json格式
-  - 清单列表（manifest list）：包含一系列清单文件及其信息（分区列的上下界信息等），这些文件构成了一个快照。此文件是Avro格式
-  - 清单文件（manifest file）：除了跟踪数据文件，还记录了每个文件的统计信息和其他详细信息，也包含数据文件的格式信息。此文件是Avro格式
-- Data Layer：每个清单文件跟踪一组数据文件
+#### 数据组织
 
 ![](/techdoc/docs/database/images/iceberg_arch.png)
+
+如上图所示，Iceberg中元数据和数据的组织分为3层：
+
+- Iceberg Catalog：存储基础元数据，每个表保存表名到“current metadata pointer”的映射指向该表当前的Metadata File
+- Metadata Layer：包含元数据文件（metadata file）、清单列表（manifest list）、清单文件（manifest file）
+  - Metadata File：记录表的元数据，包含表的表模式、分区等基本元数据，以及快照以及当前快照的信息
+  - Manifest List：记录一系列Manifest File，这些文件构成了一个快照，还包含各Manifest File的分区列的上下界信息、文件数信息、行数信息
+  - Manifest File：记录数据文件、每个文件的统计信息（如行数、值范围、空值、数据大小、分区成员）和其他详细信息（如数据文件的格式）
+- Data Layer：每个清单文件跟踪一组数据文件
+
+**更多关于Iceberg Catalog**：使用不同的Iceberg Catalog存储，Iceberg Catalog的存储组织形式也会不同。（1）如果使用HDFS存储，在表的元数据文件夹中会有一个名为version-hint.text的文件去存储current metadata pointer。（2）如果使用Hive Metastore存储，在表的属性表中会有一个字段存储current metadata pointer。
+
+**更多关于Metadata File**：（1）此文件是json格式。（2）每次数据写操作都会生成一个新的文件，包含此前的snapshot并添加新的snapshot。（3）在文件中，每个snapshot会包含这个snapshot的timestamp信息，用于Time Travel。如果查询不带Time Travel时间点，则会使用current snapshot。
+
+**更多关于Manifest List**：（1）此文件是Avro格式。（2）每次数据写操作都会生成一个新的文件，只包含当前snapshot的写入及变更。（3）因为包含分区列上下界信息，所以一些在分区列上的过滤裁剪可以在读取到Manifest List文件时进行。
+
+**更多关于Manifest FIle**：（1）此文件是Avro格式。
+
+#### 读写操作
+
+
+
+#### 事务
+
+Iceberg在每次写入或更新时，会更新Iceberg Catalog中每个表的current metadata pointer，存储Iceberg Catalog的存储必须支持原子操作。
+
+在更新Iceberg Catalog中每个表的current metadata pointer之前，所有的事务读取到的数据都基于此前的current metadata pointer。当current metadata pointer被更新之后，新的事务的都会按照当前current metadata pointer去寻找最新的snapshot数据，所以current metadata pointer一旦被更新，最新的数据降对其他事务立即可见。
+
+【OCC】
+
+#### 小结
+
+综上，Iceberg的关键点如下：
+
+- 存储Iceberg Catalog的存储必须支持原子操作，如HDFS、Hive Metastore、Nessie
 
 ### Catalog概述
 
