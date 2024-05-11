@@ -16,9 +16,13 @@
 
 [专题：SQL 之 Outer Join](/techdoc/docs/database/topic_outer_join)
 
+[专题：开放表格式](/techdoc/docs/database/topic_table_format)
+
 [专题：高可用](/techdoc/docs/database/topic_ha)
 
 [专题：数据写入](/techdoc/docs/database/topic_data_loading)
+
+[专题：数据迁移](/techdoc/docs/database/topic_data_migration)
 
 ### Tag：PostgreSQL
 
@@ -53,6 +57,8 @@
 [Postgres-XL优化器代码走读](/techdoc/docs/database/pg_optimizer)
 
 ### Tag：其他数据库
+
+[MySQL概览](/techdoc/docs/database/mysql_overview)
 
 [ClickHouse概览](/techdoc/docs/database/ck_overview)
 
@@ -115,6 +121,8 @@
 [Perf Basic](/techdoc/docs/basic/perf)
 
 [Linux Basic](/techdoc/docs/basic/linux)
+
+[Linux Parameters](/techdoc/docs/basic/linux_param)
 
 [Mac Basic](/techdoc/docs/basic/mac)
 

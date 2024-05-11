@@ -26,6 +26,7 @@ sysctl -w net.ipv4.tcp_keepalive_probes=9
 
 # 永久修改
 vim /etc/sysctl.conf
+sysctl -p /etc/sysctl.conf
 ```
 
 
