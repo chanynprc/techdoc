@@ -164,7 +164,7 @@ partition_column_definition1,partition_column_definition2...])
 - 只支持读取Iceberg，不支持写
 - 不支持Iceberg Catalog，读取Iceberg文件通过类似iceberg_scan的函数实现，数据的地址通过函数的参数传入
 - Iceberg Catalog组织不支持HMS，只支持和数据文件在一起的类似HDFS的存储方式，通过version-hint.text文件保存current metadata pointer
-- 支持数据在S3上，在S3上的数据读取，貌似是需要手动指定具体的current metadata pointer，而不支持读取version-hint.text文件（实际也不会有场景在S3上维护Iceberg Catalog）。需要httpfs extension加入去支持S3上文件的读取（这也是DuckDB的一个extension）
+- 支持数据在S3上，在S3上的数据读取，貌似是需要手动指定具体的current metadata pointer，而不支持读取version-hint.text文件（实际也不会有场景在S3上维护Iceberg Catalog）
 - 从代码中看，只支持Parquet格式
 
 ```sql
@@ -261,9 +261,9 @@ java-extensions/hadoop-ext/src/main/java/com/starrocks/connector/share/iceberg/I
 
 #### DuckDB访问Iceberg代码调研
 
-- DuckDB访问Iceberg的代码不在DuckDB代码库中，在单独的代码库中：https://github.com/duckdb/duckdb_iceberg
+DuckDB访问Iceberg的代码不在DuckDB代码库中，在单独的代码库中：https://github.com/duckdb/duckdb_iceberg。
 
-duckdb_iceberg extension中，没有调用Iceberg任何SDK，而是自己实现了一套针对FileSystem（本地文件系统或S3）的文件读取逻辑，并实现各级别元数据文件及数据文件的解析逻辑，从读取version-hint.text到metadata file、manifest list、manifest file，再到读取数据文件。
+duckdb_iceberg extension中，没有调用Iceberg任何SDK，而是自己实现了一套针对FileSystem（本地文件系统或S3，由DuckDB提供接口，S3的读取依赖于DuckDB的另一个extension：httpfs）的文件读取逻辑，并实现各级别元数据文件及数据文件的解析逻辑，从读取version-hint.text到metadata file、manifest list、manifest file，再到读取数据文件。
 
 在duckdb_iceberg extension中，对外放出3个函数，这3个函数用于直接在select语句中调用去访问Iceberg数据或元数据：
 
