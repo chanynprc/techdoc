@@ -263,7 +263,7 @@ java-extensions/hadoop-ext/src/main/java/com/starrocks/connector/share/iceberg/I
 
 - DuckDB访问Iceberg的代码不在DuckDB代码库中，在单独的代码库中：https://github.com/duckdb/duckdb_iceberg
 
-duckdb_iceberg extension中，没有调用Iceberg任何SDK，而是自己实现了一套针对本地文件系统的读取逻辑，从读取version-hint.text到metadata file、manifest list、manifest file，再到读取数据文件。
+duckdb_iceberg extension中，没有调用Iceberg任何SDK，而是自己实现了一套针对FileSystem（本地文件系统或S3）的文件读取逻辑，并实现各级别元数据文件及数据文件的解析逻辑，从读取version-hint.text到metadata file、manifest list、manifest file，再到读取数据文件。
 
 在duckdb_iceberg extension中，对外放出3个函数，这3个函数用于直接在select语句中调用去访问Iceberg数据或元数据：
 
@@ -271,7 +271,7 @@ duckdb_iceberg extension中，没有调用Iceberg任何SDK，而是自己实现�
 - iceberg_metadata
 - iceberg_snapshots
 
-具体到数据文件上，是调用DuckDB内部的parquet_scan函数去读取的数据文件，这个函数在DuckDB的parquet extension中。
+具体到元数据及数据文件的解析上，元数据的Json文件是调用了duckdb_iceberg extension自带的Json解析器，元数据的Avro文件是调用了系统的Avro库，数据的Parquet文件是调用DuckDB内部的parquet_scan函数，这个函数在DuckDB的parquet extension中。
 
 ### 引用
 
