@@ -55,7 +55,7 @@ Iceberg在每次写入或更新时，会更新Iceberg Catalog中每个表的curr
 
 ### 数据库/数据仓库对Iceberg的支持
 
-**ClickHouse**
+#### ClickHouse
 
 - 支持读取AWS S3上的Iceberg表，且Iceberg表需要已存在于AWS S3上，不支持在AWS S3上创建新的Iceberg表
 - 只支持只读，不支持写
@@ -68,7 +68,7 @@ CREATE TABLE iceberg_table
 ENGINE=Iceberg('http://test.s3.amazonaws.com/clickhouse-bucket/test_table', 'test', 'test');
 ```
 
-**Starrocks （显式创建外表方式）**
+#### Starrocks （显式创建外表方式）
 
 - 在访问文件系统或对象存储系统外，还需保证可访问Iceberg依赖的元数据服务，Starrocks对Iceberg的访问需要元数据服务的支持
 - 外表方式只支持只读，不支持写
@@ -110,7 +110,7 @@ PROPERTIES
 );
 ```
 
-**Starrocks（Catalog方式）**
+#### Starrocks（Catalog方式）
 
 - Iceberg Catalog方式支持写
 - 只支持Parquet文件格式
@@ -156,6 +156,35 @@ partition_column_definition1,partition_column_definition2...])
 [partition_desc]
 [PROPERTIES ("location" = "value", "file_format" = 'value', "compression_codec" = "", ...)]
 [AS SELECT query]
+```
+
+#### DuckDB
+
+- DuckDB通过extension形式提供Iceberg表格式的支持，extension的代码不默认包含在DuckDB代码中
+- 只支持读取Iceberg，不支持写
+- 不支持Iceberg Catalog，读取Iceberg文件通过类似iceberg_scan的函数实现，数据的地址通过函数的参数传入
+- Iceberg Catalog组织不支持HMS，只支持和数据文件在一起的类似HDFS的存储方式，通过version-hint.text文件保存current metadata pointer
+- 支持数据在S3上，在S3上的数据读取，貌似是需要手动指定具体的current metadata pointer，而不支持读取version-hint.text文件（实际也不会有场景在S3上维护Iceberg Catalog）。需要httpfs extension加入去支持S3上文件的读取（这也是DuckDB的一个extension）
+- 从代码中看，只支持Parquet格式
+
+```sql
+INSTALL iceberg;
+LOAD iceberg;
+
+SELECT count(*)
+FROM iceberg_scan('data/iceberg/lineitem_iceberg', allow_moved_paths = true);
+
+SELECT count(*)
+FROM iceberg_scan('data/iceberg/lineitem_iceberg/metadata/02701-1e474dc7-4723-4f8d-a8b3-b5f0454eb7ce.metadata.json');
+
+SELECT count(*)
+FROM iceberg_scan('s3://bucketname/lineitem_iceberg/metadata/02701-1e474dc7-4723-4f8d-a8b3-b5f0454eb7ce.metadata.json', allow_moved_paths = true);
+
+SELECT *
+FROM iceberg_metadata('data/iceberg/lineitem_iceberg', allow_moved_paths = true);
+
+SELECT *
+FROM iceberg_snapshots('data/iceberg/lineitem_iceberg');
 ```
 
 ### 代码调研
@@ -230,7 +259,19 @@ java-extensions/hadoop-ext/src/main/java/com/starrocks/connector/share/iceberg
 java-extensions/hadoop-ext/src/main/java/com/starrocks/connector/share/iceberg/IcebergMetricsBean.java
 ```
 
+#### DuckDB访问Iceberg代码调研
 
+- DuckDB访问Iceberg的代码不在DuckDB代码库中，在单独的代码库中：https://github.com/duckdb/duckdb_iceberg
+
+duckdb_iceberg extension中，没有调用Iceberg任何SDK，而是自己实现了一套针对本地文件系统的读取逻辑，从读取version-hint.text到metadata file、manifest list、manifest file，再到读取数据文件。
+
+在duckdb_iceberg extension中，对外放出3个函数，这3个函数用于直接在select语句中调用去访问Iceberg数据或元数据：
+
+- iceberg_scan
+- iceberg_metadata
+- iceberg_snapshots
+
+具体到数据文件上，是调用DuckDB内部的parquet_scan函数去读取的数据文件，这个函数在DuckDB的parquet extension中。
 
 ### 引用
 
