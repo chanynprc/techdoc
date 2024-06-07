@@ -58,6 +58,12 @@
 | |  |  |  |  |  |  |  |  |  |
 |ReparameterizeForeignPathByChild |  |  |  |  |  |  |  | ✓ | ✓ |
 
+### hdfs_fdw
+
+hdfs_fdw是由EDB提供的一个fdw插件，https://github.com/EnterpriseDB/hdfs_fdw。
+
+
+
 ### 引用
 
 [1] https://www.postgresql.org/docs/current/fdw-callbacks.html
