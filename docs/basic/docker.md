@@ -61,9 +61,9 @@ docker restart 容器ID
 启动（新）容器
 
 ```
-docker run -it 镜像ID /bin/bash
-
 docker run -d --privileged --name 容器名 镜像ID
+# 或者
+docker run -it 镜像ID /bin/bash
 ```
 
 进入容器
