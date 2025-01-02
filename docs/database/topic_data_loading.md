@@ -2,16 +2,17 @@
 
 ### Starrocks的数据写入
 
-| 导入方式        | 同步、异步 | 执行主体                           | 主要场景                          | 技术原理                                                     |
-| --------------- | ---------- | ---------------------------------- | --------------------------------- | ------------------------------------------------------------ |
-| INSERT+FILES()  | 同步       | FE，串行                           | 从云存储或HDFS中导入文件          |                                                              |
-| Broker Load     | 异步       | BE，并行                           | 文件较多较大场景                  | 各个BE从数据源（HDFS、S3、OSS、NAS等）拉取数据并把数据导入到StarRocks中 |
-| Pipe            | 持续异步   | FE，串行                           | 大规模导入、不间断导入场景        | 持续的INSERT+FILES() 大量文件分批导入，在多个事务中持续导入，并可以监听文件变化，导入新文件，中间结果用户可见 |
-| Stream Load     | 同步       | 一个BE作为Coordinator BE导入，串行 | 文件较少较小场景，实时/近实时导入 | 基于HTTP PUT，非SQL 作业请求提交到FE，轮询选定BE执行作业     |
-| Kafka connector |            |                                    | 消费Kafka                         |                                                              |
-| Routine Load    |            |                                    | 实时数据导入                      |                                                              |
-| Spark connector |            |                                    |                                   |                                                              |
-| Spark Load      |            |                                    |                                   |                                                              |
+| 导入方式        | 主要场景                                                     | 同步、异步 | 执行主体                           | 技术原理                                                     |
+| --------------- | ------------------------------------------------------------ | ---------- | ---------------------------------- | ------------------------------------------------------------ |
+| INSERT+FILES()  | 从云存储或HDFS中导入文件                                     | 同步       | FE，串行                           |                                                              |
+| Broker Load     | 大规模数据导入<br>外部存储系统文件导入，文件较多、较大场景   | 异步       | BE，并行                           | 接口：LOAD LABEL xxx WITH BROKER xxx<br/>各个BE从数据源（HDFS、S3、OSS、NAS等）拉取数据并把数据导入到StarRocks中 |
+| Stream Load     | 实时/近实时导入<br>Flink Connector导入<br>本地文件导入，文件较少较小场景 | 同步       | 一个BE作为Coordinator BE导入，单点 | 接口：CURL<BR/>基于HTTP PUT（非SQL），作业请求提交到FE，轮询选定BE执行作业 |
+| Routine Load    | 流式导入，实时数据导入，例行持续导入                         | 持续       | 并行                               | CREATE ROUTINE LOAD xxx  FROM KAFKA xxx<br/>从Kafka中消费数据，FE将任务拆分成多个Task，每个Task负责一部分数据导入，并使用Stream Load导入数据，FE不间断产生Task，并对失败的Task进行重试 |
+| Spark Load      | 初次迁移，大数据导入（TB）                                   |            |                                    | CREATE EXTERNAL RESOURCE<br/>LOAD LABEL xxx WITH RESOURCE xxx<br/>通过外部Spark资源实现导入数据的预处理，提高导入性能，接上StarRocks资源 |
+| Pipe            | 大规模导入、不间断导入场景                                   | 持续异步   | FE，串行                           | 持续的INSERT+FILES() 大量文件分批导入，在多个事务中持续导入，并可以监听文件变化，导入新文件，中间结果用户可见 |
+| Flink Connector |                                                              |            |                                    |                                                              |
+| Kafka Connector | 消费Kafka                                                    |            |                                    |                                                              |
+| Spark Connector |                                                              |            |                                    |                                                              |
 
 ### Snowflake数据写入
 
