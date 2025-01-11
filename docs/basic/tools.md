@@ -27,6 +27,24 @@ git tag -l | xargs git tag -d
 git fetch <repo_set_name>
 ```
 
+拉取远程Tag
+
+```bash
+git fetch origin --tags
+```
+
+列出本地Tag
+
+```bash
+git tag
+```
+
+从Tag新建分支
+
+```bash
+git checkout -b new-branch-name tags/v1.0.0
+```
+
 查看本地分支和追踪情况
 
 ```bash
