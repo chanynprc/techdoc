@@ -231,6 +231,101 @@ db01=# select * from graph_name_1._ag_label_edge;
 (1 row)
 ```
 
+### AGE的执行逻辑
+
+#### MATCH：顶点匹配
+
+顶点的匹配直接扫描相应顶点表即可：
+
+```sql
+explain SELECT * FROM cypher('graph_name_1', $$
+  MATCH (n:Person {name: 'Alice'})
+  WHERE n.age > 30
+  RETURN n.name, n.age
+$$) as (name agtype, age agtype);
+                                                                    QUERY PLAN
+--------------------------------------------------------------------------------------------------------------------------------------------------
+ Seq Scan on "Person" n  (cost=0.00..94.22 rows=3 width=64)
+   Filter: ((properties @> '{"name": "Alice"}'::agtype) AND (agtype_access_operator(VARIADIC ARRAY[properties, '"age"'::agtype]) > '30'::agtype))
+ Optimizer: Postgres-based planner
+(3 rows)
+```
+
+如果不带label，则会将主顶点表和其他label表append起来进行扫描：
+
+```sql
+explain SELECT * FROM cypher('graph_name_1', $$
+  MATCH (n {name: 'Alice'})
+  WHERE n.age > 30
+  RETURN n.name, n.age
+$$) as (name agtype, age agtype);
+                                                                          QUERY PLAN
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Result  (cost=0.00..103.71 rows=4 width=64)
+   ->  Append  (cost=0.00..103.61 rows=4 width=40)
+         ->  Seq Scan on _ag_label_vertex n  (cost=0.00..9.42 rows=1 width=40)
+               Filter: ((properties @> '{"name": "Alice"}'::agtype) AND (agtype_access_operator(VARIADIC ARRAY[properties, '"age"'::agtype]) > '30'::agtype))
+         ->  Seq Scan on "Person" n_1  (cost=0.00..94.18 rows=3 width=40)
+               Filter: ((properties @> '{"name": "Alice"}'::agtype) AND (agtype_access_operator(VARIADIC ARRAY[properties, '"age"'::agtype]) > '30'::agtype))
+ Optimizer: Postgres-based planner
+(7 rows)
+```
+
+#### MATCH：关系匹配
+
+进行关系匹配时，实质上是将起点、边、终点的表Join在一起：
+
+```sql
+explain SELECT * FROM cypher('graph_name_1', $$
+  MATCH (a:Person)-[:FRIENDS_WITH]->(b:Person)
+  RETURN a.name, b.name
+$$) as (v1_name agtype, v2_name agtype);
+                                                QUERY PLAN
+----------------------------------------------------------------------------------------------------------
+ Hash Join  (cost=215.75..16358.54 rows=89999 width=64)
+   Hash Cond: (_age_default_alias_0.end_id = b.id)
+   ->  Hash Join  (cost=97.53..2693.62 rows=18711 width=48)
+         Hash Cond: (a.id = _age_default_alias_0.start_id)
+         ->  Seq Scan on "Person" a  (cost=0.00..58.10 rows=4810 width=40)
+         ->  Hash  (cost=48.90..48.90 rows=3890 width=16)
+               ->  Seq Scan on "FRIENDS_WITH" _age_default_alias_0  (cost=0.00..48.90 rows=3890 width=16)
+   ->  Hash  (cost=58.10..58.10 rows=4810 width=40)
+         ->  Seq Scan on "Person" b  (cost=0.00..58.10 rows=4810 width=40)
+ Optimizer: Postgres-based planner
+(10 rows)
+```
+
+更复杂一些的关系，一般先把边的表Join在一起，然后分别和各个顶点表进行Join：
+
+```sql
+explain SELECT * FROM cypher('graph_name_1', $$
+  MATCH (b:Person)<-[:FRIENDS_WITH]-(a:Person)-[:FRIENDS_WITH]->(c:Person)
+  RETURN a.name, b.name, c.name
+$$) as (v1_name agtype, v2_name agtype, v3_name agtype);
+                                                      QUERY PLAN
+----------------------------------------------------------------------------------------------------------------------
+ Hash Join  (cost=452.20..110293.79 rows=561323 width=96)
+   Hash Cond: (_age_default_alias_1.end_id = c.id)
+   ->  Hash Join  (cost=333.98..21475.39 rows=116699 width=88)
+         Hash Cond: (_age_default_alias_0.start_id = a.id)
+         ->  Hash Join  (cost=215.75..5542.11 rows=24262 width=64)
+               Hash Cond: (_age_default_alias_0.end_id = b.id)
+               ->  Hash Join  (cost=97.53..2135.93 rows=5044 width=32)
+                     Hash Cond: (_age_default_alias_0.start_id = _age_default_alias_1.start_id)
+                     Join Filter: _ag_enforce_edge_uniqueness(_age_default_alias_0.id, _age_default_alias_1.id)
+                     ->  Seq Scan on "FRIENDS_WITH" _age_default_alias_0  (cost=0.00..48.90 rows=3890 width=24)
+                     ->  Hash  (cost=48.90..48.90 rows=3890 width=24)
+                           ->  Seq Scan on "FRIENDS_WITH" _age_default_alias_1  (cost=0.00..48.90 rows=3890 width=24)
+               ->  Hash  (cost=58.10..58.10 rows=4810 width=40)
+                     ->  Seq Scan on "Person" b  (cost=0.00..58.10 rows=4810 width=40)
+         ->  Hash  (cost=58.10..58.10 rows=4810 width=40)
+               ->  Seq Scan on "Person" a  (cost=0.00..58.10 rows=4810 width=40)
+   ->  Hash  (cost=58.10..58.10 rows=4810 width=40)
+         ->  Seq Scan on "Person" c  (cost=0.00..58.10 rows=4810 width=40)
+ Optimizer: Postgres-based planner
+(19 rows)
+```
+
 ### Cypher语言中的要点
 
 #### 独立的模式匹配：多个MATCH子句组合查询
