@@ -25,18 +25,18 @@ graphid make_graphid(const int32 label_id, const int64 entry_id)
 
 当label ID为1，entry ID为1时，graphid的值是281474976710657。
 
->>> Tips: 在PostgreSQL中，sequence默认的cache是1，而在Greenplum中，sequence默认的cache是20。所以会发现，在Greenplum中跑AGE的回归，顶点和边的ID对不上。
+> Tips: 在PostgreSQL中，sequence默认的cache是1，而在Greenplum中，sequence默认的cache是20。所以会发现，在Greenplum中跑AGE的回归，顶点和边的ID对不上。
 
 ### AGE的数据组织形式
 
-**元数据**
+#### 元数据
 
 AGE的元数据存储在名为ag_catalog的schema下，有2个表分别存储图的元数据和label的元数据。
 
 - ag_catalog.ag_graph
 - ag_catalog.ag_label
 
-**图的元数据**
+#### 图的元数据
 
 ag_catalog.ag_graph的表结构如下：
 
@@ -63,14 +63,14 @@ Access method: heap
 - namespace：图数据存储的schema，与图的名字一致
 
 ```sql
-db01=# select * from ag_graph;
+db01=# select * from ag_catalog.ag_graph;
  graphid |     name     |  namespace
 ---------+--------------+--------------
    17796 | graph_name_1 | graph_name_1
 (1 row)
 ```
 
-**label的元数据**
+#### label的元数据
 
 ag_catalog.ag_label的表结构如下：
 
@@ -106,7 +106,7 @@ Access method: heap
 在新建一个新的图时，会为顶点和边生成2个默认的label，名字分别叫_ag_label_vertex和_ag_label_edge：
 
 ```sql
-db01=# select * from ag_label;
+db01=# select * from ag_catalog.ag_label;
        name       | graph | id | kind |           relation            |        seq_name
 ------------------+-------+----+------+-------------------------------+-------------------------
  _ag_label_vertex | 17796 |  1 | v    | graph_name_1._ag_label_vertex | _ag_label_vertex_id_seq
@@ -114,9 +114,23 @@ db01=# select * from ag_label;
 (2 rows)
 ```
 
-当为该图添加带label的顶点或边时，新的label会被创建出来
+当为该图添加带label的顶点或边时，新的label会被自动创建出来：
 
-**数据的组织**
+- 元数据部分：会在ag_catalog.ag_label表中新增一行，记录该label的元数据
+- 数据部分：在该图的schema下添加一个表和一个sequence，用来存储该label的顶点或边的数据，sequence用来支撑顶点或边的id编号
+
+```sql
+db01=# select * from ag_catalog.ag_label;
+       name       | graph | id | kind |     relation     |        seq_name
+------------------+-------+----+------+------------------+-------------------------
+ _ag_label_vertex | 17796 |  1 | v    | _ag_label_vertex | _ag_label_vertex_id_seq
+ _ag_label_edge   | 17796 |  2 | e    | _ag_label_edge   | _ag_label_edge_id_seq
+ Person           | 17796 |  3 | v    | "Person"         | Person_id_seq
+ FRIENDS_WITH     | 17796 |  4 | e    | "FRIENDS_WITH"   | FRIENDS_WITH_id_seq
+(4 rows)
+```
+
+#### 数据的组织
 
 创建一个新的图之后，初始状态下在图的schema下会创建2个表，3个sequence：
 
@@ -140,7 +154,25 @@ db01=# select * from ag_label;
 - \_ag_label_edge：存储边数据
 - \_ag_label_edge_id_seq：支撑边的id编号
 
-**顶点数据**
+如果顶点或边有label，则还会在专门带label的顶点或边的数据表中存储带label的顶点和边的数据，带label的顶点或边的数据也会被存储于_ag_label_vertex或_ag_label_edge中，即_ag_label_vertex或_ag_label_edge中存储了全量的数据，label的数据表中存储了该label的数据。
+
+```sql
+                                  List of relations
+    Schema    |          Name           |   Type   | Owner |    Size    | Description
+--------------+-------------------------+----------+-------+------------+-------------
+ graph_name_1 | FRIENDS_WITH            | table    | pg12  | 16 kB      |
+ graph_name_1 | FRIENDS_WITH_id_seq     | sequence | pg12  | 8192 bytes |
+ graph_name_1 | Person                  | table    | pg12  | 16 kB      |
+ graph_name_1 | Person_id_seq           | sequence | pg12  | 8192 bytes |
+ graph_name_1 | _ag_label_edge          | table    | pg12  | 8192 bytes |
+ graph_name_1 | _ag_label_edge_id_seq   | sequence | pg12  | 8192 bytes |
+ graph_name_1 | _ag_label_vertex        | table    | pg12  | 16 kB      |
+ graph_name_1 | _ag_label_vertex_id_seq | sequence | pg12  | 8192 bytes |
+ graph_name_1 | _label_id_seq           | sequence | pg12  | 8192 bytes |
+(9 rows)
+```
+
+#### 顶点的数据
 
 ```sql
                                                                                                        Table "graph_name_1._ag_label_vertex"
@@ -158,7 +190,18 @@ Access method: heap
 - id：顶点的id，依赖_ag_label_vertex_id_seq生成id编号
 - properties：顶点的属性
 
-**边数据**
+```sql
+db01=# select * from graph_name_1._ag_label_vertex;
+       id        |           properties
+-----------------+--------------------------------
+ 281474976710657 | {}
+ 844424930131969 | {"age": 30, "name": "Alice"}
+ 844424930131970 | {"age": 28, "name": "Bob"}
+ 844424930131971 | {"age": 32, "name": "Charles"}
+(4 rows)
+```
+
+#### 边的数据
 
 ```sql
                                                                                                       Table "graph_name_1._ag_label_edge"
@@ -180,15 +223,23 @@ Access method: heap
 - end_id：边的终点顶点id
 - properties：边的属性
 
+```sql
+db01=# select * from graph_name_1._ag_label_edge;
+        id        |    start_id     |     end_id      | properties
+------------------+-----------------+-----------------+------------
+ 1125899906842625 | 844424930131969 | 844424930131970 | {}
+(1 row)
+```
+
 ### AGE的基础使用示例
 
-**创建插件**
+#### 创建插件
 
 ```sql
 CREATE EXTENSION age;
 ```
 
-**加载插件**
+#### 加载插件
 
 ```sql
 LOAD 'age';
@@ -196,7 +247,7 @@ LOAD 'age';
 
 也可以通过设置```shared_preload_libraries='age'```来加载插件。
 
-**使用示例**
+#### 使用示例
 
 ```sql
 SET search_path = ag_catalog, "$user", public;
@@ -205,18 +256,28 @@ SET search_path = ag_catalog, "$user", public;
 SELECT create_graph('graph_name_1');
 
 -- 创建节点（不带label和属性）
-SELECT * 
-FROM cypher('graph_name_1', $$
-    CREATE (n)
+SELECT * FROM cypher('graph_name_1', $$
+  CREATE (n)
 $$) as (v agtype);
 
 -- 创建节点（带label和属性）
-SELECT * 
-FROM cypher('graph_name_1', $$
-CREATE (n:Person {name: 'Alice', age: 30})
+SELECT * FROM cypher('graph_name_1', $$
+  CREATE (n:Person {name: 'Alice', age: 30})
+$$) as (v agtype);
+
+SELECT * FROM cypher('graph_name_1', $$
+  CREATE (n:Person {name: 'Bob', age: 28})
+$$) as (v agtype);
+
+SELECT * FROM cypher('graph_name_1', $$
+  CREATE (n:Person {name: 'Charles', age: 32})
 $$) as (v agtype);
 
 -- 创建边
+SELECT * FROM cypher('graph_name_1', $$
+  MATCH (a:Person {name: 'Alice'}), (b:Person {name: 'Bob'})
+  CREATE (a)-[:FRIENDS_WITH]->(b)
+$$) as (v agtype);
 
 ```
 
