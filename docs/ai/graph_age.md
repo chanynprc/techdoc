@@ -231,6 +231,38 @@ db01=# select * from graph_name_1._ag_label_edge;
 (1 row)
 ```
 
+### Cypher语言中的要点
+
+#### 独立的模式匹配：多个MATCH子句组合查询
+
+当需要从数据库中匹配多个相互独立的模式时，可以使用多个MATCH子句。每个MATCH子句会匹配其指定的模式，然后结果会被组合在一起。
+
+注意：多个MATCH子句的结果是进行笛卡尔积组合的，除非在查询中使用了其他限制条件（如WHERE子句）来过滤结果。因此，在构建查询时要小心，以避免意外的结果集膨胀。
+
+```sql
+SELECT * FROM cypher('graph_name_1', $$
+  MATCH (a:Person {name: 'Alice'})
+  MATCH (b:Person {name: 'Bob'})
+  RETURN a, b
+$$) as (a agtype, b agtype);
+```
+
+#### 相关联的模式匹配：多个MATCH子句级联查询
+
+当需要在一个查询中匹配多个相关联的模式时，多个MATCH子句可以用于逐步构建查询逻辑。上一级的MATCH子句会匹配出相应的顶点或边，在下一级的MATCH子句会根据上一级匹配出的顶点或边再去图中匹配这一级的关系。
+
+注意：在级联查询方式下，查询结果也是进行笛卡尔积的，上一级MATCH子句中相同的顶点或边在下一级中会分别进行匹配并返回结果。
+
+```sql
+-- 此例子中，第一个MATCH子句会匹配出来满足条件的a顶点，第二个MATCH子句会根据这个a顶点再去图中匹配所有以它为顶点的关系
+-- 在此文档构造的例子中，第一个MATCH子句匹配出2个关系，a顶点是2个Alice，第二个MATCH会查找以Alice为起点的关系，每个Alice有3个关系，2个Alice共6个关系，此语句最后返回6行数据
+SELECT * FROM cypher('graph_name_1', $$
+  MATCH p1=()<-[]-(a:Person)-[]->(b {name: 'Bob'})
+  MATCH p2=(a)-[]->()
+  RETURN p2
+$$) as (p agtype);
+```
+
 ### AGE的基础使用示例
 
 #### 创建插件
@@ -258,27 +290,80 @@ SELECT create_graph('graph_name_1');
 -- 创建节点（不带label和属性）
 SELECT * FROM cypher('graph_name_1', $$
   CREATE (n)
-$$) as (v agtype);
+$$) as (n agtype);
 
 -- 创建节点（带label和属性）
 SELECT * FROM cypher('graph_name_1', $$
   CREATE (n:Person {name: 'Alice', age: 30})
-$$) as (v agtype);
-
+$$) as (n agtype);
 SELECT * FROM cypher('graph_name_1', $$
   CREATE (n:Person {name: 'Bob', age: 28})
-$$) as (v agtype);
-
+$$) as (n agtype);
 SELECT * FROM cypher('graph_name_1', $$
   CREATE (n:Person {name: 'Charles', age: 32})
-$$) as (v agtype);
+$$) as (n agtype);
+SELECT * FROM cypher('graph_name_1', $$
+  CREATE (n:Person {name: 'David', age: 28})
+$$) as (n agtype);
 
 -- 创建边
 SELECT * FROM cypher('graph_name_1', $$
   MATCH (a:Person {name: 'Alice'}), (b:Person {name: 'Bob'})
-  CREATE (a)-[:FRIENDS_WITH]->(b)
-$$) as (v agtype);
+  CREATE (a)-[e:FRIENDS_WITH]->(b)
+$$) as (e agtype);
+SELECT * FROM cypher('graph_name_1', $$
+  MATCH (a:Person {name: 'Alice'}), (b:Person {name: 'Charles'})
+  CREATE (a)-[e:FRIENDS_WITH]->(b)
+$$) as (e agtype);
+SELECT * FROM cypher('graph_name_1', $$
+  MATCH (a:Person {name: 'Alice'}), (b:Person {name: 'David'})
+  CREATE (a)-[e:FRIENDS_WITH]->(b)
+$$) as (e agtype);
 
+-- 查询顶点
+SELECT * FROM cypher('graph_name_1', $$
+  MATCH (n:Person)
+  RETURN n.name, n.age
+$$) as (name agtype, age agtype);
+
+-- 使用WHERE子句进行过滤
+SELECT * FROM cypher('graph_name_1', $$
+  MATCH (n:Person)
+  WHERE n.age > 30
+  RETURN n.name, n.age
+$$) as (name agtype, age agtype);
+
+-- 查询具有特定关系的顶点
+SELECT * FROM cypher('graph_name_1', $$
+  MATCH (a:Person)-[:FRIENDS_WITH]->(b:Person)
+  RETURN a.name, b.name
+$$) as (v1_name agtype, v2_name agtype);
+
+SELECT * FROM cypher('graph_name_1', $$
+  MATCH (b:Person)<-[:FRIENDS_WITH]-(a:Person)-[:FRIENDS_WITH]->(c:Person)
+  RETURN a.name, b.name, c.name
+$$) as (v1_name agtype, v2_name agtype, v3_name agtype);
+
+-- 更新顶点的属性
+SELECT * FROM cypher('graph_name_1', $$
+   MATCH (n:Person {name: 'Alice'})
+   SET n.age = 31
+   RETURN n
+$$) as (n agtype);
+
+-- 删除顶点和边（顶点和其关联的边都会被删除）
+SELECT * FROM cypher('graph_name_1', $$
+  MATCH (n:Person {name: 'David'})
+  DETACH DELETE n
+$$) as (n agtype);
+
+-- MERGE子句（尝试查找或创建一个名称为David的节点。如果节点不存在，则创建该节点并设置age为25；如果节点已经存在，则将age属性加1）
+-- 验证失败
+SELECT * FROM cypher('graph_name_1', $$
+  MERGE (n:Person {name: 'David'})
+  ON CREATE SET n.age = 25
+  ON MATCH SET n.age = n.age + 1
+$$) as (n agtype);
 ```
 
 
