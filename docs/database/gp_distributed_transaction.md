@@ -89,12 +89,12 @@ typedef struct DistributedSnapshot
 
 1. 如果写入元组的事务（即元组头中的xmin字段）还没有提交，则该元组不可见
 2. 否则，需要判断写入元组的事务xid对Snapshot是否可见
-  1. 首先，会根据分布式Snapshot信息判断，将元组的xmin从分布式事务提交日志（DLog）中找到其对应的分布式事务gxid，然后判断此事务的gxid对分布式Snapshot是否可见
-    1. 如果元组事务gxid < 分布式Snapshot->xmin，则元组可见
-    2. 如果元组事务gxid > 分布式Snapshot->xmax，则元组不可见
-    3. 如果分布式Snapshot->inProgressXidArray包含元组事务gxid，则元组不可见
-    4. 否则元组可见
-  2. 如果不能根据分布式Snapshot判断可见性，或者不需要根据分布式Snapshot判断可见性，则使用本地Snapshot信息判断，这个逻辑和PostgreSQL的可见性判断逻辑一样
+    1. 首先，会根据分布式Snapshot信息判断，将元组的xmin从分布式事务提交日志（DLog）中找到其对应的分布式事务gxid，然后判断此事务的gxid对分布式Snapshot是否可见
+        1. 如果元组事务gxid < 分布式Snapshot->xmin，则元组可见
+        2. 如果元组事务gxid > 分布式Snapshot->xmax，则元组不可见
+        3. 如果分布式Snapshot->inProgressXidArray包含元组事务gxid，则元组不可见
+        4. 否则元组可见
+    2. 如果不能根据分布式Snapshot判断可见性，或者不需要根据分布式Snapshot判断可见性，则使用本地Snapshot信息判断，这个逻辑和PostgreSQL的可见性判断逻辑一样
 
 > [尚未确认] 为了提高判断本地 xid 可见性的效率，避免每次访问全局事务提交日志，Greenplum 引入了本地事务-分布式事务提交缓存，如下图所示。每个 QE 都维护了这样一个缓存，通过该缓存，可以快速查到本地 xid 对应的全局事务distribXid 信息，进而根据全局快照判断可见性，避免频繁访问共享内存或磁盘。
 
@@ -167,4 +167,5 @@ QE Writer创建本地事务后，在共享内存中获得一个共享本地Snaps
 
 ### 引用
 
-
+1. https://www.infoq.cn/article/iadfebtb1y0mojlvrscu
+2. https://www.infoq.cn/profile/E73F44F2A71B29/publish
