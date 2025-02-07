@@ -1,5 +1,54 @@
 ## Greenplum分布式事务
 
+### 事务ID
+
+在PostgreSQL的事务ID基础之上，Greenplum构建了一套在分布式集群上保持事务一致性的全局事务ID。在Greenplum 7中，全局事务ID被改成了64位，此前是32位。
+
+```c
+typedef uint32 TransactionId;
+
+typedef uint64 DistributedTransactionId;
+```
+
+#### 本地事务ID和全局事务ID之间的映射
+
+在Greenplum中，使用DLog（Distributed Log）来保存本地事务ID和全局事务ID之间的映射。本质上，DLog是一个DistributedTransactionId的数组，数组的下标和本地事务ID相关，内容是全局事务ID。DLog保存在共享内存中并持久化存储在pg_distributedlog目录下。
+
+```c
+typedef struct DistributedLogEntry
+{
+	DistributedTransactionId distribXid;
+} DistributedLogEntry;
+```
+
+本地事务ID到全局事务ID的转换逻辑，就是在DLog数组中通过本地事务ID计算的下标定位全局事务ID的过程。
+
+```c
+#define ENTRIES_PER_PAGE (BLCKSZ / sizeof(DistributedLogEntry))
+
+#define TransactionIdToPage(localXid) ((localXid) / (TransactionId) ENTRIES_PER_PAGE)
+#define TransactionIdToEntry(localXid) ((localXid) % (TransactionId) ENTRIES_PER_PAGE)
+
+void
+DistributedLog_GetDistributedXid(
+	TransactionId 						localXid,
+	DistributedTransactionId 			*distribXid)
+{
+	int			page = TransactionIdToPage(localXid);
+	int			entryno = TransactionIdToEntry(localXid);
+	int			slotno;
+	DistributedLogEntry *ptr;
+
+	Assert(!IS_QUERY_DISPATCHER());
+
+	slotno = SimpleLruReadPage_ReadOnly(DistributedLogCtl, page, localXid);
+	ptr = (DistributedLogEntry *) DistributedLogCtl->shared->page_buffer[slotno];
+	ptr += entryno;
+	*distribXid = ptr->distribXid;
+	LWLockRelease(DistributedLogControlLock);
+}
+```
+
 ### Two-Phase Commit
 
 ### 分布式Snapshot
@@ -30,55 +79,87 @@ typedef struct DistributedSnapshot
 } DistributedSnapshot;
 ```
 
-分布式Snapshot中的信息，和单机PostgreSQL的Snapshot类似，记录了xmin、xmax、xip等信息。
+分布式Snapshot中的信息，和PostgreSQL的Snapshot类似，记录了xmin、xmax、xip_list等信息。关于PostgreSQL的相关信息，可以参考[PostgreSQL概览](/techdoc/docs/database/pg_overview)。
 
-在执行查询时，QD会将分布式事务
+#### 分布式事务可见性判断
 
-执行查询时，QD 将分布式事务和快照等信息序列化，通过libpq协议发送给 QE。QE 反序列化后，获得 QD 的分布式事务和快照信息。这些信息被用于确定元组的可见性（HeapTupleSatisfiesMVCC）。所有参与查询的 QEs 都使用QD 发送的同一份分布式事务和快照信息判断元组的可见性，因而保证了整个集群数据的一致性，避免前面例子中出现的不一致现象。
+在执行查询时，QD会将分布式事务信息（包含当前事务的分布式Snapshot）序列化后通过libpq协议发送给QE，QE反序列化后获得QD的分布式事务信息。所有的QE都是用QD发送的同一份分布式事务信息来判断数据的可见性，进而保证了整个集群数据的一致性。
 
-在 QE 上判断一个元组对某个快照的可见性流程如下：
+在QE上判断一个元组对某个Snapshot的可见性算法如下：
 
-如果创建元组的事务：xid （即元组头中的xmin字段）还没有提交，则不需要使用分布式事务和快照信息；
+1. 如果写入元组的事务（即元组头中的xmin字段）还没有提交，则该元组不可见
+2. 否则，需要判断写入元组的事务xid对Snapshot是否可见
+  1. 首先，会根据分布式Snapshot信息判断，将元组的xmin从分布式事务提交日志（DLog）中找到其对应的分布式事务gxid，然后判断此事务的gxid对分布式Snapshot是否可见
+    1. 如果元组事务gxid < 分布式Snapshot->xmin，则元组可见
+    2. 如果元组事务gxid > 分布式Snapshot->xmax，则元组不可见
+    3. 如果分布式Snapshot->inProgressXidArray包含元组事务gxid，则元组不可见
+    4. 否则元组可见
+  2. 如果不能根据分布式Snapshot判断可见性，或者不需要根据分布式Snapshot判断可见性，则使用本地Snapshot信息判断，这个逻辑和PostgreSQL的可见性判断逻辑一样
 
-否则判断创建元组的事务 xid 对快照是否可见
+> [尚未确认] 为了提高判断本地 xid 可见性的效率，避免每次访问全局事务提交日志，Greenplum 引入了本地事务-分布式事务提交缓存，如下图所示。每个 QE 都维护了这样一个缓存，通过该缓存，可以快速查到本地 xid 对应的全局事务distribXid 信息，进而根据全局快照判断可见性，避免频繁访问共享内存或磁盘。
 
-首先根据分布式快照信息判断。根据创建元组的 xid 从分布式事务提交日志中找到其对应的分布式事务：distribXid，然后判断 distribXid 对分布式快照是否可见：
+#### 共享本地Snapshot
 
-如果 distribXid < distribSnapshot->xmin，则元组可见
+Greenplum中一个SQL的查询计划可能含有多个Slices，在每个segment上每个Slice对应一个QE进程。任一Segment上，同一会话（处理同一个用户SQL）的不同QE必须有相同的可见性。然而每个QE进程都是独立的PostgreSQL backend进程，它们之间互相不知道对方的存在，因而其事务和快照信息都是不一样的。
 
-如果 distribXid > distribSnapshot->xmax，则元组不可见
+Greenplum中每个Segment上执行同一个SQL的QE进程放在一起被称为SegMate进程组，同时又把SegMate进程组中的QE分为QE writer和QE reader：
 
-如果 distribSnapshot->inProgressXidArray 包含 distribXid，则元组不可见
+- QE writer：有且只有一个，可以修改数据库状态
+- QE reader：可以没有或者多个，不能修改数据库的状态，且需要使用和QE writer一样的快照信息以保持与QE writer一致的可见性
 
-否则元组可见
+为了保证同一个SegMate中跨Slice可见性的一致性，Greenplum引入了“共享本地快照（Shared Local Snapshot）”的概念，每个Segment上执行同一个SQL的不同QEs（QE Writer和QE Readers）通过共享内存数据结构SharedSnapshotSlot来共享会话和事务信息。
 
-如果不能根据分布式快照判断可见性，或者不需要根据分布式快照判断可见性，则使用本地快照信息判断，这个逻辑和 PostgreSQL 的判断可见性逻辑一样。
+```c
+typedef struct SharedSnapshotSlot
+{
+	int32			slotindex;  /* where in the array this one is. */
+	int32	 		slotid;
+	PGPROC			*writer_proc;
+	PGXACT			*writer_xact;
 
-和 PostgreSQL 的提交日志 clog 类似，Greenplum 需要保存全局事务的提交日志，以判断某个事务是否已经提交。这些信息保存在共享内存中并持久化存储在 distributedlog 目录下。
+	/* only used by cursor dump identification, dose not always set */
+	volatile DistributedTransactionId distributedXid;
 
-为了提高判断本地 xid 可见性的效率，避免每次访问全局事务提交日志，Greenplum 引入了本地事务-分布式事务提交缓存，如下图所示。每个 QE 都维护了这样一个缓存，通过该缓存，可以快速查到本地 xid 对应的全局事务distribXid 信息，进而根据全局快照判断可见性，避免频繁访问共享内存或磁盘。
+	volatile bool			ready;
+	volatile uint32			segmateSync;
+	SnapshotData	snapshot;
+	LWLock		   *slotLock;
 
-CENTER_PostgreSQL_Community
+	volatile int    cur_dump_id;
+	volatile SnapshotDump    dump[SNAPSHOTDUMPARRAYSZ];
+	/* for debugging only */
+	FullTransactionId	fullXid;
+	TimestampTz		startTimestamp;
+} SharedSnapshotSlot;
+```
 
-共享本地快照（Shared Local Snapshot）
+既然叫共享“本地”Snapshot，那就意味着这个Snapshot是Segment的本地Snapshot。Segment的共享内存中有一个区域存储共享本地Snapshot，该区域被分成很多槽（slots），一个SegMate进程组对应一个槽，通过的会话ID来标志，SharedSnapshotSlot.slotid就是gp_session_id。一个Segment可能有多个SegMate进程组，每个进程组对应一个用户的会话。
 
-Greenplum 中一个 SQL 查询计划可能含有多个 slices，每个 Slice 对应一个 QE 进程。任一 segment 上，同一会话（处理同一个用户SQL）的不同 QE 必须有相同的可见性。然而每个 QE 进程都是独立的 PostgreSQL backend进程，它们之间互相不知道对方的存在，因而其事务和快照信息都是不一样的。如下图所示。
+```c
+typedef struct SharedSnapshotStruct
+{
+	int 		numSlots;		/* number of valid Snapshot entries */
+	int			maxSlots;		/* allocated size of sharedSnapshotArray */
+	int 		nextSlot;		/* points to the next avail slot. */
 
-CENTER_PostgreSQL_Community
+	/*
+	 * We now allow direct indexing into this array.
+	 *
+	 * We allocate the XIPS below.
+	 *
+	 * Be very careful when accessing fields inside here.
+	 */
+	SharedSnapshotSlot	   *slots;
 
-为了保证跨slice可见性的一致性，Greenplum引入了 “共享本地快照(Shared Local Snapshot)” 的概念。每个 segment 上的执行同一个SQL的不同 QEs 通过共享内存数据结构 SharedSnapshotSlot 共享会话和事务信息。这些进程称为 SegMate 进程组。
+	TransactionId	   *xips;		/* VARIABLE LENGTH ARRAY */
+} SharedSnapshotStruct;
 
-Greenplum 把 SegMate 进程组中的 QE 分为 QE writer 和 QE reader。QE writer 有且只有一个，QE reader 可以没有或者多个。QE writer 可以修改数据库状态；QE reader 不能修改数据库的状态，且需要使用和 QE writer 一样的快照信息以保持与 QE writer 一致的可见性。如下图所示。
+static volatile SharedSnapshotStruct *sharedSnapshotArray;
+```
 
-CENTER_PostgreSQL_Community
+QE Writer创建本地事务后，在共享内存中获得一个共享本地Snapshot槽，并它自己的本地事务和Snapshot信息拷贝到共享内存槽中，SegMate进程组中的其他QE Readers从该共享内存中获得事务和Snapshot信息。QE Readers会等待QE Writer，直到QE Writer设置好共享本地Snapshot信息。
 
-“共享”意味着该快照在 QE writer 和 readers 间共享，“本地” 意味着这个快照是 segment 的本地快照，同一用户会话在不同的 segment 上可以有不同的快照。segment 的共享内存中有一个区域存储共享快照，该区域被分成很多槽（slots）。一个 SegMate 进程组对应一个槽，通过的会话id标志。一个 segment 可能有多个 SegMate 进程组，每个进程组对应一个用户的会话，如下图所示。
-
-CENTER_PostgreSQL_Community
-
-QE Writer 创建本地事务后，在共享内存中获得一个 SharedLocalSnapshot 槽，并它自己的本地事务和快照信息拷贝到共享内存槽中，SegMate 进程组中的其他 QE Reader 从该共享内存中获得事务和快照信息。Reader QEs 会等待 Writer QE 直到 Writer 设置好共享本地快照信息。
-
-只有 QE writer 参与全局事务，也只有该 QE 需要处理 commit/abort 等事务命令。
+只有QE Writer参与全局事务，也只有该QE需要处理commit及abort等事务命令。
 
 ### GTM（Global Transaction Manager）
 
