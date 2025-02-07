@@ -151,11 +151,27 @@ PostgreSQL使用了MVCC和2PL混合的方式。对于DML语句（SELECT, UPDATE,
 
 一个事务开始后，将被分配一个ID。在PostgreSQL中事务ID称为txid（transaction id），是一个32位无符号整形。通过事务ID，可以比较事务的先后顺序以及判别数据修改的可见性。由于32位无符号整形是有限的，PostgreSQL将事务ID看成一个环，环上某一点的前面一半事务ID看成是Past事务ID，后面一半事务ID看成是Future事务ID。
 
+```c
+typedef uint32 TransactionId;
+```
+
 PostgreSQL中，有3个特殊的事务ID：
 
 - 0：Invalid txid
 - 1：Bootstrap txid，只在初始化数据库时使用
 - 2：Frozen txid
+
+```c
+#define InvalidTransactionId    ((TransactionId) 0)
+#define BootstrapTransactionId  ((TransactionId) 1)
+#define FrozenTransactionId     ((TransactionId) 2)
+```
+
+在Greenplum中，全局事务标识（Global Transaction ID, GXID）用于管理和协调分布式事务。
+
+```c
+typedef uint64 DistributedTransactionId;
+```
 
 #### Tuple结构
 
@@ -270,7 +286,7 @@ clog是一个数组结构，数组下标是事务ID（txid），数组内容是�
 
 #### 事务快照（Transaction Snapshot）
 
-事务快照用于表示对于某个特性的事务、某个特定的时间点而言，哪些事务是active的。
+事务快照用于表示对于某个特定的事务、某个特定的时间点而言，哪些事务是active的。
 
 PostgreSQL使用一个格式化的字符串表示事务快照。它的格式是`xmin:xmax:xip_list`，各字段的含义为：
 

@@ -60,6 +60,19 @@ gdb a.out
 
 进制打印：x:16进制，u:无符号16进制，d:10进制，o:8进制，t:2进制
 
+#### 忽略信号
+
+```bash
+# 在GDB中忽略SIGINT信号
+handle SIGINT ignore
+
+# 恢复默认行为（即在接收到SIGINT时中断程序）
+handle SIGINT stop
+
+# 在忽略信号的同时，GDB仍然将信号传递给被调试程序
+handle SIGINT nostop pass
+```
+
 #### 其他
 
 命令 | 说明

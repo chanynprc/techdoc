@@ -44,11 +44,11 @@
 
 [Greenplum参数](/techdoc/docs/database/gp_parameter)
 
-[GPORCA概览](/techdoc/docs/database/gp_orca_overview)
+[GPORCA](/techdoc/docs/database/gp_orca)
 
 [Greenplum的资源管理](/techdoc/docs/database/gp_resource_manager)
 
-[Greenplum的2PC](/techdoc/docs/database/gp_2p)
+[Greenplum分布式事务](/techdoc/docs/database/gp_distributed_transaction)
 
 ### Tag：代码走读
 
@@ -98,11 +98,13 @@
 
 ----------
 
-### Tag：机器学习
+### Tag：机器学习 & 人工智能
 
 [Naive Bayes分类器](/techdoc/docs/ml/naive_bayes)
 
 [XGBoost使用入门](/techdoc/docs/ml/xgboost)
+
+[AGE图插件](/techdoc/docs/ai/graph_age)
 
 ----------
 
