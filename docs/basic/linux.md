@@ -4,11 +4,43 @@
 
 ### 监控及测试工具
 
+#### sysbench
+
+sysbench是一款灵活的基准测试工具，可以测试CPU、内存、磁盘I/O、数据库等多个子系统的性能。
+
+```bash
+# 安装
+yum install sysbench -y
+```
+
+进行CPU测试
+
+```bash
+sysbench cpu run --threads=2 --cpu-max-prime=40000
+# --cpu-max-prime：设置计算素数的最大值，值越高测试时间越长
+```
+
+进行内存测试
+
+```bash
+sysbench memory run --memory-total-size=2G
+# --memory-total-size：设置要测试的总内存大小
+```
+
+进行IO测试
+
+```bash
+sysbench fileio --file-total-size=1G prepare
+sysbench fileio --file-total-size=1G --file-test-mode=rndrw run
+sysbench fileio --file-total-size=1G cleanup
+# --file-test-mode：设置测试模式（seqwr、seqrd、rndwr、rndrd、rndrw等）
+```
+
 #### sar
 
 收集、报告和保存系统活动信息。
 
-```
+```bash
 # 查看特定日期的磁盘I/O统计
 sar -d -f /var/log/sa/sa<日期>
 
@@ -40,7 +72,7 @@ vmstat -w 1
 
 I/O统计工具，可以显示CPU和磁盘I/O的统计信息。
 
-```
+```bash
 # 每秒显示一次统计信息，共显示10次
 iostat -x 1 10
 ```
@@ -53,7 +85,7 @@ iostat -x 1 10
 
 专注于显示I/O使用情况。
 
-```
+```bash
 sudo iotop
 ```
 
@@ -70,7 +102,7 @@ sudo iotop
 - conv：【待补充】
 - oflag、iflag：direct（direct IO）
 
-```
+```bash
 # 测试写速度
 dd if=/dev/zero of=test.file bs=32k count=30k oflag=direct
 
